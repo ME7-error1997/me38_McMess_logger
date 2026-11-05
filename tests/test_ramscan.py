@@ -94,6 +94,18 @@ def main() -> int:
     # WSR 0x7E maps 0x1F00-0x1F7F into the upper register file. The window base is
     # a six-bit field, so no WSR value can ever reach 0xC000 -- which is the only
     # reason register-direct access can be ignored for this RAM window.
+    # A stack whose init sits just ABOVE the window still reaches into it, because
+    # it grows down. Reporting that as "outside the window" is how you end up
+    # placing a variable in stack space: on the 018CG, SP = 0x0500 and the
+    # 119-byte "unreferenced run" at 0x0489-0x04FF is the stack, not free RAM.
+    env = ramscan.scan_environment(image_of(bytes([0xA1, 0x00, 0x05, 0x18])), (0x400, 0x4FF))
+    check("a stack above the window is flagged as descending into it",
+          env["sp_descends_into"], [0x0500])
+    check("...and is not reported as being inside it", env["sp_in_window"], [])
+    env = ramscan.scan_environment(image_of(bytes([0xA1, 0x00, 0x05, 0x18])), (0xC000, 0xCFFF))
+    check("a stack far below the window does not descend into it",
+          env["sp_descends_into"], [])
+
     env = ramscan.scan_environment(image_of(bytes([0xB1, 0x7E, 0x14])), RAM)
     check("WSR reach computed", env["window_reach"], 0x1F7F)
     check("WSR cannot reach the window", env["wsr_overlaps"], False)

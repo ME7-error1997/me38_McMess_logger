@@ -161,9 +161,16 @@ def scan_environment(image: bytes, ram: tuple[int, int]) -> dict:
             reach = max(reach, (w - 0x40) * 128 + 127)
         elif 0x20 <= w <= 0x3F:
             reach = max(reach, (w - 0x20) * 64 + 63)
+    # The stack DESCENDS from its initial SP, so "the init value is not inside the
+    # window" does not mean the stack cannot reach it. An SP just above the window
+    # is the worst case of all: every byte of the window is in the stack's growth
+    # path, and the deepest the original firmware's call nesting plus interrupt
+    # frames actually go is not knowable from a static scan.
+    descends_into = [v for _, v in sp_inits if v > hi and (v - hi) <= 0x400]
     return {
         "sp_inits": sp_inits,
         "sp_in_window": [v for _, v in sp_inits if lo <= v <= hi],
+        "sp_descends_into": descends_into,
         "wsr_values": sorted(wsr_values),
         "window_reach": reach,
         "wsr_overlaps": reach >= lo,
@@ -275,8 +282,14 @@ def main(argv: list[str] | None = None) -> int:
     print("\nHAZARDS THAT CARRY NO ADDRESS AT ALL")
     if env["sp_inits"]:
         where = ", ".join(f"0x{v:04X}" for _, v in env["sp_inits"][:4])
-        verdict = "INSIDE THE WINDOW -- do not place anything" if env["sp_in_window"] else \
-                  "outside the window, so the stack is not a hazard here"
+        if env["sp_in_window"]:
+            verdict = "INSIDE THE WINDOW -- do not place anything here"
+        elif env["sp_descends_into"]:
+            top = min(env["sp_descends_into"])
+            verdict = (f"the stack GROWS DOWN from 0x{top:04X} into this window; an "
+                       f"unreferenced run just below it is stack space, not free space")
+        else:
+            verdict = "outside the window and not descending into it"
         print(f"  stack   SP initialised to {where}: {verdict}")
     else:
         print("  stack   no LD SP,#imm found -- LOCATE IT before trusting any candidate")
