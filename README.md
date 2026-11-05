@@ -207,6 +207,36 @@ Offline, with no cable or ECU:
 .venv\Scripts\python.exe tests\test_session.py
 ```
 
+```bash
+.venv\Scripts\python.exe tests\test_ramscan.py
+```
+
+## Finding RAM for a patch
+
+A code patch needs somewhere to keep its variables, and picking a RAM cell by eye
+is how you get an intermittent fault that reads like a sensor problem.
+
+```bash
+.venv\Scripts\python.exe tools\ramscan.py --need 6
+```
+
+It decodes every MCS-96 memory operand in the image, resolves the ones that carry
+an address, and ranks free cells by how deep inside an unreferenced run they sit —
+depth rather than mere absence, because the access modes it cannot see reach
+contiguous structures.
+
+**It cannot prove a cell is unused, and the two error directions are not
+symmetric.** A false positive costs you a candidate. A cell reached only through
+indirect addressing looks free and is not, and that failure is silent. The report
+prints the size of its own blind spot so you can weigh it: on the 018CG, ~3000
+indirect operands and ~2800 auto-increment ones against ~6100 it did resolve.
+
+It does clear two hazards that carry no address at all. The stack initialises to
+`0x0500`, and WSR windowing reaches only `0x1F7F` because the window base is a
+six-bit field — so neither can touch `0xC000-0xCFFF`, which is why register-direct
+operands can be ignored for that window. Treat the output as a shortlist, then
+verify on the car.
+
 ## Layout
 
 | Path | What |
@@ -224,9 +254,11 @@ Offline, with no cable or ECU:
 | `gui/theme.py` | Validated dark palette and Qt styling |
 | `tools/probe.py` | Bench bring-up and measurement |
 | `tools/build_database.py` | Rebuilds the database from the RE files |
+| `tools/ramscan.py` | Finds RAM the firmware never touches, for patch variables |
 | `tests/test_program.py` | Scheduler, conversions and channel-database checks |
 | `tests/test_session.py` | Session behaviour against the simulator |
 | `tests/test_recorder.py` | Sampling engine, ring buffer, CSV, engine model |
+| `tests/test_ramscan.py` | MCS-96 operand decoding in the RAM scanner |
 
 ## Channels and conversions
 
