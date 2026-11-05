@@ -143,10 +143,25 @@ def main() -> int:
     tq10s = loaded.conversions["TQ10S"]
     check("TQ10S: raw 255 -> -0.01 s", round(tq10s.apply(255), 10), -0.01)
     check("TQ10S: raw 1 -> +0.01 s", round(tq10s.apply(1), 10), 0.01)
-    # Every conversion in the file reproduced its declared range at build time.
+    # Every conversion taken from the DAMOS reproduced its declared range at build
+    # time. The hand-written ones merged from extra_channels.json cannot clear that
+    # bar in the same sense -- their range and their formula come from the same pen,
+    # so agreeing proves only arithmetic, not provenance. They are marked unvalidated
+    # deliberately and listed here by name, so adding another is a deliberate act and
+    # not something that slips in behind a loosened assertion.
+    hand_written = {"TIQ16"}
     unvalidated = [n for n, c in loaded.conversions.items() if not c.validated]
-    check("all conversions validated", unvalidated, [])
-    check("222 conversions loaded", len(loaded.conversions), 222)
+    check("only the hand-written conversions are unvalidated",
+          sorted(set(unvalidated)), sorted(hand_written))
+    check("222 DAMOS conversions loaded",
+          len(loaded.conversions) - len(hand_written), 222)
+    # ...and the arithmetic still has to be right: 16 bits at 0.0005 ms spans the
+    # declared range exactly, and one count must be 1/100th of a TIQ count, because
+    # tlroh is tlr_16 divided by 100 (DIVUB #0x64 at 0xD5F2).
+    tiq16 = loaded.conversions["TIQ16"]
+    check("TIQ16 full scale", round(tiq16.apply(65535), 6), 32.7675)
+    check("TIQ16 is 1/100 of TIQ",
+          round(tiq16.apply(100) - loaded.conversions["TIQ"].apply(1), 12), 0.0)
 
     print("\nDimensionless is not the same as unconvertible")
     # Two different reasons a channel shows no unit, which must not look alike:

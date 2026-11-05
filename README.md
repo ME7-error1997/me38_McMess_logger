@@ -230,7 +230,7 @@ Offline, with no cable or ECU:
 
 ## Channels and conversions
 
-**244 channels, 226 of them in physical units.** Built from the reverse-engineering
+**248 channels, 230 of them in physical units.** Built from the reverse-engineering
 files into one self-contained JSON:
 
 ```bash
@@ -242,7 +242,7 @@ The independently-known scalings come out right: `NQ40` = 40 rpm/bit, `TEMPQ` =
 0.75·raw − 48 °C, `UQ5` = 19.6078 mV/bit (255 → 5000 mV exactly), `VQ` = 1.28 km/h,
 `FAK2L` = raw/32768 so `0x8000` = 1.00.
 
-Three things worth knowing before you trust a log — all detailed in
+Four things worth knowing before you trust a log — all detailed in
 [the spec](docs/mcmess-018cg.md#7-channels-and-conversions):
 
 - **Provenance.** There is no DAMOS for the 018CG. Formulas come from `8D0907558E` (Audi
@@ -255,6 +255,13 @@ Three things worth knowing before you trust a log — all detailed in
 - **18 channels report raw**, either because the conversion they name is absent from the
   A4 damos or because the entry holds two packed bytes rather than one word.
   `probe.py channels --raw-only`.
+- **4 channels are not from the VS20 table at all.** The table names channels; it does
+  not limit them, because the responder serves any RAM address. `XKFPU`, `MLROH`,
+  `TLR_16` and `XNDIV` were read out of the load-path code in Ghidra and live in
+  [`mcmess/data/extra_channels.json`](mcmess/data/extra_channels.json), which the
+  builder merges. Each carries a `source` naming the instruction its address came
+  from. Their scalings are argued from the code's fixed-point arithmetic, not taken
+  from a DAMOS entry, and none has been checked against a running engine.
 
 ## Not done yet
 

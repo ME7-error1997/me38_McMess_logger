@@ -48,6 +48,10 @@ DEFAULT_FR = RE_ROOT / "FR" / "30O.FRM"
 DEFAULT_IMAGE = RE_ROOT / "Damoses" / "WinOLS(VW Golf (Original) 352127 csnone  ).bin"
 DEFAULT_OUT = Path(__file__).resolve().parent.parent / "mcmess" / "data" / "m38_018cg.json"
 
+#: Channels found by reading code rather than by walking the VS20 table. Merged into
+#: the generated database by merge_extra(); see that function for why they are separate.
+DEFAULT_EXTRA = Path(__file__).resolve().parent.parent / "mcmess" / "data" / "extra_channels.json"
+
 #: Offset of the VS20 pseudo-address table in the 018CG image (from the Ghidra work).
 DEFAULT_VS20_TABLE = 0x0A76
 
@@ -770,6 +774,8 @@ def build(args: argparse.Namespace) -> int:
         "rejected": rejected,
     }
 
+    merge_extra(payload, args.extra)
+
     args.out.parent.mkdir(parents=True, exist_ok=True)
     # newline="" stops Python's text mode translating \n to \r\n on Windows. Without
     # it a rebuild rewrites all 4000-odd lines with CRLF, which leaves the working
@@ -815,12 +821,86 @@ def _print_report(conversions: dict[str, Conversion], channels: list[dict]) -> N
         print(f"  {name:<10} {width:<3} {conv.unit[:16]:<16} {shape}{flag}")
 
 
+def merge_extra(payload: dict, path: Path) -> None:
+    """Fold hand-found channels and their conversions into the generated database.
+
+    The VS20 pseudo-address table is a *naming* table, not a list of what the ECU will
+    let you read -- the responder serves any RAM address. Channels located by reading
+    code therefore have no VS20 entry and the generator cannot rediscover them, so they
+    live in their own file and are merged here. Keeping them out of the generator means
+    a rebuild cannot silently drop them and their provenance stays visible: each entry
+    carries a 'source' naming the instruction its address was read from.
+
+    Collisions are fatal rather than merged. An extra channel that shadows a VS20 name
+    or address almost certainly means the VS20 table already had it and the hand entry
+    is redundant or wrong, which is worth stopping for.
+    """
+    if not path.exists():
+        print(f"\n        no extra-channel file at {path}")
+        return
+
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    convs = payload["conversions"]
+    channels = payload["channels"]
+    names = {c["name"] for c in channels}
+    addrs = {c["addr"] for c in channels}
+
+    for name, conv in doc.get("conversions", {}).items():
+        if name in convs:
+            raise SystemExit(f"extra conversion {name!r} already exists in the DAMOS set")
+        convs[name] = conv
+    payload["conversions"] = dict(sorted(convs.items()))
+
+    added = []
+    for row in doc.get("channels", []):
+        row = {k: v for k, v in row.items() if not k.startswith("_")}
+        if row["name"] in names:
+            raise SystemExit(f"extra channel {row['name']!r} collides with a VS20 name")
+        if row["addr"] in addrs:
+            clash = next(c["name"] for c in channels if c["addr"] == row["addr"])
+            raise SystemExit(
+                f"extra channel {row['name']!r} is at 0x{row['addr']:04X}, "
+                f"already covered by {clash}"
+            )
+        if row.get("umr") and row["umr"] not in payload["conversions"]:
+            raise SystemExit(
+                f"extra channel {row['name']!r} names conversion {row['umr']!r}, "
+                "which is neither in the DAMOS nor in the extra file"
+            )
+        channels.append(row)
+        names.add(row["name"])
+        addrs.add(row["addr"])
+        added.append(row)
+
+    payload["meta"]["counts"]["channels"] = len(channels)
+    payload["meta"]["counts"]["channels_extra"] = len(added)
+    payload["meta"]["counts"]["conversions"] = len(payload["conversions"])
+    payload["meta"]["counts"]["channels_with_conversion"] = sum(
+        1 for c in channels if c.get("umr") in payload["conversions"]
+    )
+    payload["meta"]["extra_channels"] = (
+        f"{len(added)} channels merged from {path.name}. These are not in the VS20 "
+        "table; they were read out of the code in Ghidra and none has been checked "
+        "against a running engine. See each channel's 'source' field."
+    )
+
+    print(f"\n        {len(added)} extra channels merged from {path.name}")
+    for row in added:
+        print(f"          {row['name']:<8} 0x{row['addr']:04X}  {row.get('source', '')}")
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--dam", type=Path, default=DEFAULT_DAM)
     parser.add_argument("--fr", type=Path, default=DEFAULT_FR)
     parser.add_argument("--image", type=Path, default=DEFAULT_IMAGE)
     parser.add_argument("--vs20-table", type=lambda s: int(s, 0), default=DEFAULT_VS20_TABLE)
+    parser.add_argument(
+        "--extra",
+        type=Path,
+        default=DEFAULT_EXTRA,
+        help="channels found by reading code, merged into the generated set",
+    )
     parser.add_argument(
         "--damos-image",
         type=Path,

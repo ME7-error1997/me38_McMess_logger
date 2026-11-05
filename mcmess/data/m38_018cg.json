@@ -16,11 +16,12 @@
   },
   "caveat": "There is no DAMOS for the 018CG. Conversion formulas are taken from 8D0907558E (Audi A4, M3.8.2, DAMOS 30N) while the channel list comes from FR 30O and the addresses from the 018CG image. Conversion names are shared across the M3.8 family, so the formulas are expected to apply, but this is a cross-image inference and has not been measured on the bench.",
   "counts": {
-   "conversions": 222,
+   "conversions": 223,
    "conversions_validated": 222,
-   "channels": 244,
+   "channels": 248,
    "channels_rejected": 13,
-   "channels_with_conversion": 227
+   "channels_with_conversion": 230,
+   "channels_extra": 4
   },
   "conversions_missing": [
    "LUQ",
@@ -46,7 +47,8 @@
      "QAD+1: word base 0xC3F6 is +2 into QAD at 0xC3F4 (multi-word variable)"
     ]
    }
-  }
+  },
+  "extra_channels": "4 channels merged from extra_channels.json. These are not in the VS20 table; they were read out of the code in Ghidra and none has been checked against a running engine. See each channel's 'source' field."
  },
  "conversions": {
   "2KMP1": {
@@ -3155,6 +3157,27 @@
     0.0
    ],
    "scale": 0.05,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TIQ16": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Quantisierung der Einspritzzeit, 16 Bit (tlroh x 100)",
+   "unit": "ms/Umdr.",
+   "min": 0.0,
+   "max": 32.7675,
+   "width": 16,
+   "validated": false,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.0005,
+    0.0,
+    0.0
+   ],
+   "scale": 0.0005,
    "offset": -0.0,
    "signed_modulus": 0
   },
@@ -6989,6 +7012,50 @@
    "umr_displayed": "DEZL",
    "description": "ABG-Zähler 500 Arbeitsspiele",
    "word_base": 51624
+  },
+  {
+   "name": "XKFPU",
+   "pseudo": null,
+   "addr": 51810,
+   "size": 2,
+   "umr": "FAK2L",
+   "umr_displayed": "FAK2L",
+   "word_base": 51810,
+   "source": "[RE] 0xCA62, operand of MULU at 0xD5BB",
+   "description": "Pulsationskorrektur, interpoliert aus KFPU"
+  },
+  {
+   "name": "MLROH",
+   "pseudo": null,
+   "addr": 51812,
+   "size": 2,
+   "umr": "MLQ025L",
+   "umr_displayed": "MLQ025L",
+   "word_base": 51812,
+   "source": "[RE] 0xCA64, stored by ST at 0xD5CE",
+   "description": "durch den LMM erfasste Luftmasse je Zeiteinheit"
+  },
+  {
+   "name": "TLR_16",
+   "pseudo": null,
+   "addr": 51814,
+   "size": 2,
+   "umr": "TIQ16",
+   "umr_displayed": "TIQ16",
+   "word_base": 51814,
+   "source": "[RE] 0xCA66, stored by ST at 0xD5ED",
+   "description": "Lastrohsignal 16 Bit, vor der Division durch 100"
+  },
+  {
+   "name": "XNDIV",
+   "pseudo": null,
+   "addr": 51580,
+   "size": 2,
+   "umr": null,
+   "umr_displayed": null,
+   "word_base": 51580,
+   "source": "[RE] 0xC97C, divisor of DIVU at 0xD5E3",
+   "description": "Drehzahl-Divisor im Lastpfad, Rohwert (linear in n, Faktor ungeprueft)"
   }
  ],
  "rejected": [

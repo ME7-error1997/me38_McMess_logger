@@ -220,9 +220,13 @@ class Channel:
     size: int
     umr: str
     description: str
-    pseudo: int = 0
+    # None for a channel that has no VS20 entry because it was found by reading code
+    # rather than by walking the pseudo-address table. See mcmess/data/extra_channels.json.
+    pseudo: int | None = 0
     umr_displayed: str = ""
     suspect: str = ""
+    #: Where the address came from, for channels that are not from the VS20 table.
+    source: str = ""
     word_base: int | None = None
     _conversion: Conversion = field(default=RAW, repr=False, compare=False)
 
@@ -402,9 +406,10 @@ def load_channels(path: Path | str = DEFAULT_DB) -> ChannelSet:
                 size=int(row.get("size", 1)),
                 umr=umr,
                 description=row.get("description", "") or "",
-                pseudo=int(row.get("pseudo", 0)),
+                pseudo=None if row.get("pseudo") is None else int(row["pseudo"]),
                 umr_displayed=row.get("umr_displayed", "") or "",
                 suspect=row.get("suspect", "") or "",
+                source=row.get("source", "") or "",
                 word_base=row.get("word_base"),
                 _conversion=conversions.get(umr, RAW),
             )
