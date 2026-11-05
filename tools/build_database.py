@@ -29,13 +29,20 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import struct
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
-RE_ROOT = Path(r"D:\Repos\Reverse Engineering\M3.8")
+#: Where the reverse-engineering sources live. They are NOT in this repository: the
+#: DAMOS, the function framework and the flash images are Bosch/VAG material, so you
+#: have to supply your own copies. Set M38_RE_ROOT to the directory holding them, or
+#: pass --dam / --fr / --image explicitly. The fallback is the path this database was
+#: originally generated from, which is useful to nobody else and is only kept so the
+#: generated JSON remains reproducible on the machine it came from.
+RE_ROOT = Path(os.environ.get("M38_RE_ROOT", r"D:\Repos\Reverse Engineering\M3.8"))
 DEFAULT_DAM = RE_ROOT / "Damoses" / "8D0907558E.DAM"
 DEFAULT_FR = RE_ROOT / "FR" / "30O.FRM"
 DEFAULT_IMAGE = RE_ROOT / "Damoses" / "WinOLS(VW Golf (Original) 352127 csnone  ).bin"
@@ -764,7 +771,12 @@ def build(args: argparse.Namespace) -> int:
     }
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps(payload, indent=1, ensure_ascii=False), encoding="utf-8")
+    # newline="" stops Python's text mode translating \n to \r\n on Windows. Without
+    # it a rebuild rewrites all 4000-odd lines with CRLF, which leaves the working
+    # tree dirty against the LF-normalised copy in git even though nothing changed.
+    args.out.write_text(
+        json.dumps(payload, indent=1, ensure_ascii=False), encoding="utf-8", newline=""
+    )
     print(f"\nwritten: {args.out}  ({args.out.stat().st_size / 1024:.0f} KB)")
 
     if args.report:

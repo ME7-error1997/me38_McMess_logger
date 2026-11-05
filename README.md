@@ -17,7 +17,9 @@ exact, not a hack around the edges.
 ## Status
 
 **Working against a real ECU.** First hardware session 2025-11-05: 06A906018CG on a
-bench harness, genuine FTDI FT232R, ignition on and engine not running.
+bench harness, genuine FTDI FT232R, ignition on and engine not running. The logs and
+window screenshots from it are in [docs/bench](docs/bench/), so the numbers below can
+be checked rather than taken on trust.
 
 - Handshake connects first attempt at both 10417 and 125000 baud, ack `0x0C`
 - 125000 baud verified correct against the slow link, 32/32 bytes
@@ -97,9 +99,11 @@ traces holds the GIL and measurably starves the sampling thread — on the bench
 the same six channels ran at 27 Hz antialiased against 56 Hz without. Antialiasing
 is therefore off; `--smooth` turns it back on if you want a prettier screenshot and
 do not mind halving the rate. `--opengl` is faster again (~67 Hz) but driver-
-dependent, so it is opt-in — check the traces actually draw before trusting a log
-taken with it. Full measurements in
-[section 8.4](docs/mcmess-018cg.md#84-drawing-competes-with-sampling).
+dependent, so it is opt-in — in the captured run it hit 73 Hz with an **empty plot
+area**, so check the traces actually draw before trusting a log taken with it. Full
+measurements in [section 8.4](docs/mcmess-018cg.md#84-drawing-competes-with-sampling);
+the four window captures behind them, including the blank OpenGL one, are in
+[docs/bench](docs/bench/).
 
 **Layout.** A searchable channel tree on the left, grouped by memory page and showing
 what a selection costs per sample and the sample rate it implies — throughput is the
@@ -267,8 +271,38 @@ Three things worth knowing before you trust a log — all detailed in
 
 ## Source material
 
-- `D:\Repos\Reverse Engineering\M3.8\analysis\mcmess_018CG.md` — Ghidra findings
-- `D:\Repos\Reverse Engineering\M3.8\Damoses\8D0907558E.DAM` — A4 damos, conversion formulas
-- `D:\Repos\Reverse Engineering\M3.8\Damoses\WinOLS(VW Golf ...).bin` — 018CG image, VS20 table
-- `D:\Repos\Reverse Engineering\M3.8\FR\30O.FRM` — Bosch function framework
-- `D:\Repos\Reverse Engineering\M3.8\mcmess protocol.txt` — the ME7 description
+The channel database in `mcmess/data/m38_018cg.json` is **generated** from the files
+below, and the generated JSON is committed, so you do not need any of them to run the
+logger. You need them only to re-run `tools/build_database.py`.
+
+They are not in this repository and will not be: they are Bosch and VAG material.
+Supply your own copies.
+
+| File | What it provides |
+|---|---|
+| `analysis/mcmess_018CG.md` | Ghidra findings on the 018CG responder |
+| `Damoses/8D0907558E.DAM` | Audi A4 M3.8.2 damos — the conversion formulas |
+| `Damoses/WinOLS(VW Golf ...).bin` | The 018CG image — channel list and VS20 table |
+| `FR/30O.FRM` | Bosch function framework — pinouts, A/D map, function definitions |
+| `mcmess protocol.txt` | The circulating ME7.5 description. Background only |
+
+Point the builder at your copies with `M38_RE_ROOT`, or override each path:
+
+```bash
+M38_RE_ROOT="/path/to/M3.8" .venv/Scripts/python.exe tools/build_database.py --report
+```
+
+```bash
+.venv\Scripts\python.exe tools\build_database.py --dam PATH --fr PATH --image PATH
+```
+
+The layout under `M38_RE_ROOT` is the one in the table. The A4 image is also used, at
+`--damos-image`, purely to re-verify the 16-bit byte-order rule at build time.
+
+## Licence
+
+MIT — see [LICENSE](LICENSE).
+
+The licence covers the code in this repository. It does not cover the Bosch and VAG
+source material above, which is not distributed here, and it is not a claim over the
+reverse-engineered facts the generated database records.

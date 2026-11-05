@@ -6,8 +6,8 @@ Every statement below is tagged with how well it is known:
 
 | Tag | Meaning |
 |---|---|
-| `[RE]` | Read out of the 018CG flash in Ghidra. High confidence. Source: `D:\Repos\Reverse Engineering\M3.8\analysis\mcmess_018CG.md` |
-| `[ME7]` | From the supplied `mcmess protocol.txt`, which documents **ME7.5**, a different ECU family. Background only. |
+| `[RE]` | Read out of the 018CG flash in Ghidra. High confidence. Source: `analysis/mcmess_018CG.md` in the reverse-engineering set (see [Source material](../README.md#source-material)). |
+| `[ME7]` | From `mcmess protocol.txt` in that same set, which documents **ME7.5**, a different ECU family. Background only. |
 | `[INF]` | Inferred by us from `[RE]` facts. Plausible but not proven. |
 | `[VERIFY]` | Must be measured on the bench ECU before it is trusted. |
 
