@@ -1,0 +1,16 @@
+# Virtualenv
+.venv/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Runtime output: logs and screenshots are written here by probe.py and the GUI
+logs/
+run.csv
+
+# Editor / OS
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini

@@ -1,0 +1,7048 @@
+{
+ "meta": {
+  "target": "06A906018CG (Bosch M3.8, VW/Audi 1.8T AGU)",
+  "generated_by": "tools/build_database.py",
+  "sources": {
+   "conversions": "D:\\Repos\\Reverse Engineering\\M3.8\\Damoses\\8D0907558E.DAM",
+   "channels": "D:\\Repos\\Reverse Engineering\\M3.8\\FR\\30O.FRM",
+   "addresses": "D:\\Repos\\Reverse Engineering\\M3.8\\Damoses\\WinOLS(VW Golf (Original) 352127 csnone  ).bin",
+   "vs20_table_offset": 2678
+  },
+  "damos": {
+   "epk": "53/1/M3.82/05/400700/DAMOS30N/30N01/30N010101/110497/",
+   "project": "R4 5VT 1.8l,04,0,0/5,2,07/97",
+   "part_number": "8D0907558E",
+   "conversion_count": 222
+  },
+  "caveat": "There is no DAMOS for the 018CG. Conversion formulas are taken from 8D0907558E (Audi A4, M3.8.2, DAMOS 30N) while the channel list comes from FR 30O and the addresses from the 018CG image. Conversion names are shared across the M3.8 family, so the formulas are expected to apply, but this is a cross-image inference and has not been measured on the bench.",
+  "counts": {
+   "conversions": 222,
+   "conversions_validated": 222,
+   "channels": 244,
+   "channels_rejected": 13,
+   "channels_with_conversion": 227
+  },
+  "conversions_missing": [
+   "LUQ",
+   "LUQX",
+   "SIG05",
+   "SIG32L",
+   "TQ100FP"
+  ],
+  "conversions_unvalidated_in_use": [],
+  "width_conflicts": [
+   "DVL_SYNA+1 (UQ5): FMT:2 but UQ5 is an 8-bit conversion -- likely two packed 8-bit values in one entry, not a 16-bit word"
+  ],
+  "fr_warnings": [],
+  "word_order": {
+   "rule": "FMT:2 entries occupy (base, base+1). An FR name ending in '+1' has its listed address at base+1; all others at base. Byte order within the word is little-endian (80C196).",
+   "evidence": {
+    "base": 35,
+    "plus_one": 45,
+    "multiword": 1,
+    "conflicts": 0,
+    "unmatched": 0,
+    "details": [
+     "QAD+1: word base 0xC3F6 is +2 into QAD at 0xC3F4 (multi-word variable)"
+    ]
+   }
+  }
+ },
+ "conversions": {
+  "2KMP1": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "2er-Kompl.-Darstellung Intervall [-1.000;< 1.000]",
+   "unit": "",
+   "min": -1.0,
+   "max": 0.99219,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    128.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    256.0
+   ],
+   "scale": 0.0078125,
+   "offset": -0.0,
+   "signed_modulus": 256.0
+  },
+  "2KMP1L": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "2er-Kompl.-Darstellung Intervall [-1.000;< 1.000]",
+   "unit": "",
+   "min": -1.0,
+   "max": 0.99997,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    32768.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    65536.0
+   ],
+   "scale": 3.0517578125e-05,
+   "offset": -0.0,
+   "signed_modulus": 65536.0
+  },
+  "AFAK2": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Anfettungsfaktor",
+   "unit": "",
+   "min": 1.0,
+   "max": 2.99219,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    128.0,
+    -128.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.0078125,
+   "offset": 1.0,
+   "signed_modulus": 0
+  },
+  "AFAK2L": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Anfettungsfaktor, 16 Bit",
+   "unit": "",
+   "min": 1.0,
+   "max": 2.99997,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    32768.0,
+    -32768.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 3.0517578125e-05,
+   "offset": 1.0,
+   "signed_modulus": 0
+  },
+  "AQL": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Fahrzeugbeschleunigung (Word)",
+   "unit": "m/s²",
+   "min": -32.0,
+   "max": 31.999,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.0009765625,
+    0.0,
+    65536.0
+   ],
+   "scale": 0.0009765625,
+   "offset": -0.0,
+   "signed_modulus": 65536.0
+  },
+  "A_BIT": {
+   "kind": "text",
+   "type_id": 10,
+   "description": "alphanumerisch: Bit",
+   "unit": "",
+   "min": 0.0,
+   "max": 1.0,
+   "width": 8,
+   "validated": true,
+   "text": [
+    [
+     0,
+     "Inaktiv"
+    ],
+    [
+     1,
+     "Aktiv"
+    ]
+   ]
+  },
+  "A_ERF": {
+   "kind": "text",
+   "type_id": 10,
+   "description": "alphanumerisch: Errorflag",
+   "unit": "",
+   "min": 0.0,
+   "max": 1.0,
+   "width": 8,
+   "validated": true,
+   "text": [
+    [
+     0,
+     "in Ordnung"
+    ],
+    [
+     1,
+     "Fehler erkannt"
+    ]
+   ]
+  },
+  "A_NEGBIT": {
+   "kind": "text",
+   "type_id": 10,
+   "description": "alphanumerisch: Bit",
+   "unit": "",
+   "min": 0.0,
+   "max": 1.0,
+   "width": 8,
+   "validated": true,
+   "text": [
+    [
+     0,
+     "Aktiv"
+    ],
+    [
+     1,
+     "Inaktiv"
+    ]
+   ]
+  },
+  "A_RDY": {
+   "kind": "text",
+   "type_id": 10,
+   "description": "alphanumerisch: OBDII-Readiness",
+   "unit": "",
+   "min": 0.0,
+   "max": 1.0,
+   "width": 8,
+   "validated": true,
+   "text": [
+    [
+     0,
+     "ready"
+    ],
+    [
+     1,
+     "not ready"
+    ]
+   ]
+  },
+  "A_ZYF": {
+   "kind": "text",
+   "type_id": 10,
+   "description": "alphanumerisch: Zyklusflag",
+   "unit": "",
+   "min": 0.0,
+   "max": 1.0,
+   "width": 8,
+   "validated": true,
+   "text": [
+    [
+     0,
+     "noch nicht geprueft"
+    ],
+    [
+     1,
+     "geprueft"
+    ]
+   ]
+  },
+  "BELIQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "TE-Beladung, Integrationsgeschwindigkeit",
+   "unit": "%FTEAD/s pro %FR",
+   "min": 0.0,
+   "max": 3.16149,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.012398,
+    0.0,
+    0.0
+   ],
+   "scale": 0.012398,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "B_FALSE": {
+   "kind": "text",
+   "type_id": 10,
+   "description": "boolsche Zustaende, negative Logik",
+   "unit": "",
+   "min": 0.0,
+   "max": 1.0,
+   "width": 8,
+   "validated": true,
+   "text": [
+    [
+     0,
+     "True"
+    ],
+    [
+     1,
+     "False"
+    ]
+   ]
+  },
+  "B_TRUE": {
+   "kind": "text",
+   "type_id": 10,
+   "description": "boolsche Zustaende, positive Logik",
+   "unit": "",
+   "min": 0.0,
+   "max": 1.0,
+   "width": 8,
+   "validated": true,
+   "text": [
+    [
+     0,
+     "False"
+    ],
+    [
+     1,
+     "True"
+    ]
+   ]
+  },
+  "CDTQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Umrechnung für RB-Standard-Fehlerpfade CDT*, 16bit",
+   "unit": "",
+   "min": 0.0,
+   "max": 65535.0,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 1.0,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "DEZ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Dezimalzahl in Hexzahl",
+   "unit": "dez",
+   "min": 0.0,
+   "max": 255.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 1.0,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "DEZ1024": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Dezimalzahl bis 1024 in Hexzahl 0 bis ff",
+   "unit": "dez",
+   "min": 0.0,
+   "max": 1020.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    4.0,
+    0.0,
+    0.0
+   ],
+   "scale": 4.0,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "DEZL": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Dezimalzahl in 16-Bit-Hexzahl",
+   "unit": "dez",
+   "min": 0.0,
+   "max": 65535.0,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 1.0,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "DEZS": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Dezimalzahl mit Vorzeichen",
+   "unit": "dez",
+   "min": -128.0,
+   "max": 127.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    256.0
+   ],
+   "scale": 1.0,
+   "offset": -0.0,
+   "signed_modulus": 256.0
+  },
+  "DFAK2L": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Faktor [-1;1], 16 Bit, 8000H = 0",
+   "unit": "",
+   "min": -1.0,
+   "max": 0.99997,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    3.051758e-05,
+    32768.0,
+    0.0
+   ],
+   "scale": 3.051758e-05,
+   "offset": -1.00000006144,
+   "signed_modulus": 0
+  },
+  "DFNDIFQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "D-Verstärkung 0.977E-3[kg/h / (Upm/20ms)]",
+   "unit": "kg/h / (Upm/20ms)",
+   "min": 0.0,
+   "max": 0.24902,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.000976562,
+    0.0,
+    0.0
+   ],
+   "scale": 0.000976562,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "DMM04": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Delta-MotorMoment in 0.4 [Nm], 8-Bit",
+   "unit": "Nm",
+   "min": 0.0,
+   "max": 102.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.4,
+    0.0,
+    0.0
+   ],
+   "scale": 0.4,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "DMMQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Delta-MotorMoment in 1.000[Nm], 8-Bit",
+   "unit": "Nm",
+   "min": 0.0,
+   "max": 255.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 1.0,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "DMMQOF": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Delta-MotorMoment in 1.000[Nm] mit Offset, 8-Bit",
+   "unit": "Nm",
+   "min": -100.0,
+   "max": 155.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    100.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 1.0,
+   "offset": -100.0,
+   "signed_modulus": 0
+  },
+  "DNQ10OF": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "delta Drehzahlquantisierung 10.00[Upm] mit Offset",
+   "unit": "Upm",
+   "min": -1280.0,
+   "max": 1270.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    1280.0,
+    0.0,
+    10.0,
+    0.0,
+    0.0
+   ],
+   "scale": 10.0,
+   "offset": -1280.0,
+   "signed_modulus": 0
+  },
+  "DPTQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Delta-Tankdruck",
+   "unit": "hPa",
+   "min": -62.5,
+   "max": 62.0117,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.48828,
+    128.0,
+    0.0
+   ],
+   "scale": 0.48828,
+   "offset": -62.49984,
+   "signed_modulus": 0
+  },
+  "DQLDD": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "D-Anteil der LDR",
+   "unit": "(% TV)/(ms/Umdr.)",
+   "min": 0.0,
+   "max": 15.9375,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.0625,
+    0.0,
+    0.0
+   ],
+   "scale": 0.0625,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "DRSQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "ASR-Reduzierstufenabweichung",
+   "unit": "Reduzierstufe",
+   "min": 0.0,
+   "max": 2.55,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.01,
+    0.0,
+    0.0
+   ],
+   "scale": 0.01,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "DRSQL": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "ASR-Reduzierstufenabweichung, 16-Bit",
+   "unit": "Reduzierstufe",
+   "min": 0.0,
+   "max": 8.0,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.01,
+    0.0,
+    0.0
+   ],
+   "scale": 0.01,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "DRSQOF": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "ASR-Reduzierstufenabweichung mit Offset",
+   "unit": "Reduzierstufe",
+   "min": -1.28,
+   "max": 1.27,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.01,
+    128.0,
+    0.0
+   ],
+   "scale": 0.01,
+   "offset": -1.28,
+   "signed_modulus": 0
+  },
+  "DRUCK": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Saugrohrdruck-Quantisierung",
+   "unit": "mbar",
+   "min": 0.0,
+   "max": 1275.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    5.0,
+    0.0,
+    0.0
+   ],
+   "scale": 5.0,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "DRZGRDLD": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Drehzahlgradient in LDR-Zeitquanten",
+   "unit": "Upm/sec",
+   "min": 0.0,
+   "max": 1593.75,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    0.16,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 6.25,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "DTEMPQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Temp.-Unterschied, Temp.-Hysterese",
+   "unit": "grad C",
+   "min": 0.0,
+   "max": 99.75,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.75,
+    0.0,
+    0.0
+   ],
+   "scale": 0.75,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "DTEMPQ4": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Lambdasonde-Temperatur-Erhoehung",
+   "unit": "grad C",
+   "min": 0.0,
+   "max": 1020.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    4.0,
+    0.0,
+    0.0
+   ],
+   "scale": 4.0,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "DUBQS": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Delta-Batteriespannung, signed Arithmetik",
+   "unit": "V",
+   "min": -8.94314,
+   "max": 8.94314,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.070418,
+    0.0,
+    256.0
+   ],
+   "scale": 0.070418,
+   "offset": -0.0,
+   "signed_modulus": 256.0
+  },
+  "DVL_SN": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "negative DVL-Kennliniensteigung",
+   "unit": "mV/(kg/h)",
+   "min": 0.0,
+   "max": 156.86,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    417.792,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.0023935355392156864,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "DWDKLD": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Drosselklappenwinkeländerung im LDR-Zeitraster",
+   "unit": "grad DK/s",
+   "min": 0.0,
+   "max": 2763.86,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    0.092262,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 10.83869848908543,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "DWNDIFQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "D-Verstärkung 0.293E-2[GRAD KW / (Upm/20ms)]",
+   "unit": "Grad KW / (Upm/20ms)",
+   "min": 0.0,
+   "max": 0.74707,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.00292969,
+    0.0,
+    0.0
+   ],
+   "scale": 0.00292969,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "FAK05L": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Faktor [0;<0.5], 16 Bit",
+   "unit": "",
+   "min": 0.0,
+   "max": 0.49999,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    131072.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 7.62939453125e-06,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "FAK1BIS2": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Faktor [1;<2], 8 Bit",
+   "unit": "",
+   "min": 1.0,
+   "max": 1.99609,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    256.0,
+    -256.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.00390625,
+   "offset": 1.0,
+   "signed_modulus": 0
+  },
+  "FAK1L": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Faktor [0;<1], 16 Bit",
+   "unit": "",
+   "min": 0.0,
+   "max": 0.99998,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    65536.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 1.52587890625e-05,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "FAK2": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Faktor [0;<2], 8 Bit",
+   "unit": "",
+   "min": 0.0,
+   "max": 1.99219,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    128.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.0078125,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "FAK2L": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Faktor [0;<2], 16 Bit",
+   "unit": "",
+   "min": 0.0,
+   "max": 1.99997,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    32768.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 3.0517578125e-05,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "FAK2L10S": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Änderung FAK2L-Faktor (LOW-Byte) je Zeiteinheit (hier: 10 s)",
+   "unit": "1/s",
+   "min": 0.0,
+   "max": 0.0007782,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    327680.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 3.0517578125e-06,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "FAK32L": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Faktor [0;<32], 16 Bit",
+   "unit": "",
+   "min": 0.0,
+   "max": 31.9995,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    2048.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.00048828125,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "FAK4L": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Faktor [0;<4], 16 Bit",
+   "unit": "",
+   "min": 0.0,
+   "max": 3.99994,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    16384.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 6.103515625e-05,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "FKT128": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Umsetzung des Intervalles [0;<2]",
+   "unit": "",
+   "min": 0.0,
+   "max": 1.99219,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    128.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.0078125,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "FKT128B": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Umsetzung des Intervalles [0;1]",
+   "unit": "",
+   "min": 0.0,
+   "max": 1.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    128.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.0078125,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "FKT128L": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Umsetzung des Intervalles [0;<256] 15 Bit",
+   "unit": "",
+   "min": 0.0,
+   "max": 255.992,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    128.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.0078125,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "FKT16": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Umsetzung des Intervalles [0;<16]",
+   "unit": "",
+   "min": 0.0,
+   "max": 15.9375,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    16.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.0625,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "FKT1_16": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Umsetzung des Intervalles [1;<16]",
+   "unit": "",
+   "min": 1.0,
+   "max": 15.9375,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    16.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.0625,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "FKT1_2": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Faktor 1..2",
+   "unit": "",
+   "min": 1.0,
+   "max": 1.99609,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    256.0,
+    -256.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.00390625,
+   "offset": 1.0,
+   "signed_modulus": 0
+  },
+  "FKT2048": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Umsetzung des Intervalles [0;<0.128]",
+   "unit": "",
+   "min": 0.0,
+   "max": 0.12451,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    2048.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.00048828125,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "FKT256": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Umsetzung des Intervalles [0;<1]",
+   "unit": "",
+   "min": 0.0,
+   "max": 0.99609,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    256.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.00390625,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "FKT256L": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Umsetzung des Intervalles [0;<1], 16 Bit",
+   "unit": "",
+   "min": 0.0,
+   "max": 0.99998,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    65536.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 1.52587890625e-05,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "FKT256S": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "\"Umsetzung des Intervalls [-1;<1]",
+   "unit": "",
+   "min": -1.0,
+   "max": 0.99219,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    256.0,
+    0.0,
+    0.0,
+    2.0,
+    0.0,
+    256.0
+   ],
+   "scale": 0.0078125,
+   "offset": -0.0,
+   "signed_modulus": 256.0
+  },
+  "FKT32": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Umsetzung des Intervalles [0;<8]",
+   "unit": "",
+   "min": 0.0,
+   "max": 7.96875,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    32.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.03125,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "FKT32L": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Umsetzung des Intervalles [0;<8], 16 Bit",
+   "unit": "",
+   "min": 0.0,
+   "max": 7.99988,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    8192.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.0001220703125,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "FKT512": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Umsetzung des Intervalles [0;<0.5]",
+   "unit": "",
+   "min": 0.0,
+   "max": 0.49805,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    512.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.001953125,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "FKT64": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Umsetzung des Intervalles [0;<4]",
+   "unit": "",
+   "min": 0.0,
+   "max": 3.98438,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    64.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.015625,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "FKT8": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Umsetzung des Intervalles [0;<32]",
+   "unit": "",
+   "min": 0.0,
+   "max": 31.875,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    8.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.125,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "FKT8192": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Umsetzung des Intervalles [0;<0.03125]",
+   "unit": "",
+   "min": 0.0,
+   "max": 0.031128,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    8192.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.0001220703125,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "FLAG": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Dezimalzahl in Hexzahl, bitweise Verwendung",
+   "unit": "dez",
+   "min": 0.0,
+   "max": 255.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 1.0,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "FPC25": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Korrekturfaktor fuer Aenderung um 25 Prozent",
+   "unit": "",
+   "min": 0.75,
+   "max": 1.24805,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    256.0,
+    -192.0,
+    0.0,
+    0.5,
+    0.0,
+    0.0
+   ],
+   "scale": 0.001953125,
+   "offset": 0.75,
+   "signed_modulus": 0
+  },
+  "FRIQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "LRA - Faktoraenderung, Integrator",
+   "unit": "1/sec",
+   "min": 0.0,
+   "max": 0.7782,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    327.68,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.0030517578125,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "FRPQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "LRA - Faktoraenderung, Proportionalteil",
+   "unit": "",
+   "min": 0.0,
+   "max": 0.12451,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    32768.0,
+    0.0,
+    0.0,
+    16.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.00048828125,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "FTEKVA2": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Umsetzung Te -> TKVA",
+   "unit": "cm**3/min",
+   "min": 0.0,
+   "max": 780.0,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    84.01923,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.011902037188391277,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "GLDSKNQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Gradienten LDR-Sollwertkorrektur",
+   "unit": "1/min",
+   "min": 0.0,
+   "max": 5.83649,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    43.6907,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.02288816613146505,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "HOEHE": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Umgebungsdruck",
+   "unit": "mbar",
+   "min": 559.846,
+   "max": 1120.9,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    0.4545,
+    -254.45,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 2.2002200220022003,
+   "offset": 559.8459845984598,
+   "signed_modulus": 0
+  },
+  "IMLQL": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Luftmasse, 16 Bit",
+   "unit": "kg",
+   "min": 0.0,
+   "max": 372.821,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.0056889,
+    0.0,
+    0.0
+   ],
+   "scale": 0.0056889,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "IMLQL1": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Luftmasse, 16 Bit",
+   "unit": "kg",
+   "min": 0.0,
+   "max": 74.5643,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.0011378,
+    0.0,
+    0.0
+   ],
+   "scale": 0.0011378,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "IVQX": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "LL-Integrator, 8/8 Bit Komma-extended",
+   "unit": "kg/h",
+   "min": -64.0,
+   "max": 63.998,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.00195312,
+    32768.0,
+    0.0
+   ],
+   "scale": 0.00195312,
+   "offset": -63.99983616,
+   "signed_modulus": 0
+  },
+  "K1QUANT": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Ventilkonstanten - Quantisierung",
+   "unit": "kg/h * min / ms",
+   "min": 0.0057221,
+   "max": 0.375,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    0.0,
+    374.99997,
+    1.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "signed_modulus": 0
+  },
+  "KGHGDK": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Steigung der DK-Kennlinie",
+   "unit": "(kg/h)/(grad DK)",
+   "min": 0.0,
+   "max": 147.618,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    443.9511,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.002252500331680674,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "KGHQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Luftmassen-Durchsatzes",
+   "unit": "kg/h",
+   "min": 0.0,
+   "max": 63.75,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.25,
+    0.0,
+    0.0
+   ],
+   "scale": 0.25,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "KGHQX": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "LL-Luftmassen-Durchsatz, 8/8 Bit Komma-extended",
+   "unit": "kg/h",
+   "min": 0.0,
+   "max": 63.999,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    256.0,
+    0.0,
+    0.0,
+    0.25,
+    0.0,
+    0.0
+   ],
+   "scale": 0.0009765625,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "KRSQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Klopfregelschwelle",
+   "unit": "",
+   "min": 1.0,
+   "max": 256.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    0.0,
+    -256.0,
+    1.0,
+    0.0,
+    256.0,
+    0.0
+   ],
+   "signed_modulus": 0
+  },
+  "LAMPTAB": {
+   "kind": "table",
+   "type_id": 9,
+   "description": "Fehlerlampenansteuerung",
+   "unit": "Auswahl",
+   "min": 0.0,
+   "max": 30.0,
+   "width": 8,
+   "validated": true,
+   "table": [
+    [
+     0,
+     0.0
+    ],
+    [
+     2,
+     3.0
+    ],
+    [
+     3,
+     30.0
+    ],
+    [
+     18,
+     1.0
+    ],
+    [
+     19,
+     10.0
+    ],
+    [
+     50,
+     2.0
+    ],
+    [
+     51,
+     20.0
+    ]
+   ]
+  },
+  "LDIQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "LDR - Integrator-Steigung",
+   "unit": "%TV/sec",
+   "min": 0.0,
+   "max": 48.6374,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    26.2144,
+    0.0,
+    0.0,
+    5.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.19073486328125,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "LDPQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "LDR - P-Verstaerkung",
+   "unit": "%TV/ms",
+   "min": 0.0,
+   "max": 99.6094,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    2.56,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.390625,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "LDZDQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "LDR - Filterzeitkonstante fuer Abregelung D-Anteil",
+   "unit": "sec",
+   "min": 0.040157,
+   "max": 10.24,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    0.0,
+    10240.0,
+    1000.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "signed_modulus": 0
+  },
+  "LLRIQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Leerlaufregelung, Integral-Anteil",
+   "unit": "kg/h pro sec",
+   "min": 0.0,
+   "max": 24.9023,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.097656,
+    0.0,
+    0.0
+   ],
+   "scale": 0.097656,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "LUQS": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Laufunruhe",
+   "unit": "(Umdr./sec)^2",
+   "min": -130.967,
+   "max": 129.944,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    1.02318,
+    0.0,
+    256.0
+   ],
+   "scale": 1.02318,
+   "offset": -0.0,
+   "signed_modulus": 256.0
+  },
+  "LUQXS": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Laufunruhe, 8/8 Bit Komma-extended, signed",
+   "unit": "(Umdr./sec)^2",
+   "min": -130.967,
+   "max": 130.963,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.0039968,
+    0.0,
+    65536.0
+   ],
+   "scale": 0.0039968,
+   "offset": -0.0,
+   "signed_modulus": 65536.0
+  },
+  "MDIQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "ind. MotorMoment in 0.1000[Nm], 16-Bit",
+   "unit": "Nm",
+   "min": 0.0,
+   "max": 6553.5,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.1,
+    0.0,
+    0.0
+   ],
+   "scale": 0.1,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "MDIQOF": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "ind. MotorMoment in 0.1000[Nm] mit Offset, 16-Bit",
+   "unit": "Nm",
+   "min": -100.0,
+   "max": 6453.5,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    100.0,
+    0.0,
+    0.1,
+    0.0,
+    0.0
+   ],
+   "scale": 0.1,
+   "offset": -100.0,
+   "signed_modulus": 0
+  },
+  "MDIQS": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Motormoment signed in 0.1000 Nm (16 Bit)",
+   "unit": "Nm",
+   "min": -3276.8,
+   "max": 3276.7,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.1,
+    0.0,
+    65536.0
+   ],
+   "scale": 0.1,
+   "offset": -0.0,
+   "signed_modulus": 65536.0
+  },
+  "MLQ025": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Luftmassen-Durchsatzes",
+   "unit": "kg/h",
+   "min": 0.0,
+   "max": 63.75,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.25,
+    0.0,
+    0.0
+   ],
+   "scale": 0.25,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "MLQ025L": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Luftmassen-Durchsatzes, 16 Bit",
+   "unit": "kg/h",
+   "min": 0.0,
+   "max": 16383.8,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.25,
+    0.0,
+    0.0
+   ],
+   "scale": 0.25,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "MLQ4": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Luftmassendurchsatz",
+   "unit": "kg/h",
+   "min": 0.0,
+   "max": 1020.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    4.0,
+    0.0,
+    0.0
+   ],
+   "scale": 4.0,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "MLQ8": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Luftmassendurchsatz",
+   "unit": "kg/h",
+   "min": 0.0,
+   "max": 2040.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    8.0,
+    0.0,
+    0.0
+   ],
+   "scale": 8.0,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "MLQ_OL": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Luftmassen-Durchsatzes, 16 Bit, mit Offset",
+   "unit": "kg/h",
+   "min": -200.0,
+   "max": 7991.88,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    200.0,
+    0.0,
+    0.125,
+    0.0,
+    0.0
+   ],
+   "scale": 0.125,
+   "offset": -200.0,
+   "signed_modulus": 0
+  },
+  "MLSQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Luftmasse für KAT-Heizfunktion",
+   "unit": "kg",
+   "min": 0.0,
+   "max": 5.80267,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.022756,
+    0.0,
+    0.0
+   ],
+   "scale": 0.022756,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "MMQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Motor-Moment in 2.000[Nm], 8-Bit",
+   "unit": "Nm",
+   "min": 0.0,
+   "max": 510.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    2.0,
+    0.0,
+    0.0
+   ],
+   "scale": 2.0,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "MMQOF": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Motor-Moment in 2.000[Nm] mit Offset, 8-Bit",
+   "unit": "Nm",
+   "min": -100.0,
+   "max": 410.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    100.0,
+    0.0,
+    2.0,
+    0.0,
+    0.0
+   ],
+   "scale": 2.0,
+   "offset": -100.0,
+   "signed_modulus": 0
+  },
+  "NDIFQ1": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Drehzahlgradient 1.000[Upm/20ms]",
+   "unit": "Upm/20ms",
+   "min": -128.0,
+   "max": 127.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    1.0,
+    128.0,
+    0.0
+   ],
+   "scale": 1.0,
+   "offset": -128.0,
+   "signed_modulus": 0
+  },
+  "NGEQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Drehzahlquantisierung 10.00[Upm], Offset 1000. [UpM]",
+   "unit": "Upm",
+   "min": 1000.0,
+   "max": 3550.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    -1000.0,
+    0.0,
+    10.0,
+    0.0,
+    0.0
+   ],
+   "scale": 10.0,
+   "offset": 1000.0,
+   "signed_modulus": 0
+  },
+  "NGRDP": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Drehzahlanstieg",
+   "unit": "Upm/sec",
+   "min": 0.0,
+   "max": 20400.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    80.0,
+    0.0,
+    0.0
+   ],
+   "scale": 80.0,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "NGRDQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Drehzahlabfall",
+   "unit": "Upm/sec",
+   "min": 0.0,
+   "max": 2550.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    10.0,
+    0.0,
+    0.0
+   ],
+   "scale": 10.0,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "NGRDQ100S": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Drehzahlgradient, signed Arithmetik",
+   "unit": "Upm/sec",
+   "min": -12800.0,
+   "max": 12700.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    100.0,
+    0.0,
+    256.0
+   ],
+   "scale": 100.0,
+   "offset": -0.0,
+   "signed_modulus": 256.0
+  },
+  "NQ025": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Drehzahlquantisierung 0.250[Upm]",
+   "unit": "Upm",
+   "min": 0.0,
+   "max": 12000.0,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.25,
+    0.0,
+    0.0
+   ],
+   "scale": 0.25,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "NQ1": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Drehzahlquantisierung 1.000[Upm]",
+   "unit": "Upm",
+   "min": 0.0,
+   "max": 65535.0,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 1.0,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "NQ10": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Drehzahlquantisierung 10.00[Upm]",
+   "unit": "Upm",
+   "min": 0.0,
+   "max": 2550.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    10.0,
+    0.0,
+    0.0
+   ],
+   "scale": 10.0,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "NQ10OF": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Delta-Drehzahl in 10.00[Upm] mit Offset",
+   "unit": "Upm",
+   "min": -1280.0,
+   "max": 1270.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    10.0,
+    128.0,
+    0.0
+   ],
+   "scale": 10.0,
+   "offset": -1280.0,
+   "signed_modulus": 0
+  },
+  "NQ40": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Drehzahlquantisierung 40.00[Upm]",
+   "unit": "Upm",
+   "min": 0.0,
+   "max": 9960.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    40.0,
+    0.0,
+    0.0
+   ],
+   "scale": 40.0,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "NWDEZ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zahl der Nockenwellenumdrehungen",
+   "unit": "NW-Umdr.",
+   "min": 0.0,
+   "max": 255.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 1.0,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "PCENT": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Prozent",
+   "unit": "%",
+   "min": 0.0,
+   "max": 99.6094,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    256.0,
+    0.0,
+    0.0,
+    100.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.390625,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "PCENT256": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Prozent: 100% = 100hex",
+   "unit": "%",
+   "min": 0.0,
+   "max": 100.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    256.0,
+    0.0,
+    0.0,
+    100.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.390625,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "PCENTL": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Prozent, 16 Bit",
+   "unit": "%",
+   "min": 0.0,
+   "max": 99.9985,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    655.36,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.00152587890625,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "PCENTLS": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Prozent, 16 Bit, Signed",
+   "unit": "%",
+   "min": -100.0,
+   "max": 99.9969,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    655.36,
+    0.0,
+    0.0,
+    2.0,
+    0.0,
+    65536.0
+   ],
+   "scale": 0.0030517578125,
+   "offset": -0.0,
+   "signed_modulus": 65536.0
+  },
+  "PCENTS": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Prozent, 8 Bit, Signed",
+   "unit": "%",
+   "min": -100.0,
+   "max": 99.2188,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    2.56,
+    0.0,
+    0.0,
+    2.0,
+    0.0,
+    256.0
+   ],
+   "scale": 0.78125,
+   "offset": -0.0,
+   "signed_modulus": 256.0
+  },
+  "PCGRD": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Ausgabe Tastverhältnis in % je Grad",
+   "unit": "%/Grad",
+   "min": 0.0,
+   "max": 134.379,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    487.688,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.0020504912977149323,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "PCR256": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitkonstante für Abregelung",
+   "unit": "%/sec",
+   "min": 0.0,
+   "max": 38.8477,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.15234,
+    0.0,
+    0.0
+   ],
+   "scale": 0.15234,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "PC_I24": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Umrechnung in Prozent mit: 100% = 24 Inkremente",
+   "unit": "%",
+   "min": 0.0,
+   "max": 100.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    4.16667,
+    0.0,
+    0.0
+   ],
+   "scale": 4.16667,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "PHI1_10": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Filterzeitkonstante fuer Tiefpass",
+   "unit": "ms",
+   "min": 10.0392,
+   "max": 2560.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    0.0,
+    2560.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "signed_modulus": 0
+  },
+  "PHI1_10LD": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "LDR-Filterzeitkonstante fuer Tiefpass",
+   "unit": "ms",
+   "min": 40.1569,
+   "max": 10240.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    0.0,
+    10240.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "signed_modulus": 0
+  },
+  "PHI1_20": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Filterzeitkonstante fuer Tiefpass",
+   "unit": "ms",
+   "min": 20.0784,
+   "max": 5120.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    0.0,
+    5120.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "signed_modulus": 0
+  },
+  "PHI1_PH": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Phasensegment- abhaengige Filterkonstante",
+   "unit": "% pro Phaseninterrup",
+   "min": 0.0,
+   "max": 99.6094,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.39063,
+    0.0,
+    0.0
+   ],
+   "scale": 0.39063,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "PHI1_SY": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zuendungsabhaengige Filterkonstante",
+   "unit": "% pro Zuendung",
+   "min": 0.0,
+   "max": 99.6094,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.39063,
+    0.0,
+    0.0
+   ],
+   "scale": 0.39063,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "PHI2_10": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Filterzeitkonstante fuer Tiefpass",
+   "unit": "sec",
+   "min": 2.57004,
+   "max": 655.36,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    0.0,
+    655.36,
+    1.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "signed_modulus": 0
+  },
+  "PHI2_20": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Filterzeitkonstante fuer Tiefpass",
+   "unit": "sec",
+   "min": 5.14008,
+   "max": 1310.72,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    0.0,
+    1310.72,
+    1.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "signed_modulus": 0
+  },
+  "PHI3_10": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Filterzeitkonstante fuer Tiefpass, 16 Bit",
+   "unit": "sec",
+   "min": 0.01,
+   "max": 655.36,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    0.0,
+    655.36,
+    1.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "signed_modulus": 0
+  },
+  "PHI3_100": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Filterzeitkonstante fuer Tiefpass, 16 Bit",
+   "unit": "sec",
+   "min": 0.1,
+   "max": 6553.6,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    0.0,
+    6553.6,
+    1.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "signed_modulus": 0
+  },
+  "PHI3_20": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Filterzeitkonstante fuer Tiefpass, 16 Bit",
+   "unit": "sec",
+   "min": 0.02,
+   "max": 1310.72,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    0.0,
+    1310.72,
+    1.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "signed_modulus": 0
+  },
+  "REFTAB": {
+   "kind": "table",
+   "type_id": 1,
+   "description": "Referenzpegelbereiche fuer Klopferkennung",
+   "unit": "",
+   "min": 0.0,
+   "max": 1.25,
+   "width": 8,
+   "validated": true,
+   "table": [
+    [
+     0,
+     0.0
+    ],
+    [
+     1,
+     0.75
+    ],
+    [
+     2,
+     0.875
+    ],
+    [
+     3,
+     1.125
+    ],
+    [
+     4,
+     1.25
+    ]
+   ]
+  },
+  "RHSQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Innenwiderstand Sondenheizung",
+   "unit": "Ohm",
+   "min": 0.0,
+   "max": 94.3265,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.36991,
+    0.0,
+    0.0
+   ],
+   "scale": 0.36991,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "RSQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "ASR-Reduzierstufenauswahl",
+   "unit": "Reduzierstufe",
+   "min": 0.0,
+   "max": 8.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 1.0,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "S1_DEZL": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Dezimalzahl begrenzt (in 16-Bit-Hexzahl)",
+   "unit": "dez",
+   "min": 2500.0,
+   "max": 7000.0,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 1.0,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "SIG10": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Umsetzung des Intervalles [-1.0;<1.0]",
+   "unit": "",
+   "min": -1.0,
+   "max": 0.99219,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    128.0,
+    0.0,
+    0.0,
+    1.0,
+    128.0,
+    0.0
+   ],
+   "scale": 0.0078125,
+   "offset": -1.0,
+   "signed_modulus": 0
+  },
+  "SIG64L": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Umsetzung des Intervalles [- 64.00;< 64.00]",
+   "unit": "",
+   "min": -64.0,
+   "max": 63.998,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    32768.0,
+    0.0,
+    0.0,
+    64.0,
+    32768.0,
+    0.0
+   ],
+   "scale": 0.001953125,
+   "offset": -64.0,
+   "signed_modulus": 0
+  },
+  "SIGTEQL": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Korrektur von te (16 Bit)",
+   "unit": "ms",
+   "min": -43.6907,
+   "max": 43.6893,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.0013333,
+    0.0,
+    65536.0
+   ],
+   "scale": 0.0013333,
+   "offset": -0.0,
+   "signed_modulus": 65536.0
+  },
+  "SWQL": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Schließwinkel ohne Offset, 16 Bit",
+   "unit": "grad KW",
+   "min": 0.0,
+   "max": 720.0,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.375,
+    0.0,
+    0.0
+   ],
+   "scale": 0.375,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "T1Q32": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "32* Timer1",
+   "unit": "us",
+   "min": 0.0,
+   "max": 10837.3,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    42.6667,
+    0.0,
+    0.0
+   ],
+   "scale": 42.6667,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "T1QL": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung in Timer1-Quanten, 16 Bit",
+   "unit": "us",
+   "min": 0.0,
+   "max": 87380.0,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    1.33333,
+    0.0,
+    0.0
+   ],
+   "scale": 1.33333,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TEIQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Tankentlüftung, Integrationsgeschwindigkeit Spülrate (100ms-Raster)",
+   "unit": "% / s",
+   "min": 0.00763,
+   "max": 0.97282,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.003815,
+    0.0,
+    0.0
+   ],
+   "scale": 0.003815,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TEIQL": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Tankentlüftung, Integrationsgeschwindigkeit Spülrate (100ms-Raster)",
+   "unit": "% / s",
+   "min": 0.00763,
+   "max": 250.016,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.003815,
+    0.0,
+    0.0
+   ],
+   "scale": 0.003815,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TEMPQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Temperatur",
+   "unit": "grad C",
+   "min": -48.0,
+   "max": 143.25,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    48.0,
+    0.0,
+    0.75,
+    0.0,
+    0.0
+   ],
+   "scale": 0.75,
+   "offset": -48.0,
+   "signed_modulus": 0
+  },
+  "TEMPQ4": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Temperatur",
+   "unit": "grad C",
+   "min": -48.0,
+   "max": 972.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    48.0,
+    0.0,
+    4.0,
+    0.0,
+    0.0
+   ],
+   "scale": 4.0,
+   "offset": -48.0,
+   "signed_modulus": 0
+  },
+  "TEQ2048": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Quantisierung von KLWF, 8 Bit",
+   "unit": "ms",
+   "min": 0.0,
+   "max": 696.32,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    2.73067,
+    0.0,
+    0.0
+   ],
+   "scale": 2.73067,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TEQ32L": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "te-Quantisierung 32us",
+   "unit": "ms",
+   "min": 0.0,
+   "max": 2796.16,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.042667,
+    0.0,
+    0.0
+   ],
+   "scale": 0.042667,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TEQ32SL": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Dte-Quantisierung 32us",
+   "unit": "ms",
+   "min": -1398.1,
+   "max": 1398.06,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.042667,
+    0.0,
+    65536.0
+   ],
+   "scale": 0.042667,
+   "offset": -0.0,
+   "signed_modulus": 65536.0
+  },
+  "TEQL": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Quantisierung von te, 16 Bit",
+   "unit": "ms",
+   "min": 0.0,
+   "max": 87.38,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.0013333,
+    0.0,
+    0.0
+   ],
+   "scale": 0.0013333,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TEQL2": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Quantisierung von te, 16 Bit",
+   "unit": "ms/Umdr.",
+   "min": 0.0,
+   "max": 43.69,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.00066667,
+    0.0,
+    0.0
+   ],
+   "scale": 0.00066667,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TEQSL": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Korrektur von te (16 Bit)",
+   "unit": "ms",
+   "min": -43.6907,
+   "max": 43.6893,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.0013333,
+    0.0,
+    65536.0
+   ],
+   "scale": 0.0013333,
+   "offset": -0.0,
+   "signed_modulus": 65536.0
+  },
+  "TEQST": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Quantisierung von te im Start, 16 Bit",
+   "unit": "ms",
+   "min": 0.0,
+   "max": 699.04,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.010667,
+    0.0,
+    0.0
+   ],
+   "scale": 0.010667,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "THAINT": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Integratorsteigung bei Hoehenadaption: 1/(Sek.*Millisek.)",
+   "unit": "1/(s*ms)",
+   "min": 0.0,
+   "max": 0.12159,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    2097.15,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.00047683761295090957,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "THAINTL": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Integratorsteigung bei Hoehenadaption: 1/(Sek.*Millisek.)",
+   "unit": "1/(s*ms)",
+   "min": 0.0,
+   "max": 0.00047497,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    536871.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 1.8626448439196752e-06,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "THAINTLG": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Integratorsteigung bei Hoehenadaption: 1/(Sek.*Millisek.)",
+   "unit": "1/(s*ms)",
+   "min": 0.0,
+   "max": 0.12207,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    536871.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 1.8626448439196752e-06,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TIQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Quantisierung der Einspritzzeit",
+   "unit": "ms/Umdr.",
+   "min": 0.0,
+   "max": 12.75,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.05,
+    0.0,
+    0.0
+   ],
+   "scale": 0.05,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TIQL": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Quantisierung der Einspritzzeit",
+   "unit": "ms/Umdr.",
+   "min": 0.0,
+   "max": 12.7998,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    256.0,
+    0.0,
+    0.0,
+    0.05,
+    0.0,
+    0.0
+   ],
+   "scale": 0.0001953125,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TIQLSL": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "\"Quantisierung der Einspritzzeit signed, 16 bit",
+   "unit": "ms/Umdr.",
+   "min": -1638.4,
+   "max": 1638.35,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.05,
+    0.0,
+    65536.0
+   ],
+   "scale": 0.05,
+   "offset": -0.0,
+   "signed_modulus": 65536.0
+  },
+  "TIQS": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Quantisierung der Einspritzzeit signed",
+   "unit": "ms/Umdr.",
+   "min": -6.4,
+   "max": 6.35,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.05,
+    0.0,
+    256.0
+   ],
+   "scale": 0.05,
+   "offset": -0.0,
+   "signed_modulus": 256.0
+  },
+  "TIQSL": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "\"Quantisierung der Einspritzzeit signed, 16 bit",
+   "unit": "ms/Umdr.",
+   "min": -6.4,
+   "max": 6.39981,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.0001953125,
+    0.0,
+    65536.0
+   ],
+   "scale": 0.0001953125,
+   "offset": -0.0,
+   "signed_modulus": 65536.0
+  },
+  "TP2_10": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Filterzeitkonstante fuer Tiefpass 2. Ordnung",
+   "unit": "ms",
+   "min": 24.3137,
+   "max": 6200.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    0.0,
+    6200.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "signed_modulus": 0
+  },
+  "TQ0H1L": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung mit 0.1[h], 16 Bit",
+   "unit": "h",
+   "min": 0.0,
+   "max": 6553.5,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.1,
+    0.0,
+    0.0
+   ],
+   "scale": 0.1,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TQ1": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung mit 1.00[ms]",
+   "unit": "ms",
+   "min": 0.0,
+   "max": 255.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 1.0,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TQ10": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung mit 10[ms]",
+   "unit": "sec",
+   "min": 0.0,
+   "max": 2.55,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    100.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.01,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TQ100": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung mit 100[ms]",
+   "unit": "sec",
+   "min": 0.0,
+   "max": 25.5,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    10.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.1,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TQ1000": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung mit 1.00[s]",
+   "unit": "sec",
+   "min": 0.0,
+   "max": 255.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 1.0,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TQ1000L": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung mit 1.00[s], 16 Bit",
+   "unit": "sec",
+   "min": 0.0,
+   "max": 65535.0,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 1.0,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TQ100L": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung mit 100[ms], 16 Bit",
+   "unit": "sec",
+   "min": 0.0,
+   "max": 6553.5,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    10.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.1,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TQ10L": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung mit 10[ms], 16 Bit",
+   "unit": "sec",
+   "min": 0.0,
+   "max": 655.35,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.01,
+    0.0,
+    0.0
+   ],
+   "scale": 0.01,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TQ10OF": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung mit 10[ms], Offset: 80[hex]",
+   "unit": "sec",
+   "min": -1.28,
+   "max": 1.27,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.01,
+    128.0,
+    0.0
+   ],
+   "scale": 0.01,
+   "offset": -1.28,
+   "signed_modulus": 0
+  },
+  "TQ10OFP": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung mit 10[ms], Offset: 80[hex],nur positive Werte",
+   "unit": "sec",
+   "min": 0.0,
+   "max": 1.27,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.01,
+    128.0,
+    0.0
+   ],
+   "scale": 0.01,
+   "offset": -1.28,
+   "signed_modulus": 0
+  },
+  "TQ10S": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung mit 10[ms], Signed Arithmetik",
+   "unit": "sec",
+   "min": -1.28,
+   "max": 1.27,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.01,
+    0.0,
+    256.0
+   ],
+   "scale": 0.01,
+   "offset": -0.0,
+   "signed_modulus": 256.0
+  },
+  "TQ1280": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung mit 1.280[sec]",
+   "unit": "sec",
+   "min": 0.0,
+   "max": 326.4,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    1.28,
+    0.0,
+    0.0
+   ],
+   "scale": 1.28,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TQ1L": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung mit 1.00[ms]",
+   "unit": "sec",
+   "min": 0.0,
+   "max": 65.535,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1000.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.001,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TQ20": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung mit 20[ms]",
+   "unit": "sec",
+   "min": 0.0,
+   "max": 5.1,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    50.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.02,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TQ200L": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung mit 200[ms], 16 Bit",
+   "unit": "sec",
+   "min": 0.0,
+   "max": 13107.0,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.2,
+    0.0,
+    0.0
+   ],
+   "scale": 0.2,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TQ20L": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung mit 20[ms], 16 Bit",
+   "unit": "sec",
+   "min": 0.0,
+   "max": 1310.7,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.02,
+    0.0,
+    0.0
+   ],
+   "scale": 0.02,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TQ256": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung mit 2.560[sec]",
+   "unit": "sec",
+   "min": 0.0,
+   "max": 652.8,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    2.56,
+    0.0,
+    0.0
+   ],
+   "scale": 2.56,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TQ320": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung mit 0.320[sec]",
+   "unit": "sec",
+   "min": 0.0,
+   "max": 81.6,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.32,
+    0.0,
+    0.0
+   ],
+   "scale": 0.32,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TQ40": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung mit 40[ms]",
+   "unit": "sec",
+   "min": 0.0,
+   "max": 10.2,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    100.0,
+    0.0,
+    0.0,
+    4.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.04,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TQ40L": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung mit 40[ms], 16 Bit",
+   "unit": "sec",
+   "min": 0.0,
+   "max": 2621.4,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    100.0,
+    0.0,
+    0.0,
+    4.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.04,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TQ50": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung mit 50[ms]",
+   "unit": "sec",
+   "min": 0.0,
+   "max": 12.75,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    20.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.05,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TQ500": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung mit 500[ms]",
+   "unit": "sec",
+   "min": 0.0,
+   "max": 127.5,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.5,
+    0.0,
+    0.0
+   ],
+   "scale": 0.5,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TQ500L": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung mit 500[ms]",
+   "unit": "sec",
+   "min": 0.0,
+   "max": 32767.0,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.5,
+    0.0,
+    0.0
+   ],
+   "scale": 0.5,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TQLD": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung Bearbeitungsraster LDR",
+   "unit": "sec",
+   "min": 0.0,
+   "max": 10.2,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    100.0,
+    0.0,
+    0.0,
+    4.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.04,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TQLD8": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung 8 * Bearbeitungsraster LDR",
+   "unit": "sec",
+   "min": 0.0,
+   "max": 81.6,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    100.0,
+    0.0,
+    0.0,
+    32.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.32,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TQLDL": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung Bearbeitungsraster LDR",
+   "unit": "sec",
+   "min": 0.0,
+   "max": 2621.4,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    100.0,
+    0.0,
+    0.0,
+    4.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.04,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TQOV": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung mit 0.0874[sec]",
+   "unit": "sec",
+   "min": 0.0,
+   "max": 22.2822,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.087381,
+    0.0,
+    0.0
+   ],
+   "scale": 0.087381,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TSUBQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Schließzeit",
+   "unit": "us",
+   "min": 0.0,
+   "max": 15240.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    60.0,
+    0.0,
+    0.0
+   ],
+   "scale": 60.0,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "TVUBQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Korrektur der Einspritzzeit",
+   "unit": "ms",
+   "min": 0.0,
+   "max": 2.72,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.010667,
+    0.0,
+    0.0
+   ],
+   "scale": 0.010667,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "T_60E_6": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zeitquantisierung mit 0.06[ms]",
+   "unit": "ms",
+   "min": 0.0,
+   "max": 15.3,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.06,
+    0.0,
+    0.0
+   ],
+   "scale": 0.06,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "UBQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Batteriespannung",
+   "unit": "V",
+   "min": 0.0,
+   "max": 17.9567,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.070418,
+    0.0,
+    0.0
+   ],
+   "scale": 0.070418,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "UHSQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Spannung Sondenheizungs-Shunt",
+   "unit": "V",
+   "min": 0.0,
+   "max": 5.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.019608,
+    0.0,
+    0.0
+   ],
+   "scale": 0.019608,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "ULSQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Lambdasonden-Spannung",
+   "unit": "V",
+   "min": -0.2,
+   "max": 1.13,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.2,
+    0.0,
+    0.0052157,
+    0.0,
+    0.0
+   ],
+   "scale": 0.0052157,
+   "offset": -0.2,
+   "signed_modulus": 0
+  },
+  "UQ20": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Spannung",
+   "unit": "V",
+   "min": 0.0,
+   "max": 20.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.078431,
+    0.0,
+    0.0
+   ],
+   "scale": 0.078431,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "UQ5": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "ADW-Spannung",
+   "unit": "mV",
+   "min": 0.0,
+   "max": 5000.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    19.6078,
+    0.0,
+    0.0
+   ],
+   "scale": 19.6078,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "UQ5L": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "ADW-Spannung",
+   "unit": "mV",
+   "min": 0.0,
+   "max": 5000.0,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.076295,
+    0.0,
+    0.0
+   ],
+   "scale": 0.076295,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "UQ5X": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Spannung",
+   "unit": "V",
+   "min": 0.0,
+   "max": 1285.0,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.019608,
+    0.0,
+    0.0
+   ],
+   "scale": 0.019608,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "UQ80": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Spannung",
+   "unit": "V",
+   "min": 0.0,
+   "max": 80.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.31373,
+    0.0,
+    0.0
+   ],
+   "scale": 0.31373,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "VERBI3": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Verbrauchsintegrator",
+   "unit": "ml",
+   "min": 0.0,
+   "max": 2056.0,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    31.875,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.03137254901960784,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "VERBR": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Verbrauchsanzeige",
+   "unit": "ml/s",
+   "min": 0.0,
+   "max": 10.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    25.5,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.0392156862745098,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "VOL": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "TEV-Durchflussvolumen",
+   "unit": "m^3/h",
+   "min": 0.0,
+   "max": 5.1,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.02,
+    0.0,
+    0.0
+   ],
+   "scale": 0.02,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "VOL_L": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Volumenstrom (Wort)",
+   "unit": "m^3/h",
+   "min": 0.0,
+   "max": 1310.7,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.02,
+    0.0,
+    0.0
+   ],
+   "scale": 0.02,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "VOL_L1": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Volumenstrom",
+   "unit": "m^3/h",
+   "min": 0.0,
+   "max": 5.11992,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    7.8125e-05,
+    0.0,
+    0.0
+   ],
+   "scale": 7.8125e-05,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "VQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Fahrgeschwindigkeit",
+   "unit": "km/h",
+   "min": 0.0,
+   "max": 326.4,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    1.28,
+    0.0,
+    0.0
+   ],
+   "scale": 1.28,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "VQ1GL": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Fahrzeuggeschwindigkeitsgradient (Word)",
+   "unit": "km/h/s",
+   "min": 0.0,
+   "max": 511.992,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.007812499,
+    0.0,
+    0.0
+   ],
+   "scale": 0.007812499,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "VQ1L": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Fahrzeuggeschwindigkeit (Word)",
+   "unit": "km/h",
+   "min": 0.0,
+   "max": 511.992,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.007812499,
+    0.0,
+    0.0
+   ],
+   "scale": 0.007812499,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "VQ2L": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Fahrzeuggeschwindigkeit (Word)",
+   "unit": "km/h",
+   "min": 0.0,
+   "max": 4095.94,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.0625,
+    0.0,
+    0.0
+   ],
+   "scale": 0.0625,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "VQ2LS": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Fahrzeuggeschwindigkeit (Signed Integer)",
+   "unit": "km/h",
+   "min": -2048.0,
+   "max": 2047.94,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.0625,
+    0.0,
+    65536.0
+   ],
+   "scale": 0.0625,
+   "offset": -0.0,
+   "signed_modulus": 65536.0
+  },
+  "VZUN": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Gangerkennung mittels Quotientbildung Geschw./Drehzahl",
+   "unit": "Km/h / Upm",
+   "min": 0.0,
+   "max": 0.06375,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    4000.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.00025,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "WDK": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Drosselklappenwinkel",
+   "unit": "grad DK",
+   "min": 0.0,
+   "max": 110.554,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    2.30656,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.4335460599334073,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "WDK10": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "DK-Aenderungsgeschwindigkeit pro 10.00 [ms]",
+   "unit": "grad DK /  10.00 [ms",
+   "min": 0.0,
+   "max": 110.554,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    2.30656,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.4335460599334073,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "WDK20": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "DK-Aenderungsgeschwindigkeit pro 20.00 [ms]",
+   "unit": "grad DK /  20.00 [ms",
+   "min": 0.0,
+   "max": 110.554,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    2.30656,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.4335460599334073,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "WDKQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Drosselklappenwinkel in Prozent",
+   "unit": "%",
+   "min": 0.0,
+   "max": 99.6094,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    256.0,
+    0.0,
+    0.0,
+    100.0,
+    0.0,
+    0.0
+   ],
+   "scale": 0.390625,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "WOF1536": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Kurbelwellenwinkel-Aenderung",
+   "unit": "grad KW",
+   "min": -768.0,
+   "max": 762.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    6.0,
+    128.0,
+    0.0
+   ],
+   "scale": 6.0,
+   "offset": -768.0,
+   "signed_modulus": 0
+  },
+  "WQ1": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Kurbelwellenwinkel-Quantisierung",
+   "unit": "grad KW",
+   "min": 0.0,
+   "max": 255.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "scale": 1.0,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "WQ1536": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Kurbelwellenwinkel-Quantisierung",
+   "unit": "grad KW",
+   "min": 0.0,
+   "max": 1536.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    6.0,
+    0.0,
+    0.0
+   ],
+   "scale": 6.0,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "WQ1S": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Kurbelwellenwinkel-Quantisierung signed",
+   "unit": "grad KW",
+   "min": -128.0,
+   "max": 127.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    256.0
+   ],
+   "scale": 1.0,
+   "offset": -0.0,
+   "signed_modulus": 256.0
+  },
+  "WQ3": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Kurbelwellenwinkel-Quantisierung",
+   "unit": "grad KW",
+   "min": 0.0,
+   "max": 765.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    3.0,
+    0.0,
+    0.0
+   ],
+   "scale": 3.0,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "WQ3L": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Kurbelwellenwinkel-Quantisierung",
+   "unit": "grad KW",
+   "min": 0.0,
+   "max": 196605.0,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    3.0,
+    0.0,
+    0.0
+   ],
+   "scale": 3.0,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "WQ768": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Kurbelwellenwinkel-Quantisierung",
+   "unit": "grad KW",
+   "min": 0.0,
+   "max": 1536.0,
+   "width": 16,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    3.0,
+    0.0,
+    0.0
+   ],
+   "scale": 3.0,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "WQOT3": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Kurbelwellenwinkel-Quantisierung ab OT",
+   "unit": "grad KW ab OT",
+   "min": -72.0,
+   "max": 693.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    72.0,
+    0.0,
+    3.0,
+    0.0,
+    0.0
+   ],
+   "scale": 3.0,
+   "offset": -72.0,
+   "signed_modulus": 0
+  },
+  "ZWNEG": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zuendwinkelverstellung nach spaet",
+   "unit": "grad KW",
+   "min": -90.0,
+   "max": 0.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    -0.75,
+    0.0,
+    0.0
+   ],
+   "scale": -0.75,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "ZWOF": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zuendwinkel mit Offset",
+   "unit": "grad KW",
+   "min": -22.5,
+   "max": 168.75,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.75,
+    30.0,
+    0.0
+   ],
+   "scale": 0.75,
+   "offset": -22.5,
+   "signed_modulus": 0
+  },
+  "ZWOF128": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zuendwinkel mit Offset 128",
+   "unit": "grad KW",
+   "min": -95.25,
+   "max": 96.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    -0.75,
+    128.0,
+    0.0
+   ],
+   "scale": -0.75,
+   "offset": 96.0,
+   "signed_modulus": 0
+  },
+  "ZWOFF1": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "ZW mit Offset für Katheizen",
+   "unit": "grad KW",
+   "min": -45.0,
+   "max": 146.25,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.75,
+    60.0,
+    0.0
+   ],
+   "scale": 0.75,
+   "offset": -45.0,
+   "signed_modulus": 0
+  },
+  "ZWQ": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zuendwinkel ohne Offset",
+   "unit": "grad KW",
+   "min": 0.0,
+   "max": 191.25,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.75,
+    0.0,
+    0.0
+   ],
+   "scale": 0.75,
+   "offset": -0.0,
+   "signed_modulus": 0
+  },
+  "ZWS": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zündwinkel, Signed",
+   "unit": "grad KW",
+   "min": -96.0,
+   "max": 95.25,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    0.75,
+    0.0,
+    256.0
+   ],
+   "scale": 0.75,
+   "offset": -0.0,
+   "signed_modulus": 256.0
+  },
+  "ZWV6": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Winkellage bezogen auf OT",
+   "unit": "grad KW",
+   "min": -84.0,
+   "max": 72.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    -1.0,
+    72.0,
+    0.0,
+    6.0,
+    0.0,
+    0.0
+   ],
+   "scale": -6.0,
+   "offset": 72.0,
+   "signed_modulus": 0
+  },
+  "ZWVEK": {
+   "kind": "formula",
+   "type_id": 6,
+   "description": "Zuendwinkellage ab BZM",
+   "unit": "grad KW",
+   "min": -22.5,
+   "max": 72.0,
+   "width": 8,
+   "validated": true,
+   "coeffs": [
+    1.0,
+    0.0,
+    0.0,
+    -0.75,
+    96.0,
+    0.0
+   ],
+   "scale": -0.75,
+   "offset": 72.0,
+   "signed_modulus": 0
+  }
+ },
+ "channels": [
+  {
+   "name": "STATVS",
+   "pseudo": 8192,
+   "addr": 136,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Status-Zelle"
+  },
+  {
+   "name": "N40",
+   "pseudo": 8193,
+   "addr": 164,
+   "size": 1,
+   "umr": "NQ40",
+   "umr_displayed": "NQ40",
+   "description": "Drehzahl"
+  },
+  {
+   "name": "N10",
+   "pseudo": 8194,
+   "addr": 52621,
+   "size": 1,
+   "umr": "NQ10",
+   "umr_displayed": "NQ10",
+   "description": "Drehzahl in 10 UPM"
+  },
+  {
+   "name": "NSOL",
+   "pseudo": 8195,
+   "addr": 93,
+   "size": 1,
+   "umr": "NQ10",
+   "umr_displayed": "NQ10",
+   "description": "Soll-Drehzahl"
+  },
+  {
+   "name": "ZWOUT",
+   "pseudo": 8196,
+   "addr": 127,
+   "size": 1,
+   "umr": "ZWVEK",
+   "umr_displayed": "ZWVEK",
+   "description": "Zuendwinkel"
+  },
+  {
+   "name": "TL",
+   "pseudo": 8197,
+   "addr": 166,
+   "size": 1,
+   "umr": "TIQ",
+   "umr_displayed": "TIQ",
+   "description": "Lastsignal"
+  },
+  {
+   "name": "UB",
+   "pseudo": 8198,
+   "addr": 156,
+   "size": 1,
+   "umr": "UBQ",
+   "umr_displayed": "UBQ",
+   "description": "UB"
+  },
+  {
+   "name": "TANS",
+   "pseudo": 8199,
+   "addr": 154,
+   "size": 1,
+   "umr": "TEMPQ",
+   "umr_displayed": "TEMPQ",
+   "description": "Tans"
+  },
+  {
+   "name": "TMOT",
+   "pseudo": 8200,
+   "addr": 155,
+   "size": 1,
+   "umr": "TEMPQ",
+   "umr_displayed": "TEMPQ",
+   "description": "Tmot"
+  },
+  {
+   "name": "VRL",
+   "pseudo": 8201,
+   "addr": 52836,
+   "size": 1,
+   "umr": "WQ1536",
+   "umr_displayed": "WQ1536",
+   "description": "Vorlagerung"
+  },
+  {
+   "name": "QSOLL+1",
+   "pseudo": 8202,
+   "addr": 52069,
+   "size": 2,
+   "umr": "KGHQX",
+   "umr_displayed": "KQHQ",
+   "description": "Solluftmenge",
+   "word_base": 52068
+  },
+  {
+   "name": "QAD+1",
+   "pseudo": 8203,
+   "addr": 50165,
+   "size": 2,
+   "umr": "IVQX",
+   "umr_displayed": "IVQX",
+   "description": "Luftvorsteuerungskorrektur",
+   "word_base": 50164
+  },
+  {
+   "name": "DKPOT",
+   "pseudo": 8204,
+   "addr": 185,
+   "size": 1,
+   "umr": "WDK",
+   "umr_displayed": "WDK",
+   "description": "Drosselklappenpoti"
+  },
+  {
+   "name": "TIMLDP",
+   "pseudo": 8205,
+   "addr": 51698,
+   "size": 2,
+   "umr": "TQ100L",
+   "umr_displayed": "TQ100L",
+   "description": "Timer für max. Diagn.zeit DLDP",
+   "word_base": 51698
+  },
+  {
+   "name": "FR2+1",
+   "pseudo": 8206,
+   "addr": 51325,
+   "size": 2,
+   "umr": "FAK2L",
+   "umr_displayed": "FAK2L",
+   "description": "LR-Integrator Bank2",
+   "word_base": 51324
+  },
+  {
+   "name": "DWKR_Z",
+   "pseudo": 8207,
+   "addr": 52943,
+   "size": 1,
+   "umr": "ZWNEG",
+   "umr_displayed": "ZWNEG",
+   "description": "Spaetverstellung akt. ZW"
+  },
+  {
+   "name": "RFPG_Z",
+   "pseudo": 8208,
+   "addr": 52916,
+   "size": 1,
+   "umr": "UQ5",
+   "umr_displayed": "UQ5",
+   "description": "Zylinderselektive Referenzp."
+  },
+  {
+   "name": "VER_Z",
+   "pseudo": 8209,
+   "addr": 52917,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Verstaerkung CC192"
+  },
+  {
+   "name": "KLINFO",
+   "pseudo": 8210,
+   "addr": 52942,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Akt. Zyl.Nr. der Klopfreg."
+  },
+  {
+   "name": "ALRST",
+   "pseudo": 8211,
+   "addr": 194,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Flags: LR und TAE"
+  },
+  {
+   "name": "FTEA+1",
+   "pseudo": 8212,
+   "addr": 52293,
+   "size": 2,
+   "umr": "FAK2L",
+   "umr_displayed": "FKT128",
+   "description": "TE-Gemischadaptionsfaktor",
+   "word_base": 52292
+  },
+  {
+   "name": "TATE",
+   "pseudo": 8213,
+   "addr": 53168,
+   "size": 1,
+   "umr": "FKT256",
+   "umr_displayed": "FKT256",
+   "description": "Tastverhaeltnis Tankentl."
+  },
+  {
+   "name": "FRA+1",
+   "pseudo": 8214,
+   "addr": 51237,
+   "size": 2,
+   "umr": "FAK2L",
+   "umr_displayed": "FKT128",
+   "description": "LR-Adapt. mult. Faktor, Bereich 2",
+   "word_base": 51236
+  },
+  {
+   "name": "TRA+1",
+   "pseudo": 8215,
+   "addr": 51241,
+   "size": 2,
+   "umr": "TEQSL",
+   "umr_displayed": "TEQS",
+   "description": "LR-Adapt. add. Faktor, Bereich 1",
+   "word_base": 51240
+  },
+  {
+   "name": "TRADTV+1",
+   "pseudo": 8216,
+   "addr": 51247,
+   "size": 2,
+   "umr": "TEQSL",
+   "umr_displayed": "TEQS",
+   "description": "LR-Adapt. add. Faktor gesamt",
+   "word_base": 51246
+  },
+  {
+   "name": "UDKLLMN",
+   "pseudo": 8217,
+   "addr": 50297,
+   "size": 1,
+   "umr": "UQ5",
+   "umr_displayed": "UQ5",
+   "description": "Minimalanschlag"
+  },
+  {
+   "name": "UDKLLMX",
+   "pseudo": 8218,
+   "addr": 50304,
+   "size": 1,
+   "umr": "UQ5",
+   "umr_displayed": "UQ5",
+   "description": "Maximalanschlag"
+  },
+  {
+   "name": "UDKNL",
+   "pseudo": 8219,
+   "addr": 50296,
+   "size": 1,
+   "umr": "UQ5",
+   "umr_displayed": "UQ5",
+   "description": "Notluftquerschnitt"
+  },
+  {
+   "name": "XDTLW",
+   "pseudo": 8220,
+   "addr": 53189,
+   "size": 1,
+   "umr": "TIQ",
+   "umr_displayed": "TIQ",
+   "description": "Lastdifferenz fuer DK-BA"
+  },
+  {
+   "name": "ZWBEG",
+   "pseudo": 8221,
+   "addr": 128,
+   "size": 1,
+   "umr": "ZWVEK",
+   "umr_displayed": "ZWVEK",
+   "description": "Zuendwinkel"
+  },
+  {
+   "name": "REFBER_Z",
+   "pseudo": 8222,
+   "addr": 52915,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Referenzpegel-Bereich"
+  },
+  {
+   "name": "XFR_TE",
+   "pseudo": 8223,
+   "addr": 53165,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Tankentlueftungsflags"
+  },
+  {
+   "name": "FTEAD+1",
+   "pseudo": 8224,
+   "addr": 52291,
+   "size": 2,
+   "umr": "SIG32L",
+   "umr_displayed": "SIG32",
+   "description": "TE-Beladungsfaktor(High Byte)",
+   "word_base": 52290
+  },
+  {
+   "name": "TEVPER",
+   "pseudo": 8225,
+   "addr": 53172,
+   "size": 1,
+   "umr": "TQ1",
+   "umr_displayed": "TQ1",
+   "description": "TEV-Periodenlaenge"
+  },
+  {
+   "name": "MLUFT",
+   "pseudo": 8226,
+   "addr": 165,
+   "size": 1,
+   "umr": "MLQ4",
+   "umr_displayed": "MLQ4",
+   "description": "Luftmassendurchsatz UMR: MLQ4"
+  },
+  {
+   "name": "XKFKEF_Z",
+   "pseudo": 8227,
+   "addr": 52918,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Klopferkennungsschwelle"
+  },
+  {
+   "name": "TEMEAN",
+   "pseudo": 8228,
+   "addr": 1028,
+   "size": 2,
+   "umr": "TEQL",
+   "umr_displayed": "TEQL",
+   "description": "mittlere eff. Einspritzzeit",
+   "word_base": 1028
+  },
+  {
+   "name": "TEMEAN+1",
+   "pseudo": 8229,
+   "addr": 1029,
+   "size": 1,
+   "umr": "",
+   "umr_displayed": "",
+   "description": ""
+  },
+  {
+   "name": "TI0",
+   "pseudo": 8230,
+   "addr": 1024,
+   "size": 2,
+   "umr": "TEQL",
+   "umr_displayed": "TEQL",
+   "description": "Einspritzzeit Bank0",
+   "word_base": 1024
+  },
+  {
+   "name": "TI0+1",
+   "pseudo": 8231,
+   "addr": 1025,
+   "size": 1,
+   "umr": "",
+   "umr_displayed": "",
+   "description": ""
+  },
+  {
+   "name": "DVL_LL+1",
+   "pseudo": 8232,
+   "addr": 52063,
+   "size": 2,
+   "umr": "UQ5L",
+   "umr_displayed": "UQ5L",
+   "description": "Spannungsverh. IPA Leerlaufbedarf",
+   "word_base": 52062
+  },
+  {
+   "name": "DVL_VS+1",
+   "pseudo": 8233,
+   "addr": 52065,
+   "size": 2,
+   "umr": "UQ5L",
+   "umr_displayed": "UQ5L",
+   "description": "Spannungsverh. IPA Sollwert",
+   "word_base": 52064
+  },
+  {
+   "name": "TL_16",
+   "pseudo": 8234,
+   "addr": 51584,
+   "size": 2,
+   "umr": "TEQL",
+   "umr_displayed": "TEQL",
+   "description": "gefiltertes Lastsignal (16bit)",
+   "word_base": 51584
+  },
+  {
+   "name": "TL_16+1",
+   "pseudo": 8235,
+   "addr": 51585,
+   "size": 1,
+   "umr": "",
+   "umr_displayed": "",
+   "description": ""
+  },
+  {
+   "name": "ML",
+   "pseudo": 8236,
+   "addr": 78,
+   "size": 2,
+   "umr": "MLQ025L",
+   "umr_displayed": "MLQ025L",
+   "description": "Luftmassendurchsatz",
+   "word_base": 78
+  },
+  {
+   "name": "ML+1",
+   "pseudo": 8237,
+   "addr": 79,
+   "size": 1,
+   "umr": "",
+   "umr_displayed": "",
+   "description": ""
+  },
+  {
+   "name": "FR",
+   "pseudo": 8238,
+   "addr": 51202,
+   "size": 2,
+   "umr": "FAK2L",
+   "umr_displayed": "FAK2L",
+   "description": "Lambdaregler Bank1",
+   "word_base": 51202
+  },
+  {
+   "name": "FR+1",
+   "pseudo": 8239,
+   "addr": 51203,
+   "size": 1,
+   "umr": "",
+   "umr_displayed": "",
+   "description": ""
+  },
+  {
+   "name": "DVL_SYNA+1",
+   "pseudo": 8240,
+   "addr": 52009,
+   "size": 2,
+   "umr": "UQ5",
+   "umr_displayed": "UQ5",
+   "description": "Speicher DVL_SYN + DDVLSYN",
+   "word_base": 52008,
+   "suspect": "FMT:2 but UQ5 is an 8-bit conversion -- likely two packed 8-bit values in one entry, not a 16-bit word"
+  },
+  {
+   "name": "DVL_SYN",
+   "pseudo": 8241,
+   "addr": 52876,
+   "size": 1,
+   "umr": "UQ5",
+   "umr_displayed": "UQ5",
+   "description": "Spannung Lagerückmeldepoti"
+  },
+  {
+   "name": "QREGP+1",
+   "pseudo": 8242,
+   "addr": 52099,
+   "size": 2,
+   "umr": "IVQX",
+   "umr_displayed": "IVQX",
+   "description": "Leerlauf-Proportionalanteil",
+   "word_base": 52098
+  },
+  {
+   "name": "QREGI+1",
+   "pseudo": 8243,
+   "addr": 52097,
+   "size": 2,
+   "umr": "IVQX",
+   "umr_displayed": "IVQX",
+   "description": "Leerlauf-Integrator",
+   "word_base": 52096
+  },
+  {
+   "name": "QREG",
+   "pseudo": 8244,
+   "addr": 52092,
+   "size": 2,
+   "umr": "IVQX",
+   "umr_displayed": "IVQX",
+   "description": "LL- Reglerausgang",
+   "word_base": 52092
+  },
+  {
+   "name": "QREG+1",
+   "pseudo": 8245,
+   "addr": 52093,
+   "size": 1,
+   "umr": "",
+   "umr_displayed": "",
+   "description": ""
+  },
+  {
+   "name": "ISPEI0",
+   "pseudo": 8246,
+   "addr": 197,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Input Schalter 0..7, PE0"
+  },
+  {
+   "name": "ISPEI1",
+   "pseudo": 8247,
+   "addr": 198,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Input Schalter 8,9, PE1"
+  },
+  {
+   "name": "USVK",
+   "pseudo": 8248,
+   "addr": 51222,
+   "size": 1,
+   "umr": "ULSQ",
+   "umr_displayed": "ULSQ",
+   "description": "Spannung Lambdasonde v.Kat, korr."
+  },
+  {
+   "name": "USHK",
+   "pseudo": 8249,
+   "addr": 51223,
+   "size": 1,
+   "umr": "ULSQ",
+   "umr_displayed": "ULSQ",
+   "description": "Spannung Lambdasonde h.Kat, korr."
+  },
+  {
+   "name": "TIMTRPLL+1",
+   "pseudo": 8250,
+   "addr": 51745,
+   "size": 2,
+   "umr": "TQ40L",
+   "umr_displayed": "TQ40L",
+   "description": "Zeit im LL für Trip",
+   "word_base": 51744
+  },
+  {
+   "name": "TIMTRPDC+1",
+   "pseudo": 8251,
+   "addr": 51747,
+   "size": 2,
+   "umr": "TQ40L",
+   "umr_displayed": "TQ40L",
+   "description": "Zeit seit Driving cycle",
+   "word_base": 51746
+  },
+  {
+   "name": "QVSB+1",
+   "pseudo": 8252,
+   "addr": 52111,
+   "size": 2,
+   "umr": "KGHQX",
+   "umr_displayed": "KGHQX",
+   "description": "Bereitstellung Luftsteuerwert",
+   "word_base": 52110
+  },
+  {
+   "name": "TABGM",
+   "pseudo": 8253,
+   "addr": 52591,
+   "size": 1,
+   "umr": "TEMPQ4",
+   "umr_displayed": "TEMPQ4",
+   "description": "modellierte Abgastemperatur"
+  },
+  {
+   "name": "TVLRH",
+   "pseudo": 8254,
+   "addr": 51274,
+   "size": 1,
+   "umr": "TQ10OF",
+   "umr_displayed": "TQ10OF",
+   "description": "TV-Sperrzeit S1HK"
+  },
+  {
+   "name": "TVLR",
+   "pseudo": 8255,
+   "addr": 51226,
+   "size": 1,
+   "umr": "TQ10OF",
+   "umr_displayed": "TQ10OF",
+   "description": "Summe TV-Sperrzeiten"
+  },
+  {
+   "name": "AVKAT",
+   "pseudo": 8256,
+   "addr": 51302,
+   "size": 1,
+   "umr": "FKT256",
+   "umr_displayed": "FKT256",
+   "description": "Kat-Konvertierungsfaktor"
+  },
+  {
+   "name": "WDKPOT",
+   "pseudo": 8257,
+   "addr": 386,
+   "size": 1,
+   "umr": "UQ5",
+   "umr_displayed": "UQ5",
+   "description": "A/D-Wert DK-Poti"
+  },
+  {
+   "name": "TEUKL",
+   "pseudo": 8258,
+   "addr": 52392,
+   "size": 2,
+   "umr": "TEQ32SL",
+   "umr_displayed": "TEQ32S",
+   "description": "UK Langzeitspeicher",
+   "word_base": 52392
+  },
+  {
+   "name": "TEUKK",
+   "pseudo": 8259,
+   "addr": 52390,
+   "size": 2,
+   "umr": "TEQ32SL",
+   "umr_displayed": "TEQ32S",
+   "description": "UK Kurzzeitspeicher",
+   "word_base": 52390
+  },
+  {
+   "name": "TEUKWM",
+   "pseudo": 8260,
+   "addr": 52410,
+   "size": 2,
+   "umr": "SIGTEQL",
+   "umr_displayed": "SIGTEQL",
+   "description": "UK DK-Anteil",
+   "word_base": 52410
+  },
+  {
+   "name": "TEUKG",
+   "pseudo": 8261,
+   "addr": 52394,
+   "size": 2,
+   "umr": "TEQSL",
+   "umr_displayed": "TEQS",
+   "description": "UK effektives TE",
+   "word_base": 52394
+  },
+  {
+   "name": "KATSPRZ",
+   "pseudo": 8263,
+   "addr": 51300,
+   "size": 2,
+   "umr": "TQ20L",
+   "umr_displayed": "TQ20",
+   "description": "Sperrzeit Filterstop Kat1",
+   "word_base": 51300
+  },
+  {
+   "name": "TFPPULS",
+   "pseudo": 8264,
+   "addr": 52760,
+   "size": 1,
+   "umr": "TQ10",
+   "umr_displayed": "TQ10",
+   "description": "Pulsdauer-Timer für Fast Pulse"
+  },
+  {
+   "name": "TIMALUST+1",
+   "pseudo": 8265,
+   "addr": 51609,
+   "size": 2,
+   "umr": "TQ20L",
+   "umr_displayed": "TQ20L",
+   "description": "ASE: Sperrzeit nach Start",
+   "word_base": 51608
+  },
+  {
+   "name": "LURS+1",
+   "pseudo": 8266,
+   "addr": 51615,
+   "size": 2,
+   "umr": "LUQX",
+   "umr_displayed": "LUQ",
+   "description": "ASE: Laufunruhe-Ref.",
+   "word_base": 51614
+  },
+  {
+   "name": "LUMS+1",
+   "pseudo": 8267,
+   "addr": 51617,
+   "size": 2,
+   "umr": "LUQX",
+   "umr_displayed": "LUQ",
+   "description": "ASE: LU-Mittelwert",
+   "word_base": 51616
+  },
+  {
+   "name": "FZKATS",
+   "pseudo": 8268,
+   "addr": 51638,
+   "size": 2,
+   "umr": "DEZL",
+   "umr_displayed": "DEZ",
+   "description": "ASE: Aussetzer Summe",
+   "word_base": 51638
+  },
+  {
+   "name": "IVZKAT",
+   "pseudo": 8269,
+   "addr": 51636,
+   "size": 2,
+   "umr": "DEZL",
+   "umr_displayed": "DEZ",
+   "description": "Zaehler Statistik-Intervall",
+   "word_base": 51636
+  },
+  {
+   "name": "FLGASE",
+   "pseudo": 8270,
+   "addr": 51618,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Flags: ASE"
+  },
+  {
+   "name": "STPTR",
+   "pseudo": 8271,
+   "addr": 52759,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Zustandspointer der DLDP"
+  },
+  {
+   "name": "FZABG1",
+   "pseudo": 8272,
+   "addr": 51628,
+   "size": 2,
+   "umr": "DEZL",
+   "umr_displayed": "DEZ",
+   "description": "Aussetzer-Zaehler Zyl.1",
+   "word_base": 51628
+  },
+  {
+   "name": "FZABG2",
+   "pseudo": 8273,
+   "addr": 51634,
+   "size": 2,
+   "umr": "DEZL",
+   "umr_displayed": "DEZ",
+   "description": "Aussetzer-Zaehler Zyl.2",
+   "word_base": 51634
+  },
+  {
+   "name": "FZABG3",
+   "pseudo": 8274,
+   "addr": 51630,
+   "size": 2,
+   "umr": "DEZL",
+   "umr_displayed": "DEZ",
+   "description": "Aussetzer-Zaehler Zyl.3",
+   "word_base": 51630
+  },
+  {
+   "name": "FZABG4",
+   "pseudo": 8275,
+   "addr": 51632,
+   "size": 2,
+   "umr": "DEZL",
+   "umr_displayed": "DEZ",
+   "description": "Aussetzer-Zaehler Zyl.4",
+   "word_base": 51632
+  },
+  {
+   "name": "FLGDLDP",
+   "pseudo": 8278,
+   "addr": 51702,
+   "size": 1,
+   "umr": "FLAG",
+   "umr_displayed": "DEZ",
+   "description": "Flagregister 1 der DLDP"
+  },
+  {
+   "name": "FLGDLDP3",
+   "pseudo": 8279,
+   "addr": 51704,
+   "size": 1,
+   "umr": "FLAG",
+   "umr_displayed": "DEZ",
+   "description": "Flagregister 3 der DLDP"
+  },
+  {
+   "name": "TKATM",
+   "pseudo": 8280,
+   "addr": 52593,
+   "size": 1,
+   "umr": "TEMPQ4",
+   "umr_displayed": "TEMPQ4",
+   "description": "theor. Abgastemperatur NK"
+  },
+  {
+   "name": "ASA",
+   "pseudo": 8281,
+   "addr": 51604,
+   "size": 2,
+   "umr": "FAK2L",
+   "umr_displayed": "FAK2L",
+   "description": "Segmentzeitkorrektur Seg 1",
+   "word_base": 51604
+  },
+  {
+   "name": "ASA+1",
+   "pseudo": 8282,
+   "addr": 51605,
+   "size": 1,
+   "umr": "",
+   "umr_displayed": "",
+   "description": ""
+  },
+  {
+   "name": "ASB",
+   "pseudo": 8283,
+   "addr": 51606,
+   "size": 2,
+   "umr": "FAK2L",
+   "umr_displayed": "FAK2L",
+   "description": "Segmentzeitkorrektur Seg 2",
+   "word_base": 51606
+  },
+  {
+   "name": "ASB+1",
+   "pseudo": 8284,
+   "addr": 51607,
+   "size": 1,
+   "umr": "",
+   "umr_displayed": "",
+   "description": ""
+  },
+  {
+   "name": "FESB",
+   "pseudo": 8287,
+   "addr": 49164,
+   "size": 2,
+   "umr": "FAK2L",
+   "umr_displayed": "FKT128",
+   "description": "Einschwingabstand fuer ZAD",
+   "word_base": 49164
+  },
+  {
+   "name": "FLGHSV",
+   "pseudo": 8288,
+   "addr": 52900,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Flags: Sondenheizung VK"
+  },
+  {
+   "name": "FLGHSH",
+   "pseudo": 8289,
+   "addr": 52908,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Flags: Sondenheizung HK"
+  },
+  {
+   "name": "FZKAT1",
+   "pseudo": 8291,
+   "addr": 51640,
+   "size": 2,
+   "umr": "DEZL",
+   "umr_displayed": "DEZL",
+   "description": "KAT-Aussetzerzähler Zylinder 1",
+   "word_base": 51640
+  },
+  {
+   "name": "FZKAT2",
+   "pseudo": 8292,
+   "addr": 51646,
+   "size": 2,
+   "umr": "DEZL",
+   "umr_displayed": "DEZL",
+   "description": "KAT-Aussetzerzähler Zylinder 2",
+   "word_base": 51646
+  },
+  {
+   "name": "FZKAT3",
+   "pseudo": 8293,
+   "addr": 51642,
+   "size": 2,
+   "umr": "DEZL",
+   "umr_displayed": "DEZL",
+   "description": "KAT-Aussetzerzähler Zylinder 3",
+   "word_base": 51642
+  },
+  {
+   "name": "FZKAT4",
+   "pseudo": 8294,
+   "addr": 51644,
+   "size": 2,
+   "umr": "DEZL",
+   "umr_displayed": "DEZL",
+   "description": "KAT-Aussetzerzähler Zylinder 4",
+   "word_base": 51644
+  },
+  {
+   "name": "TI1",
+   "pseudo": 8297,
+   "addr": 1026,
+   "size": 2,
+   "umr": "TEQL",
+   "umr_displayed": "TEQL",
+   "description": "Einspritzzeit Bank1",
+   "word_base": 1026
+  },
+  {
+   "name": "TI1+1",
+   "pseudo": 8298,
+   "addr": 1027,
+   "size": 1,
+   "umr": "",
+   "umr_displayed": "",
+   "description": ""
+  },
+  {
+   "name": "XSUMSPV",
+   "pseudo": 8299,
+   "addr": 52944,
+   "size": 1,
+   "umr": "ZWNEG",
+   "umr_displayed": "ZWNEG",
+   "description": "Summenspätverstellung"
+  },
+  {
+   "name": "F_KR0",
+   "pseudo": 8300,
+   "addr": 147,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Flagregister KR"
+  },
+  {
+   "name": "KLOPFB",
+   "pseudo": 8301,
+   "addr": 146,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Flagregister KR"
+  },
+  {
+   "name": "DDRZ",
+   "pseudo": 8302,
+   "addr": 52933,
+   "size": 1,
+   "umr": "NGRDP",
+   "umr_displayed": "NGRDP",
+   "description": "Delta-Drehzahl"
+  },
+  {
+   "name": "FZW+1",
+   "pseudo": 8303,
+   "addr": 51759,
+   "size": 2,
+   "umr": "AFAK2L",
+   "umr_displayed": "AFAK2",
+   "description": "Einspritzfaktor ZW, Kat.schutz",
+   "word_base": 51758
+  },
+  {
+   "name": "TVAGR",
+   "pseudo": 8304,
+   "addr": 52567,
+   "size": 1,
+   "umr": "FKT256",
+   "umr_displayed": "FKT256",
+   "description": "AGR-Tastverhaeltnis"
+  },
+  {
+   "name": "FWKH",
+   "pseudo": 8305,
+   "addr": 52600,
+   "size": 1,
+   "umr": "FKT256",
+   "umr_displayed": "FKT256",
+   "description": "Winkel-Faktor Katheizen"
+  },
+  {
+   "name": "FEKH",
+   "pseudo": 8306,
+   "addr": 52601,
+   "size": 1,
+   "umr": "FKT256",
+   "umr_displayed": "FKT256",
+   "description": "Einspritz-Faktor Katheizen"
+  },
+  {
+   "name": "LUTS_AP",
+   "pseudo": 8307,
+   "addr": 51622,
+   "size": 1,
+   "umr": "LUQ",
+   "umr_displayed": "LUQ",
+   "description": "Laufunruhe-Monitor"
+  },
+  {
+   "name": "LURS_AP",
+   "pseudo": 8308,
+   "addr": 51623,
+   "size": 1,
+   "umr": "LUQ",
+   "umr_displayed": "LUQ",
+   "description": "Laufunruhe Referenzwert"
+  },
+  {
+   "name": "IMLPR",
+   "pseudo": 8309,
+   "addr": 52605,
+   "size": 1,
+   "umr": "FKT256",
+   "umr_displayed": "FKT256",
+   "description": "IMLATM/MLSUS (Filterw.)"
+  },
+  {
+   "name": "TVM",
+   "pseudo": 8310,
+   "addr": 53008,
+   "size": 1,
+   "umr": "PCENT",
+   "umr_displayed": "PCENT",
+   "description": "LDR-Ausgabe-Tastverhältnis"
+  },
+  {
+   "name": "LDSHK",
+   "pseudo": 8311,
+   "addr": 53000,
+   "size": 1,
+   "umr": "TIQ",
+   "umr_displayed": "TIQ",
+   "description": "TL-Sollwert nach KFLDSHK"
+  },
+  {
+   "name": "LDSKF",
+   "pseudo": 8312,
+   "addr": 53002,
+   "size": 1,
+   "umr": "TIQ",
+   "umr_displayed": "TIQ",
+   "description": "TL-Sollwert gefiltert"
+  },
+  {
+   "name": "LDEF",
+   "pseudo": 8313,
+   "addr": 190,
+   "size": 1,
+   "umr": "TIQ",
+   "umr_displayed": "TIQ",
+   "description": "Luftmassenregelung Betrag Abweichung"
+  },
+  {
+   "name": "DTVLD",
+   "pseudo": 8314,
+   "addr": 52999,
+   "size": 1,
+   "umr": "PCENT",
+   "umr_displayed": "PCENT",
+   "description": "LDR-LD-Reglerausgang"
+  },
+  {
+   "name": "LDTVK",
+   "pseudo": 8315,
+   "addr": 53007,
+   "size": 1,
+   "umr": "PCENT",
+   "umr_displayed": "PCENT",
+   "description": "LDR-TV-Vorsteuerwert"
+  },
+  {
+   "name": "FTVLDA",
+   "pseudo": 8316,
+   "addr": 53004,
+   "size": 1,
+   "umr": "FKT128",
+   "umr_displayed": "FKT128",
+   "description": "LDR aktueller Adaptionswert"
+  },
+  {
+   "name": "TVLDVA",
+   "pseudo": 8317,
+   "addr": 53003,
+   "size": 1,
+   "umr": "PCENT",
+   "umr_displayed": "PCENT",
+   "description": "LDR-Vorsteuerwert mit FTVLDA"
+  },
+  {
+   "name": "FNKH",
+   "pseudo": 8318,
+   "addr": 52602,
+   "size": 1,
+   "umr": "FKT256",
+   "umr_displayed": "FKT256",
+   "description": "Drehzahl-Faktor-Katheizen"
+  },
+  {
+   "name": "DTVKAI",
+   "pseudo": 8319,
+   "addr": 53082,
+   "size": 1,
+   "umr": "TQ100FP",
+   "umr_displayed": "TQ100FP",
+   "description": "Delta-TV für Kat ausräumen"
+  },
+  {
+   "name": "TZLSATV+1",
+   "pseudo": 8320,
+   "addr": 51287,
+   "size": 2,
+   "umr": "TQ10L",
+   "umr_displayed": "TQ10L",
+   "description": "Zeitzähler Zyklus-Flag Z_LATV",
+   "word_base": 51286
+  },
+  {
+   "name": "TPSVKMF",
+   "pseudo": 8321,
+   "addr": 51284,
+   "size": 1,
+   "umr": "",
+   "umr_displayed": "",
+   "description": ""
+  },
+  {
+   "name": "TPSVKMF+1",
+   "pseudo": 8322,
+   "addr": 51285,
+   "size": 2,
+   "umr": "TQ10L",
+   "umr_displayed": "TQ10L",
+   "description": "Gefilterte Periodendauer",
+   "word_base": 51284
+  },
+  {
+   "name": "ZLSATP",
+   "pseudo": 8323,
+   "addr": 51288,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Periodenz. Zyklus-Flag Z_LATP"
+  },
+  {
+   "name": "XBFLSA",
+   "pseudo": 8324,
+   "addr": 51289,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Flagbyte DLSA Abgasstrang 1"
+  },
+  {
+   "name": "XBFLSAG",
+   "pseudo": 8325,
+   "addr": 52772,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Globales Flagbyte DLSA"
+  },
+  {
+   "name": "TLROH",
+   "pseudo": 8326,
+   "addr": 186,
+   "size": 1,
+   "umr": "TIQ",
+   "umr_displayed": "TIQ",
+   "description": "Lastrohwert (ungefiltert)"
+  },
+  {
+   "name": "XDWDK",
+   "pseudo": 8327,
+   "addr": 52870,
+   "size": 1,
+   "umr": "WDK",
+   "umr_displayed": "WDK",
+   "description": "pos. DKPOT-Aenderung"
+  },
+  {
+   "name": "XDWDKN",
+   "pseudo": 8328,
+   "addr": 52872,
+   "size": 1,
+   "umr": "WDK",
+   "umr_displayed": "WDK",
+   "description": "neg. DKPOT-Aenderung"
+  },
+  {
+   "name": "FST+1",
+   "pseudo": 8329,
+   "addr": 51751,
+   "size": 2,
+   "umr": "FAK32L",
+   "umr_displayed": "FKT8",
+   "description": "Startfaktor Einspritzung",
+   "word_base": 51750
+  },
+  {
+   "name": "FNS+1",
+   "pseudo": 8330,
+   "addr": 52207,
+   "size": 2,
+   "umr": "AFAK2L",
+   "umr_displayed": "AFAK2",
+   "description": "Nachstartfaktor Einspritzung",
+   "word_base": 52206
+  },
+  {
+   "name": "WKOR+1",
+   "pseudo": 8331,
+   "addr": 52549,
+   "size": 2,
+   "umr": "AFAK2L",
+   "umr_displayed": "AFAK2",
+   "description": "Warmlauffaktor Einspritzung",
+   "word_base": 52548
+  },
+  {
+   "name": "DVL_LLMN",
+   "pseudo": 8332,
+   "addr": 50287,
+   "size": 1,
+   "umr": "UQ5",
+   "umr_displayed": "UQ5",
+   "description": "DVL-Minimalanschlag"
+  },
+  {
+   "name": "DVL_LLMX",
+   "pseudo": 8333,
+   "addr": 50294,
+   "size": 1,
+   "umr": "UQ5",
+   "umr_displayed": "UQ5",
+   "description": "DVL-Maximalanschlag"
+  },
+  {
+   "name": "DVL_NL",
+   "pseudo": 8334,
+   "addr": 50286,
+   "size": 1,
+   "umr": "UQ5",
+   "umr_displayed": "UQ5",
+   "description": "DVL-Notluftposition"
+  },
+  {
+   "name": "DVL_IST",
+   "pseudo": 8335,
+   "addr": 52043,
+   "size": 2,
+   "umr": "DEZL",
+   "umr_displayed": "UQ5",
+   "description": "DVL-Istwert",
+   "word_base": 52043
+  },
+  {
+   "name": "DVL_SOL",
+   "pseudo": 8336,
+   "addr": 52023,
+   "size": 2,
+   "umr": "DEZL",
+   "umr_displayed": "UQ5",
+   "description": "DVL-Sollwert",
+   "word_base": 52023
+  },
+  {
+   "name": "FLGDVL",
+   "pseudo": 8337,
+   "addr": 191,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Flagregister DVL"
+  },
+  {
+   "name": "IWERT+1",
+   "pseudo": 8338,
+   "addr": 52049,
+   "size": 2,
+   "umr": "DEZL",
+   "umr_displayed": "DEZ",
+   "description": "DVL-I-Anteil Lageregler",
+   "word_base": 52048
+  },
+  {
+   "name": "TNST+1",
+   "pseudo": 8339,
+   "addr": 51545,
+   "size": 2,
+   "umr": "TQ10L",
+   "umr_displayed": "TQ10L",
+   "description": "Zeitzähler nach Startende",
+   "word_base": 51544
+  },
+  {
+   "name": "ZDSLSE",
+   "pseudo": 8340,
+   "addr": 51736,
+   "size": 2,
+   "umr": "TQ10L",
+   "umr_displayed": "TQ10L",
+   "description": "Zeitzähler Einschaltverz.",
+   "word_base": 51736
+  },
+  {
+   "name": "ZDSLSI",
+   "pseudo": 8341,
+   "addr": 51738,
+   "size": 2,
+   "umr": "TQ10L",
+   "umr_displayed": "TQ10L",
+   "description": "Zeitzähler Intervall",
+   "word_base": 51738
+  },
+  {
+   "name": "ZMSLS",
+   "pseudo": 8342,
+   "addr": 52815,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Anzahl erfolgter Tests"
+  },
+  {
+   "name": "ZIOSLS",
+   "pseudo": 8343,
+   "addr": 52816,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Anzahl der i. O.-Tests"
+  },
+  {
+   "name": "TLDPP",
+   "pseudo": 8344,
+   "addr": 49742,
+   "size": 2,
+   "umr": "TQ10L",
+   "umr_displayed": "TQ10L",
+   "description": "Gemess. Per.dauer bei Leckdia.",
+   "word_base": 49742
+  },
+  {
+   "name": "TLDPP+1",
+   "pseudo": 8345,
+   "addr": 49743,
+   "size": 2,
+   "umr": "TQ10L",
+   "umr_displayed": "TQ10L",
+   "description": "\" \" \" \"",
+   "word_base": 49742
+  },
+  {
+   "name": "TLDPPMW",
+   "pseudo": 8346,
+   "addr": 51700,
+   "size": 2,
+   "umr": "TQ10L",
+   "umr_displayed": "TQ10L",
+   "description": "Periodendauermittelwert DLDP",
+   "word_base": 51700
+  },
+  {
+   "name": "TLDPPMW+1",
+   "pseudo": 8347,
+   "addr": 51701,
+   "size": 2,
+   "umr": "TQ10L",
+   "umr_displayed": "TQ10L",
+   "description": "\" \"",
+   "word_base": 51700
+  },
+  {
+   "name": "PTV",
+   "pseudo": 8348,
+   "addr": 51273,
+   "size": 1,
+   "umr": "TQ10S",
+   "umr_displayed": "TQ10S",
+   "description": "Proportionalanteil der LRHK Bank1"
+  },
+  {
+   "name": "FRSLSA",
+   "pseudo": 8349,
+   "addr": 51322,
+   "size": 1,
+   "umr": "FAK2",
+   "umr_displayed": "FAK2",
+   "description": "Regelfaktor zu Beginn der Dia."
+  },
+  {
+   "name": "PTV2",
+   "pseudo": 8350,
+   "addr": 51395,
+   "size": 1,
+   "umr": "TQ10S",
+   "umr_displayed": "TQ10S",
+   "description": "Proportionalanteil der LRHK Bank2"
+  },
+  {
+   "name": "XTDSLP",
+   "pseudo": 8351,
+   "addr": 52817,
+   "size": 1,
+   "umr": "TQ100",
+   "umr_displayed": "TQ100",
+   "description": "Zeitzähler für TDSLP"
+  },
+  {
+   "name": "FTEFVA+1",
+   "pseudo": 8352,
+   "addr": 52307,
+   "size": 2,
+   "umr": "FAK05L",
+   "umr_displayed": "FKT512",
+   "description": "Spuelrate TEA",
+   "word_base": 52306
+  },
+  {
+   "name": "VFZ",
+   "pseudo": 8353,
+   "addr": 52833,
+   "size": 1,
+   "umr": "VQ",
+   "umr_displayed": "VQ",
+   "description": "Fahrzeug-Geschwindigkeit"
+  },
+  {
+   "name": "TLWK",
+   "pseudo": 8354,
+   "addr": 52632,
+   "size": 1,
+   "umr": "TIQ",
+   "umr_displayed": "TIQ",
+   "description": "kor. tlw-Nebenlastsignal"
+  },
+  {
+   "name": "TLW",
+   "pseudo": 8355,
+   "addr": 52631,
+   "size": 1,
+   "umr": "TIQ",
+   "umr_displayed": "TIQ",
+   "description": "Kennfeldwert KFTLW (alpha/n)"
+  },
+  {
+   "name": "ZDKHAX+1",
+   "pseudo": 8356,
+   "addr": 51547,
+   "size": 2,
+   "umr": "THAINTLG",
+   "umr_displayed": "THAINTLG",
+   "description": "Zeitkonst. f. Integr. FDKHA",
+   "word_base": 51546
+  },
+  {
+   "name": "WLLR",
+   "pseudo": 8357,
+   "addr": 53049,
+   "size": 1,
+   "umr": "ZWVEK",
+   "umr_displayed": "ZWVEK",
+   "description": "Winkel LLR-Regelabweichung"
+  },
+  {
+   "name": "IXKKFM",
+   "pseudo": 8358,
+   "addr": 50225,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Index fuer Filtermatrix"
+  },
+  {
+   "name": "DAV",
+   "pseudo": 8359,
+   "addr": 51303,
+   "size": 1,
+   "umr": "SIG05",
+   "umr_displayed": "SIG05",
+   "description": "Grenzwert Abstand"
+  },
+  {
+   "name": "FSKKR",
+   "pseudo": 8360,
+   "addr": 51997,
+   "size": 1,
+   "umr": "FKT256",
+   "umr_displayed": "FKT256",
+   "description": "akt.Wert LDR-Sollwertkorrektur"
+  },
+  {
+   "name": "WF+1",
+   "pseudo": 8361,
+   "addr": 52381,
+   "size": 2,
+   "umr": "TEQ32L",
+   "umr_displayed": "TEQ32L",
+   "description": "abs. Gesamt-Wandfilmmasse",
+   "word_base": 52380
+  },
+  {
+   "name": "FDKHA+1",
+   "pseudo": 8362,
+   "addr": 49157,
+   "size": 2,
+   "umr": "FAK2L",
+   "umr_displayed": "FKT128",
+   "description": "Faktor Hoehenadaption",
+   "word_base": 49156
+  },
+  {
+   "name": "FRA2+1",
+   "pseudo": 8363,
+   "addr": 51359,
+   "size": 2,
+   "umr": "FAK2L",
+   "umr_displayed": "FKT128",
+   "description": "LR-Adapt. mult. Faktor Bank2",
+   "word_base": 51358
+  },
+  {
+   "name": "TRA2+1",
+   "pseudo": 8364,
+   "addr": 51363,
+   "size": 2,
+   "umr": "TEQSL",
+   "umr_displayed": "TEQS",
+   "description": "LR-Adapt. add. Faktor Bank2",
+   "word_base": 51362
+  },
+  {
+   "name": "TRADTV2+1",
+   "pseudo": 8365,
+   "addr": 51369,
+   "size": 2,
+   "umr": "TEQSL",
+   "umr_displayed": "TEQS",
+   "description": "LR-Adapt. add. Faktor gesamt Bank2",
+   "word_base": 51368
+  },
+  {
+   "name": "DZWLDY",
+   "pseudo": 8366,
+   "addr": 52934,
+   "size": 1,
+   "umr": "ZWNEG",
+   "umr_displayed": "ZWNEG",
+   "description": "Delta-ZW bei Lastdynamik"
+  },
+  {
+   "name": "KKAGW",
+   "pseudo": 8367,
+   "addr": 51304,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Anz. Grenzwert-Ueberschr."
+  },
+  {
+   "name": "F_LLR",
+   "pseudo": 8368,
+   "addr": 145,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Flagregister LL-Regelung"
+  },
+  {
+   "name": "KATRDYZ+1",
+   "pseudo": 8369,
+   "addr": 51299,
+   "size": 2,
+   "umr": "TQ20L",
+   "umr_displayed": "TQ5120",
+   "description": "Zeitzaehler Readiness-Code",
+   "word_base": 51298
+  },
+  {
+   "name": "ERFLG0",
+   "pseudo": 8370,
+   "addr": 49184,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Error-Flagbyte Digitalteil"
+  },
+  {
+   "name": "ERFLG1",
+   "pseudo": 8371,
+   "addr": 49186,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Error-Flagbyte Temperatur-Sensoren"
+  },
+  {
+   "name": "ERFLG2",
+   "pseudo": 8372,
+   "addr": 49188,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Error-Flagbyte restliche AD-Kanäle"
+  },
+  {
+   "name": "ERFLG3",
+   "pseudo": 8373,
+   "addr": 49190,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Error-Flagbyte Lambdaregelung"
+  },
+  {
+   "name": "ERFLG4",
+   "pseudo": 8374,
+   "addr": 49192,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Error-Flagbyte Endstufen 1"
+  },
+  {
+   "name": "ERFLG5",
+   "pseudo": 8375,
+   "addr": 49194,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Error-Flagbyte Endstufen 2"
+  },
+  {
+   "name": "ERFLG6",
+   "pseudo": 8376,
+   "addr": 49196,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Error-Flagbyte LLS-Endstufen"
+  },
+  {
+   "name": "ERFLG7",
+   "pseudo": 8377,
+   "addr": 49198,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Error-Flagbyte EV-Endstufen"
+  },
+  {
+   "name": "ERFLG8",
+   "pseudo": 8378,
+   "addr": 49200,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Error-Flagbyte Impuls-Eingänge"
+  },
+  {
+   "name": "ERFLG9",
+   "pseudo": 8379,
+   "addr": 49202,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Error-Flagbyte Schalter-Eingänge"
+  },
+  {
+   "name": "ERFLGA",
+   "pseudo": 8380,
+   "addr": 49204,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Error-Flagbyte Lambdasonden"
+  },
+  {
+   "name": "ERFLGB",
+   "pseudo": 8381,
+   "addr": 49206,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Error-Flagbyte Sondentechnik"
+  },
+  {
+   "name": "ERFLGC",
+   "pseudo": 8382,
+   "addr": 49208,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Error-Flagbyte Klopfregelung"
+  },
+  {
+   "name": "ERFLGD",
+   "pseudo": 8383,
+   "addr": 49210,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Error-Flagbyte katschäd. Aussetzer"
+  },
+  {
+   "name": "ERFLGE",
+   "pseudo": 8384,
+   "addr": 49212,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Error-Flagbyte Abg. Aussetzer"
+  },
+  {
+   "name": "ERFLGF",
+   "pseudo": 8385,
+   "addr": 49214,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Error-Flagbyte OBDII-Diagnose"
+  },
+  {
+   "name": "ZYFLG0",
+   "pseudo": 8386,
+   "addr": 49216,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Zyklus-Flagbyte Digitalteil"
+  },
+  {
+   "name": "ZYFLG1",
+   "pseudo": 8387,
+   "addr": 49218,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Zyklus-Flagbyte Temperatur-Sensoren"
+  },
+  {
+   "name": "ZYFLG2",
+   "pseudo": 8388,
+   "addr": 49220,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Zyklus-Flagbyte restl. AD-Kanäle"
+  },
+  {
+   "name": "ZYFLG3",
+   "pseudo": 8389,
+   "addr": 49222,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Zyklus-Flagbyte Lambdaregelung"
+  },
+  {
+   "name": "ZYFLG4",
+   "pseudo": 8390,
+   "addr": 49224,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Zyklus-Flagbyte Endstufen 1"
+  },
+  {
+   "name": "ZYFLG5",
+   "pseudo": 8391,
+   "addr": 49226,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Zyklus-Flagbyte Endstufen 2"
+  },
+  {
+   "name": "ZYFLG6",
+   "pseudo": 8392,
+   "addr": 49228,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Zyklus-Flagbyte LLS-Endstufen"
+  },
+  {
+   "name": "ZYFLG7",
+   "pseudo": 8393,
+   "addr": 49230,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Zyklus-Flagbyte EV-Endstufen"
+  },
+  {
+   "name": "ZYFLG8",
+   "pseudo": 8394,
+   "addr": 49232,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Zyklus-Flagbyte Impuls-Eingänge"
+  },
+  {
+   "name": "ZYFLG9",
+   "pseudo": 8395,
+   "addr": 49234,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Zyklus-Flagbyte Schalter-Eingänge"
+  },
+  {
+   "name": "ZYFLGA",
+   "pseudo": 8396,
+   "addr": 49236,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Zyklus-Flagbyte Lambdasonden"
+  },
+  {
+   "name": "ZYFLGB",
+   "pseudo": 8397,
+   "addr": 49238,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Zyklus-Flagbyte Sondentechnik"
+  },
+  {
+   "name": "ZYFLGC",
+   "pseudo": 8398,
+   "addr": 49240,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Zyklus-Flagbyte Klopfregelung"
+  },
+  {
+   "name": "ZYFLGD",
+   "pseudo": 8399,
+   "addr": 49242,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Zyklus-Flagbyte katschäd. Aussetzer"
+  },
+  {
+   "name": "ZYFLGE",
+   "pseudo": 8400,
+   "addr": 49244,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Zyklus-Flagbyte Abg. Aussetzer"
+  },
+  {
+   "name": "ZYFLGF",
+   "pseudo": 8401,
+   "addr": 49246,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Zyklus-Flagbyte OBDII-Diagnose"
+  },
+  {
+   "name": "TIMTRPST+1",
+   "pseudo": 8402,
+   "addr": 51743,
+   "size": 2,
+   "umr": "TQ40L",
+   "umr_displayed": "TQ40L",
+   "description": "Zeit seit Start für Trip",
+   "word_base": 51742
+  },
+  {
+   "name": "OBDSTAT",
+   "pseudo": 8403,
+   "addr": 49248,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Flagbyte OBD-Status"
+  },
+  {
+   "name": "ERFLGC_",
+   "pseudo": 8404,
+   "addr": 49209,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Error-Flagbyte Klopfregelung"
+  },
+  {
+   "name": "ZYFLGC_",
+   "pseudo": 8405,
+   "addr": 49241,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Zyklus-Flagbyte Klopfregelung"
+  },
+  {
+   "name": "ERFLGD_",
+   "pseudo": 8406,
+   "addr": 49211,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Error-Flagbyte katsch. Aussetzer"
+  },
+  {
+   "name": "ZYFLGD_",
+   "pseudo": 8407,
+   "addr": 49243,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Zyklus-Flagbyte katsch. Aussetzer"
+  },
+  {
+   "name": "ERFLGE_",
+   "pseudo": 8408,
+   "addr": 49213,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Error-Flagbyte Abg. Aussetzer"
+  },
+  {
+   "name": "ZYFLGE_",
+   "pseudo": 8409,
+   "addr": 49245,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Zyklus-Flagbyte Abg. Aussetzer"
+  },
+  {
+   "name": "ERFLGF_",
+   "pseudo": 8410,
+   "addr": 49215,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Error-Flagbyte OBDII-Diagnose"
+  },
+  {
+   "name": "ZYFLGF_",
+   "pseudo": 8411,
+   "addr": 49247,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Zyklus-Flagbyte OBDII-Diagnose"
+  },
+  {
+   "name": "READY",
+   "pseudo": 8412,
+   "addr": 50217,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Readiness-Byte"
+  },
+  {
+   "name": "TEPHC+1",
+   "pseudo": 8413,
+   "addr": 52315,
+   "size": 2,
+   "umr": "TQ100L",
+   "umr_displayed": "TQ100L",
+   "description": "Zeitzähler für Spül-/Lernphase",
+   "word_base": 52314
+  },
+  {
+   "name": "XFLGDVL",
+   "pseudo": 8414,
+   "addr": 50156,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Flagregister für DVL-Adaption"
+  },
+  {
+   "name": "XFLGDVL2",
+   "pseudo": 8415,
+   "addr": 50157,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Flagregister für DVL-Adaption"
+  },
+  {
+   "name": "XFANS",
+   "pseudo": 8416,
+   "addr": 52634,
+   "size": 1,
+   "umr": "FKT128",
+   "umr_displayed": "FKT128",
+   "description": "Ansaugluftkorrektur für TLW"
+  },
+  {
+   "name": "F_LAST",
+   "pseudo": 8417,
+   "addr": 52618,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Flagbyte DK Höhenadaption"
+  },
+  {
+   "name": "VREGO+1",
+   "pseudo": 8418,
+   "addr": 52313,
+   "size": 1,
+   "umr": "VOL",
+   "umr_displayed": "VOL_L",
+   "description": "TEV-Volumenstrom"
+  },
+  {
+   "name": "XFKAT",
+   "pseudo": 8419,
+   "addr": 51306,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Flags f. Katkonv. u. Sondenüb."
+  },
+  {
+   "name": "MLNKA+1",
+   "pseudo": 8420,
+   "addr": 51271,
+   "size": 2,
+   "umr": "IMLQL",
+   "umr_displayed": "IMLQL",
+   "description": "Luftmassen-Integrator",
+   "word_base": 51270
+  },
+  {
+   "name": "ATV",
+   "pseudo": 8421,
+   "addr": 51272,
+   "size": 1,
+   "umr": "TQ10S",
+   "umr_displayed": "TQ10S",
+   "description": "TV-Regler hinter Kat"
+  },
+  {
+   "name": "ATV2",
+   "pseudo": 8422,
+   "addr": 51394,
+   "size": 1,
+   "umr": "TQ10S",
+   "umr_displayed": "TQ10S",
+   "description": "TV-Regler hinter Kat Bank2"
+  },
+  {
+   "name": "FLGLRH",
+   "pseudo": 8423,
+   "addr": 51276,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Flagbyte LRHK f. Abgasstrang 1"
+  },
+  {
+   "name": "QSDTEHP+1",
+   "pseudo": 8424,
+   "addr": 51457,
+   "size": 2,
+   "umr": "KGHQX",
+   "umr_displayed": "KGHQX",
+   "description": "Hochpaßgef. LLS-Luft",
+   "word_base": 51456
+  },
+  {
+   "name": "DTEVPHC+1",
+   "pseudo": 8425,
+   "addr": 51447,
+   "size": 2,
+   "umr": "TQ40L",
+   "umr_displayed": "TQ40L",
+   "description": "Diagnoseverbot nach Start",
+   "word_base": 51446
+  },
+  {
+   "name": "TDTEWT",
+   "pseudo": 8426,
+   "addr": 51492,
+   "size": 1,
+   "umr": "TQOV",
+   "umr_displayed": "TQOV",
+   "description": "Wartezeit bis LR eingeschw."
+  },
+  {
+   "name": "TADTEA",
+   "pseudo": 8427,
+   "addr": 51473,
+   "size": 1,
+   "umr": "FKT256",
+   "umr_displayed": "FKT256",
+   "description": "TV aus Tankentlüftungsdiagnose"
+  },
+  {
+   "name": "DFRDTE",
+   "pseudo": 8428,
+   "addr": 51485,
+   "size": 1,
+   "umr": "2KMP1",
+   "umr_displayed": "2KMP1",
+   "description": "FR Regelfaktoränderung der LR"
+  },
+  {
+   "name": "DQSDTE+1",
+   "pseudo": 8429,
+   "addr": 51469,
+   "size": 2,
+   "umr": "KGHQX",
+   "umr_displayed": "KGHQX",
+   "description": "Änderung LLS-Luft bei TEV-Auf.",
+   "word_base": 51468
+  },
+  {
+   "name": "FDTEV_W",
+   "pseudo": 8430,
+   "addr": 51448,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Flagregister DTEV"
+  },
+  {
+   "name": "XUHV",
+   "pseudo": 8431,
+   "addr": 51482,
+   "size": 1,
+   "umr": "UHSQ",
+   "umr_displayed": "UHSQ",
+   "description": "DPRAM-Kopie von UHV"
+  },
+  {
+   "name": "XUHH",
+   "pseudo": 8432,
+   "addr": 51483,
+   "size": 1,
+   "umr": "UHSQ",
+   "umr_displayed": "UHSQ",
+   "description": "DPRAM-Kopie von UHH"
+  },
+  {
+   "name": "IMLATM+1",
+   "pseudo": 8433,
+   "addr": 51517,
+   "size": 2,
+   "umr": "IMLQL",
+   "umr_displayed": "IMLQL",
+   "description": "Luftmassen-Integrator, ATM",
+   "word_base": 51516
+  },
+  {
+   "name": "DFLGABG",
+   "pseudo": 8434,
+   "addr": 50204,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Dauerflags Abgasanlage"
+  },
+  {
+   "name": "FLGAGR",
+   "pseudo": 8439,
+   "addr": 52569,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Flagbyte AGR"
+  },
+  {
+   "name": "TIMTRA",
+   "pseudo": 8440,
+   "addr": 51308,
+   "size": 2,
+   "umr": "TQ200L",
+   "umr_displayed": "TQ200L",
+   "description": "Überwachungstimer für TRA",
+   "word_base": 51308
+  },
+  {
+   "name": "TRAZS+1",
+   "pseudo": 8441,
+   "addr": 51317,
+   "size": 2,
+   "umr": "TIQSL",
+   "umr_displayed": "TIQSL",
+   "description": "Anfangswert TRA bei Start",
+   "word_base": 51316
+  },
+  {
+   "name": "TIMFRA",
+   "pseudo": 8442,
+   "addr": 51310,
+   "size": 2,
+   "umr": "TQ200L",
+   "umr_displayed": "TQ200L",
+   "description": "Überwachungstimer für FRA",
+   "word_base": 51310
+  },
+  {
+   "name": "FRAZS+1",
+   "pseudo": 8443,
+   "addr": 51319,
+   "size": 2,
+   "umr": "FAK2L",
+   "umr_displayed": "FAK2L",
+   "description": "Anfangswert FRA bei Start",
+   "word_base": 51318
+  },
+  {
+   "name": "FLGDKVS",
+   "pseudo": 8444,
+   "addr": 52756,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Flagregister der DKVS"
+  },
+  {
+   "name": "FLGDSLS",
+   "pseudo": 8445,
+   "addr": 52818,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Flags für SLS-Diagnose"
+  },
+  {
+   "name": "FLGSLS",
+   "pseudo": 8446,
+   "addr": 53149,
+   "size": 1,
+   "umr": "DEZ",
+   "umr_displayed": "DEZ",
+   "description": "Flagregister SLS"
+  },
+  {
+   "name": "IVZABG",
+   "pseudo": 8447,
+   "addr": 51624,
+   "size": 2,
+   "umr": "DEZL",
+   "umr_displayed": "DEZL",
+   "description": "ABG-Zähler 500 Arbeitsspiele",
+   "word_base": 51624
+  }
+ ],
+ "rejected": [
+  [
+   "LDPRS",
+   "unresolved VS20 entry (0x0000) - not fitted"
+  ],
+  [
+   "0",
+   "unresolved VS20 entry (0x0000) - not fitted"
+  ],
+  [
+   "0",
+   "unresolved VS20 entry (0x0000) - not fitted"
+  ],
+  [
+   "0",
+   "unresolved VS20 entry (0x0000) - not fitted"
+  ],
+  [
+   "0",
+   "unresolved VS20 entry (0x0000) - not fitted"
+  ],
+  [
+   "TAGR",
+   "unresolved VS20 entry (0x0000) - not fitted"
+  ],
+  [
+   "0",
+   "unresolved VS20 entry (0x0000) - not fitted"
+  ],
+  [
+   "0",
+   "unresolved VS20 entry (0x0000) - not fitted"
+  ],
+  [
+   "TAGRLL",
+   "unresolved VS20 entry (0x0000) - not fitted"
+  ],
+  [
+   "TAGRD",
+   "unresolved VS20 entry (0x0000) - not fitted"
+  ],
+  [
+   "TIMAGRLL",
+   "unresolved VS20 entry (0x0000) - not fitted"
+  ],
+  [
+   "TIMAGRTL",
+   "unresolved VS20 entry (0x0000) - not fitted"
+  ],
+  [
+   "0",
+   "no usable name in the FR list"
+  ]
+ ]
+}

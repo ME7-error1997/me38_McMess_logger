@@ -1,0 +1,7 @@
+# The whole project is LF in the working tree as well as in the repo. The global
+# core.autocrlf=true on this machine would otherwise check these files out as CRLF.
+* text=auto eol=lf
+
+# Keep the generated channel database and screenshots byte-exact.
+*.json text eol=lf
+*.png binary
