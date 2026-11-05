@@ -66,6 +66,16 @@
    "description": "Lastrohsignal 16 Bit, vor der Division durch 100"
   },
   {
+   "name": "XKFPUSL",
+   "pseudo": null,
+   "addr": 50343,
+   "size": 1,
+   "umr": null,
+   "umr_displayed": null,
+   "source": "[RE] 0xC4A7, read by LDBZE at pA:0xD04F",
+   "description": "Auswahl-Offset KFPU in der Zeigertabelle 0x7A40 (0=KFPU.0, 2=.1, 4=.2)"
+  },
+  {
    "name": "XNDIV",
    "pseudo": null,
    "addr": 51580,
