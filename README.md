@@ -249,9 +249,11 @@ verify on the car.
 | `mcmess/transport.py` | 9-bit frames via parity, init pulse, echo handling, timing |
 | `mcmess/session.py` | Handshake, latch-aware reads, read scheduler |
 | `mcmess/channels.py` | Channels and physical conversions |
+| `mcmess/identify.py` | Checks the connected ECU against the loaded database |
+| `mcmess/wideband.py` | Second input on its own port: decoders, source thread |
 | `mcmess/recorder.py` | Sampling thread, ring buffer, CSV — Qt-free |
 | `mcmess/simulator.py` | Simulated 018CG responder + engine model |
-| `mcmess/data/m38_018cg.json` | Generated channel + conversion database |
+| `mcmess/data/m38_018cg.json` | Generated channel + conversion database, one per ECU |
 | `gui/main.py` | The window |
 | `gui/plots.py` | Stacked small-multiple plot panels |
 | `gui/picker.py` | Channel tree with live cost estimate |
@@ -263,6 +265,85 @@ verify on the car.
 | `tests/test_session.py` | Session behaviour against the simulator |
 | `tests/test_recorder.py` | Sampling engine, ring buffer, CSV, engine model |
 | `tests/test_ramscan.py` | MCS-96 operand decoding in the RAM scanner |
+| `tests/test_wideband.py` | Decoders, staleness, and the join onto the ECU clock |
+
+## Logging a wideband
+
+AFR goes in the same CSV, on the same timestamps, read from the controller's **own
+serial port** rather than through the ECU.
+
+Not through the ECU because there is nowhere to put it. The 06A906018 connector has
+exactly one lambda input — pin 26, `LS1`, pre-cat — and **no rear-O2 pin at all**:
+the Europe variant leaves the post-cat sensor unfitted, so the usual trick of
+hijacking an unused narrowband input has no cavity to hijack. The only full-scale
+0–5 V input is pin 61, the ambient pressure sensor, which is in use; driving it
+corrupts `fho`/`fdkha`, the altitude correction, and changes fuelling while you are
+trying to measure it.
+
+Reading the controller directly is better anyway: it costs **zero K-line bandwidth**,
+so the whole ~800 byte/s budget stays available for ECU channels, it sets no DTCs,
+it cannot affect how the engine runs, and it keeps the wideband's full resolution.
+
+```bash
+.venv\Scripts\python.exe tools\probe.py watch --port COM3 --wb-port COM5 --csv logs\pull.csv
+```
+
+```bash
+.venv\Scripts\python.exe gui\main.py --port COM3 --wb-port COM5
+```
+
+The AFR gets its own panel in the window and its own column in the log.
+
+**Look at the device first.** Before trusting any decode:
+
+```bash
+.venv\Scripts\python.exe tools\probe.py wideband --wb-port COM5 --seconds 5
+```
+
+That dumps what actually arrives, says whether it is ASCII or binary, and reports
+what the chosen decoder made of it — min, mean, max and rate.
+
+### Decoders
+
+| `--wb-decoder` | For |
+|---|---|
+| `ascii` (default) | One reading per line. Handles `14.72`, `AFR 14.72` and `14.72,0.98,1` alike |
+| `linear` | Fixed-width unsigned binary samples, no framing |
+
+Map whatever the device sends onto the unit you want with `--wb-scale` and
+`--wb-offset`. For a USB ADC or Arduino bridging a 0–5 V analog output, with the
+controller set to 10–20 AFR across that range and the ADC printing 0–1023:
+
+```bash
+--wb-decoder ascii --wb-scale 0.009775 --wb-offset 10 --wb-range 9,21
+```
+
+`--wb-range` is a sanity filter, not decoration: a half-received line decodes to
+*something*, and dropping anything outside a believable AFR window is what stops
+that something reaching the log.
+
+**Binary controller protocols are deliberately not built in.** Innovate ISP2,
+Zeitronix and AEM all have one, but none has been verified against a real device
+here, and a decoder that mis-frames reports a confident wrong AFR instead of
+failing — the same class of bug as the wrong channel database. Run
+`probe.py wideband --wb-port ...` on yours; the dump makes the framing obvious and
+a decoder for it is a small addition.
+
+### How the two streams are joined
+
+The ECU sampler is the clock. Each time it finishes a sample it takes the
+wideband's most recent reading and writes it into the same row — a zero-order
+hold, no interpolation. Interpolating would invent values between two measurements
+of something that moves fast and matters a lot; a held value is at least a number
+the sensor really produced.
+
+Past `--wb-max-age` (default 0.25 s) the column goes **blank instead of holding**.
+A controller that has stopped sending — unplugged, still warming up, in free-air
+calibration — would otherwise log a flat, entirely plausible AFR for as long as you
+keep driving. An empty cell is obviously missing data; a frozen one is not.
+
+The aux column costs nothing on the wire, which the picker's cost line shows: three
+ECU channels plus a wideband still reads `3 channels, 3 bytes`.
 
 ## ECU variants
 

@@ -23,6 +23,11 @@ from serial.tools import list_ports  # noqa: E402
 
 from mcmess.channels import ChannelSet, load_channels  # noqa: E402
 from mcmess.recorder import Recorder  # noqa: E402
+from mcmess.wideband import (  # noqa: E402
+    add_arguments as add_wideband_args,
+    from_args as make_wideband,
+    make_channel,
+)
 
 # Absolute, not relative: this file is meant to run directly as
 # `py gui/main.py`, where there is no parent package. The sys.path insert above
@@ -57,7 +62,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self._paused = False
         self._reported_error = ""
 
-        self.setWindowTitle("McMESS logger - Bosch M3.8 / 06A906018CG")
+        # A wideband (or any second input) is not in the channel database and never
+        # appears in the picker: it is not an ECU channel and cannot be ticked off
+        # without also closing its port. It is appended to whatever is selected.
+        self.aux_source = make_wideband(args)
+        self.aux_channels = [make_channel(self.aux_source)] if self.aux_source else []
+        self._selection = list(self.aux_channels)
+
+        part = channels.part_number or "unknown ECU"
+        self.setWindowTitle(f"McMESS logger - Bosch M3.8 / {part}")
         self.resize(1480, 940)
 
         self._build_ui()
@@ -225,7 +238,9 @@ class MainWindow(QtWidgets.QMainWindow):
     # -- selection ---------------------------------------------------------
 
     def _on_selection_changed(self, channels: list) -> None:
-        self._selection = list(channels)
+        # Aux columns ride along with every selection, always last, so the panel
+        # order does not shuffle when ECU channels are ticked on and off.
+        self._selection = list(channels) + self.aux_channels
         self.plots.rebuild(self._selection)
         if self.recorder is not None:
             self.recorder.set_channels(self._selection)
@@ -243,8 +258,12 @@ class MainWindow(QtWidgets.QMainWindow):
         if port is None:
             self._warn("No serial port", "No port is selected. Plug the cable in and press Refresh.")
             return
-        if not self._selection:
-            self._warn("No channels", "Tick at least one channel before connecting.")
+        if not any(not c.is_aux for c in self._selection):
+            self._warn(
+                "No channels",
+                "Tick at least one ECU channel before connecting. Aux inputs are "
+                "sampled on the ECU's clock, so they cannot be logged on their own.",
+            )
             return
 
         factory = None
@@ -260,6 +279,7 @@ class MainWindow(QtWidgets.QMainWindow):
             highspeed=bool(self.speed_combo.currentData()),
             serial_factory=factory,
             channel_set=self.channel_set,
+            aux_sources=[self.aux_source] if self.aux_source else [],
         )
         self.recorder.start()
         self.connect_button.setText("Disconnect")
@@ -380,6 +400,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--screenshot", help="render the window to this PNG and exit (for checking)"
     )
+    add_wideband_args(parser)
     parser.add_argument(
         "--smooth",
         action="store_true",

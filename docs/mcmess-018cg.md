@@ -604,3 +604,73 @@ Two things follow for anyone extending this. Throughput depends on what is on
 screen, so quote the channel selection and the render settings with any rate. And
 the headless `Recorder` is the honest measure of the link -- `tools/probe.py` will
 always beat the window.
+
+---
+
+## 9. The second input
+
+AFR belongs in the same log as the ECU channels, but it does not come through the
+ECU. This section records why, because "feed the wideband into a spare analog input"
+is the first thing everyone tries.
+
+### 9.1 There is no spare input
+
+From `%STECK` in FR 30O, the 80-pin connector carries exactly one lambda input:
+
+| Pin | Signal | Type |
+|---|---|---|
+| 25 | `RM_LS1`, reference ground | RM |
+| 26 | `LS1`, Lambdasonde 1 (pre-cat) | E-A |
+| 27 | `LSH`, heater for the **front** sensor | A-S |
+
+There is no `LS2` and no `RM_LS2` anywhere in the framework. `%DLSH` says why:
+*"Bei der Europa-Version wird die Sonde hinter KAT nicht bestückt"* — with `CDLSH = 0`
+the post-cat sensor is a variant that was never wired, not an option left unpopulated.
+
+`USHK` nevertheless **is** a live McMESS channel (pseudo `0x2039` → RAM `0xC817`,
+conversion `ULSQ`), because the firmware is family code. The software path is
+complete end to end; there is simply no wire into it.
+
+The nine `E-A` pins are `13` (HFM), `26` (LS1), `53` (TMOT), `54` (TANS), `60`/`68`
+(knock), `61` (Höhengeber), `74` (DVL), `75` (DKG). Only seven appear in the
+tester-readable A/D map of `%TKADCL` — knock has its own evaluation path and LS1 its
+own input circuit. The one full-scale 0–5 V input is pin 61, `UDSU`, range 0..5.1 V,
+and on a turbo car it is in use: it feeds `fho` → `fdkha`, so injecting there changes
+fuelling and boost. `[RE]`
+
+Note that the pinout above is headed `06A 906 018 BB`, a sibling of the CG and AQ.
+Same family, same 80-pin layout, but verify against your own connector before
+trusting a pin number. `[VERIFY]`
+
+### 9.2 Joining two streams on one clock
+
+`mcmess/wideband.py` reads the controller on a second serial port, on its own
+thread. The ECU sampler is the clock: each completed sample takes the aux source's
+most recent reading by **zero-order hold**, with no interpolation. Interpolation
+would manufacture values between two measurements of a fast-moving quantity that
+directly drives tuning decisions; a held value is at least one the sensor produced.
+
+Past `max_age` (0.25 s by default) the column reports NaN rather than holding. This
+is the part that matters. A wideband that stops sending — unplugged, warming up, in
+free-air calibration — would otherwise write a flat, plausible AFR for the rest of
+the log, and nothing about the trace would look wrong. It is the same failure shape
+as the wrong channel database in section 3.2, and gets the same treatment: make it
+visible rather than survivable.
+
+The aux column costs nothing on the K-line. `AuxChannel.byte_addresses` is empty, so
+the read program never sees it, and its `assemble()` raises rather than returning a
+value — a bug that routed one into a memory read would otherwise quietly read page
+`0xFF`.
+
+### 9.3 Decoders, and the ones that are missing
+
+Built in: line-based ASCII, and fixed-width unsigned binary. Both are fully
+specified by their options, so they can be tested without a device, and both drop
+readings outside a configured range because a half-received frame decodes to
+*something*.
+
+Innovate ISP2, Zeitronix and AEM framing are **not** implemented. Their formats have
+not been checked against real hardware here, and a mis-framing decoder reports a
+confident wrong AFR rather than an error — the one outcome this project spends most
+of its effort avoiding. `tools/probe.py wideband` dumps what a device actually
+sends and classifies it, which is the honest first step.

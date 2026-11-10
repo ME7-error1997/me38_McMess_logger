@@ -100,7 +100,12 @@ class ChannelPanel:
 
     def set_readout(self, raw: int | None, value: float | None, at_cursor: bool) -> None:
         conv = self.channel.conversion
-        if raw is None:
+        if self.channel.is_aux:
+            # No raw integer and no DAMOS conversion behind an aux value: it arrives
+            # in physical units already. "--" here means genuinely no reading, which
+            # for a wideband means stale or disconnected -- worth seeing.
+            text = "--" if value is None else f"{value:.{self.channel.decimals}f}"
+        elif raw is None:
             text = "--"
         elif value is None:
             text = f"raw {raw}"

@@ -45,6 +45,12 @@ from mcmess.channels import (  # noqa: E402
 )
 from mcmess.identify import identify  # noqa: E402
 from mcmess.session import PING_ADDR, SESSION_REARM  # noqa: E402
+from mcmess.wideband import (  # noqa: E402
+    add_arguments as add_wideband_args,
+    build_decoder,
+    from_args as make_wideband,
+    make_channel,
+)
 
 RULE = "-" * 72
 
@@ -754,6 +760,80 @@ def cmd_dump(args: argparse.Namespace) -> int:
 # --------------------------------------------------------------------------- watch
 
 
+def cmd_wideband(args: argparse.Namespace) -> int:
+    """Look at what a device on a second port is actually sending.
+
+    Worth running before trusting any decode. Binary controller protocols are not
+    built in, because a decoder that mis-frames reports a confident wrong AFR rather
+    than failing, and none has been checked against a real device here. The raw
+    bytes make the format obvious enough to add one.
+    """
+    import serial
+
+    print(f"Opening {args.wb_port} at {args.wb_baud} baud for {args.seconds:g} s\n")
+    try:
+        handle = serial.Serial(port=args.wb_port, baudrate=args.wb_baud, timeout=0.1)
+    except Exception as exc:  # noqa: BLE001
+        print(f"ERROR: cannot open {args.wb_port}: {exc}")
+        return 1
+
+    raw = bytearray()
+    decoder = build_decoder(args)
+    decoded: list[float] = []
+
+    start = time.perf_counter()
+    try:
+        while time.perf_counter() - start < args.seconds:
+            chunk = handle.read(max(1, handle.in_waiting or 1))
+            if chunk:
+                raw.extend(chunk)
+                decoded.extend(decoder.feed(chunk))
+    except KeyboardInterrupt:
+        pass
+    finally:
+        handle.close()
+
+    elapsed = time.perf_counter() - start
+    print(f"{len(raw)} bytes in {elapsed:.1f} s ({len(raw) / max(elapsed, 1e-9):.0f} B/s)\n")
+    if not raw:
+        print("Nothing arrived. Check the baud rate, the port, and that the device")
+        print("is powered and streaming rather than waiting to be polled.")
+        return 1
+
+    printable = sum(1 for b in raw if 0x20 <= b < 0x7F or b in (0x0A, 0x0D))
+    ratio = printable / len(raw)
+    newlines = raw.count(0x0A)
+    print("first 128 bytes")
+    for off in range(0, min(128, len(raw)), 16):
+        row = raw[off : off + 16]
+        hexed = " ".join(f"{b:02X}" for b in row)
+        text = "".join(chr(b) if 0x20 <= b < 0x7F else "." for b in row)
+        print(f"  {off:04X}  {hexed:<47}  {text}")
+
+    print(f"\nprintable {ratio:.0%}, {newlines} newlines")
+    if ratio > 0.95 and newlines:
+        print("  -> looks like line-based ASCII; --wb-decoder ascii should work")
+    elif ratio > 0.95:
+        print("  -> ASCII but no newlines; it may use CR only, or be fixed-width")
+    else:
+        print("  -> binary. Not decodable by the built-in decoders: send this dump")
+        print("     along with the controller's model and a decoder can be written")
+        print("     for its framing.")
+
+    if decoded:
+        lo, hi = min(decoded), max(decoded)
+        mean = sum(decoded) / len(decoded)
+        print(
+            f"\ndecoded {len(decoded)} readings with --wb-decoder {args.wb_decoder}: "
+            f"min {lo:.2f}  mean {mean:.2f}  max {hi:.2f}  {args.wb_unit}"
+        )
+        print(f"  rate {len(decoded) / max(elapsed, 1e-9):.1f} Hz")
+    else:
+        print(f"\nno readings decoded with --wb-decoder {args.wb_decoder}")
+        print("  check --wb-range: values outside it are dropped as framing noise")
+    return 0
+
+
 def cmd_watch(args: argparse.Namespace) -> int:
     channel_set = _load(args)
     names = args.channels.split(",") if args.channels else PAGE0_STARTER
@@ -764,6 +844,17 @@ def cmd_watch(args: argparse.Namespace) -> int:
         print(f"ERROR: {exc}")
         return 1
 
+    wideband = make_wideband(args)
+    if wideband is not None:
+        # Appended after the ECU channels so the CSV column order stays stable
+        # whether or not a wideband is attached.
+        channels = list(channels) + [make_channel(wideband)]
+        print(
+            f"aux input: {wideband.name} from {wideband.port} at "
+            f"{wideband.baudrate} baud, {wideband.decoder.unit}, "
+            f"blank when older than {wideband.max_age:g} s\n"
+        )
+
     addresses = ChannelSet.addresses_for(channels)
     prog = build_program(addresses)
     print(f"{len(channels)} channels, {len(addresses)} byte addresses")
@@ -773,8 +864,9 @@ def cmd_watch(args: argparse.Namespace) -> int:
     )
     for ch in channels:
         unit = ch.unit or "raw"
+        where = "   aux  " if ch.is_aux else f"0x{ch.addr:04X}"
         print(
-            f"  {ch.name:<10} 0x{ch.addr:04X}  {ch.size}B  {ch.umr:<9} "
+            f"  {ch.name:<10} {where}  {ch.size}B  {ch.umr:<9} "
             f"{unit:<10} {ch.description}"
         )
         if ch.suspect:
@@ -784,6 +876,8 @@ def cmd_watch(args: argparse.Namespace) -> int:
     print()
 
     tp, session = open_session(args, channel_set)
+    if wideband is not None:
+        wideband.start()
     writer = None
     handle = None
     start = time.perf_counter()
@@ -814,6 +908,15 @@ def cmd_watch(args: argparse.Namespace) -> int:
             cells = []
             row = [f"{now:.3f}"]
             for ch in channels:
+                if ch.is_aux:
+                    value = wideband.value()
+                    if value != value:  # NaN: nothing recent enough to report
+                        cells.append(f"{ch.name}=--")
+                        row.append("")
+                    else:
+                        cells.append(f"{ch.name}={value:.2f}")
+                        row.append(csv_number(value, 4))
+                    continue
                 raw = ch.assemble(values)
                 if raw is None:
                     cells.append(f"{ch.name}=??")
@@ -847,6 +950,21 @@ def cmd_watch(args: argparse.Namespace) -> int:
         print(RULE)
         print(f"{samples} samples in {elapsed:.1f} s = {samples / max(elapsed, 1e-9):.1f} Hz")
         print(tp.stats.summary())
+        if wideband is not None:
+            wb = wideband.stats()
+            print(
+                f"{wideband.name}: {wb.readings} readings "
+                f"({wb.readings / max(elapsed, 1e-9):.1f} Hz), "
+                f"{wb.reconnects} reconnects, {wb.decode_errors} decode errors"
+            )
+            if wb.last_error:
+                print(f"  last error: {wb.last_error}")
+            if not wb.readings:
+                print(
+                    "  nothing decoded -- run 'probe.py wideband --wb-port ...' to "
+                    "see what the device is actually sending"
+                )
+            wideband.stop()
         if args.csv:
             print(f"log: {Path(args.csv).resolve()}")
         tp.close()
@@ -963,9 +1081,16 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("watch", help="live channel values, optionally logged to CSV")
     add_link_args(p)
     add_channel_args(p)
+    add_wideband_args(p)
     p.add_argument("--channels", help="comma-separated names (default: page-0 starter set)")
     p.add_argument("--csv", help="write samples to this CSV file")
     p.add_argument("--seconds", type=float, default=0.0, help="stop after N seconds")
+
+    p = sub.add_parser(
+        "wideband", help="see what a device on a second port is sending, and test a decode"
+    )
+    add_wideband_args(p)
+    p.add_argument("--seconds", type=float, default=5.0, help="capture for N seconds")
 
     p = sub.add_parser("channels", help="list known channels")
     add_channel_args(p)
@@ -990,6 +1115,7 @@ def main(argv: list[str] | None = None) -> int:
         "word": cmd_word,
         "dump": cmd_dump,
         "watch": cmd_watch,
+        "wideband": cmd_wideband,
         "channels": cmd_channels,
     }
     try:

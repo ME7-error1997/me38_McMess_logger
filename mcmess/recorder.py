@@ -25,10 +25,14 @@ import traceback
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import numpy as np
 
 from .channels import Channel, ChannelSet, csv_number
+
+if TYPE_CHECKING:  # import cycle: wideband builds AuxChannels from channels.py
+    from .wideband import WidebandSource
 from .errors import McMessError, PortError, TimeoutError_
 from .session import ConnectResult, McMessSession, ReadProgram, build_program
 from .transport import KLineTransport
@@ -155,6 +159,7 @@ class Recorder:
         on_state_change: Callable[[str], None] | None = None,
         channel_set: ChannelSet | None = None,
         verify_ecu: bool = True,
+        aux_sources: Sequence["WidebandSource"] | None = None,
     ) -> None:
         self.port = port
         self.highspeed = highspeed
@@ -170,6 +175,11 @@ class Recorder:
         #: numbers rather than an error, so this cannot be left to the operator.
         self.channel_set = channel_set
         self.verify_ecu = verify_ecu
+        #: Extra inputs on their own ports, e.g. a wideband. They run on their own
+        #: threads and are only ever sampled, never waited for, so a dead one costs
+        #: a column of NaN rather than the log.
+        self.aux_sources = list(aux_sources or [])
+        self._aux_by_key = {s.key: s for s in self.aux_sources}
 
         self._lock = threading.Lock()
         self._channels: list[Channel] = list(channels)
@@ -244,6 +254,11 @@ class Recorder:
         if self.running:
             return
         self._stop.clear()
+        # Start the aux sources first so a wideband has its port open and a reading
+        # ready by the time the first row is written, rather than logging NaN
+        # through the handshake and the first second of sampling.
+        for source in self.aux_sources:
+            source.start()
         self._thread = threading.Thread(target=self._run, name="mcmess-recorder", daemon=True)
         self._set_state("connecting")
         self._thread.start()
@@ -255,6 +270,8 @@ class Recorder:
             self._set_state("stopping")
             thread.join(timeout)
         self._thread = None
+        for source in self.aux_sources:
+            source.stop()
         if self.state != "error":
             self._set_state("idle")
 
@@ -279,7 +296,17 @@ class Recorder:
             channels = list(self._channels)
         if not channels:
             return None
-        program = build_program(ChannelSet.addresses_for(channels))
+        addresses = ChannelSet.addresses_for(channels)
+        if not addresses:
+            # Aux channels cost no wire bytes, so a selection of nothing but aux
+            # would build an empty program and sample in a tight, pointless loop.
+            # The ECU is the clock here; there has to be something to clock on.
+            self._fail(
+                "select at least one ECU channel: aux inputs are sampled on the "
+                "ECU's clock and cannot run on their own"
+            )
+            return None
+        program = build_program(addresses)
         with self._lock:
             self._stats.wire_bytes_per_sample = program.wire_bytes
             self._stats.parity_switches = program.parity_switches
@@ -428,6 +455,14 @@ class Recorder:
         row: list[float] = []
         raws: dict[str, int | None] = {}
         for channel in channels:
+            if channel.is_aux:
+                # Zero-order hold off the source's own thread. value() returns NaN
+                # once the reading is stale, so a stopped wideband leaves the cell
+                # empty instead of repeating its last number down the whole log.
+                source = self._aux_by_key.get(channel.source_key)
+                row.append(source.value(now) if source is not None else float("nan"))
+                raws[channel.name] = None
+                continue
             raw = channel.assemble(values)
             raws[channel.name] = raw
             if raw is None:
@@ -493,8 +528,9 @@ class Recorder:
         """
         channels = self.channels
         result = self.connect_result
+        part = (self.channel_set.part_number if self.channel_set else None) or "unknown ECU"
         lines = [
-            "McMESS log, Bosch M3.8 / 06A906018CG",
+            f"McMESS log, Bosch M3.8 / {part}",
             f"recorded {time.strftime('%Y-%m-%d %H:%M:%S')}",
             f"link {self.port} at {self._stats.baudrate} baud"
             + (" (highspeed)" if self.highspeed else "")
@@ -506,6 +542,12 @@ class Recorder:
         raw_names = [c.name for c in channels if not c.has_physical]
         if raw_names:
             lines.append(f"reported raw, no usable conversion: {', '.join(raw_names)}")
+        for source in self.aux_sources:
+            lines.append(
+                f"{source.name} is NOT from the ECU: {source.decoder.unit} read from "
+                f"{source.port} at {source.baudrate} baud, held to the ECU sample "
+                f"clock, blank when older than {source.max_age:g} s"
+            )
         for line in lines:
             handle.write(f"# {line}\n")
         writer.writerow(

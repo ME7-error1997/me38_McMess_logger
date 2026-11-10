@@ -336,6 +336,63 @@ class Channel:
             return f"raw {raw}"
         return self._conversion.format(raw)
 
+    @property
+    def is_aux(self) -> bool:
+        """Whether this column comes from somewhere other than the ECU."""
+        return False
+
+
+@dataclass(frozen=True)
+class AuxChannel(Channel):
+    """A column that does not come from the ECU, such as a wideband on a second port.
+
+    It is a Channel so the picker, the plots, the ring buffer and the CSV writer need
+    no special case -- but it costs nothing on the K-line, so `byte_addresses` is
+    empty and the read program never sees it. The recorder fills it from its source
+    instead of from a memory read.
+
+    `addr` is meaningless here and is set to -1 so that a bug which routes an aux
+    channel into the read program fails loudly rather than quietly reading page 0xFF.
+    """
+
+    #: Key of the AuxSource that feeds this column.
+    source_key: str = ""
+    #: Unit shown in the UI and the CSV header, e.g. "AFR" or "lambda".
+    aux_unit: str = ""
+    #: Decimal places for the live readout. An aux value arrives already in physical
+    #: units, so it has no raw integer behind it and no DAMOS conversion to ask.
+    decimals: int = 2
+
+    @property
+    def byte_addresses(self) -> tuple[int, ...]:
+        return ()
+
+    @property
+    def has_physical(self) -> bool:
+        return True
+
+    @property
+    def unit(self) -> str:
+        return self.aux_unit
+
+    @property
+    def unit_label(self) -> str:
+        return self.aux_unit or ""
+
+    @property
+    def page(self) -> int:
+        return -1
+
+    @property
+    def is_aux(self) -> bool:
+        return True
+
+    def assemble(self, values: dict[int, int]) -> int | None:
+        raise AssertionError(
+            f"aux channel {self.name!r} must be filled from its source, not from a "
+            "memory read -- it has no ECU address"
+        )
+
 
 def csv_number(value: float, digits: int = 6) -> str:
     """Format a physical value for a CSV cell.
