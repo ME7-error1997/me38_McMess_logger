@@ -8,6 +8,12 @@
   "tools/build_database.py merges this file into the generated database. Edit it here,",
   "not in m38_018cg.json, which is regenerated.",
   "",
+  "Each channel carries an \"ecus\" list of the part numbers it is valid for, and is",
+  "skipped when building any other. These addresses were read from one image's own",
+  "instruction stream and RAM is not laid out alike across the family: 121 of the 249",
+  "VS20 channels sit elsewhere in 018AQ than in 018CG. Carrying one across would read",
+  "the wrong cell and still look like a sensible number.",
+  "",
   "Everything below is tagged [RE] or [INF] in 'source'. [RE] means the address was read",
   "out of the instruction stream; [INF] means the scaling was argued from the code's",
   "fixed-point arithmetic rather than taken from a DAMOS entry. None of it has been",
@@ -40,6 +46,7 @@
    "umr": "FAK2L",
    "umr_displayed": "FAK2L",
    "word_base": 51810,
+   "ecus": ["06A906018CG"],
    "source": "[RE] 0xCA62, operand of MULU at 0xD5BB",
    "description": "Pulsationskorrektur, interpoliert aus KFPU"
   },
@@ -51,6 +58,7 @@
    "umr": "MLQ025L",
    "umr_displayed": "MLQ025L",
    "word_base": 51812,
+   "ecus": ["06A906018CG"],
    "source": "[RE] 0xCA64, stored by ST at 0xD5CE",
    "description": "durch den LMM erfasste Luftmasse je Zeiteinheit"
   },
@@ -62,6 +70,7 @@
    "umr": "TIQ16",
    "umr_displayed": "TIQ16",
    "word_base": 51814,
+   "ecus": ["06A906018CG"],
    "source": "[RE] 0xCA66, stored by ST at 0xD5ED",
    "description": "Lastrohsignal 16 Bit, vor der Division durch 100"
   },
@@ -72,6 +81,7 @@
    "size": 1,
    "umr": null,
    "umr_displayed": null,
+   "ecus": ["06A906018CG"],
    "source": "[RE] 0xC4A7, read by LDBZE at pA:0xD04F",
    "description": "Auswahl-Offset KFPU in der Zeigertabelle 0x7A40 (0=KFPU.0, 2=.1, 4=.2)"
   },
@@ -83,6 +93,7 @@
    "umr": null,
    "umr_displayed": null,
    "word_base": 51580,
+   "ecus": ["06A906018CG"],
    "source": "[RE] 0xC97C, divisor of DIVU at 0xD5E3",
    "description": "Drehzahl-Divisor im Lastpfad, Rohwert (linear in n, Faktor ungeprueft)"
   }

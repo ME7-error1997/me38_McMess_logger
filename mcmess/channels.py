@@ -24,7 +24,33 @@ import json
 from dataclasses import dataclass, field
 from pathlib import Path
 
-DEFAULT_DB = Path(__file__).resolve().parent / "data" / "m38_018cg.json"
+DATA_DIR = Path(__file__).resolve().parent / "data"
+DEFAULT_DB = DATA_DIR / "m38_018cg.json"
+
+
+def available_databases() -> dict[str, Path]:
+    """Every generated database on disk, keyed by the ECU part number it is for.
+
+    One database per ECU, because the family does NOT share a RAM layout: 121 of the
+    249 channels sit at different addresses in 018AQ than in 018CG. Using the wrong
+    one does not fail loudly -- it reads neighbouring cells and returns numbers that
+    look entirely plausible, which is why the part number is checked at connect.
+    """
+    found: dict[str, Path] = {}
+    for path in sorted(DATA_DIR.glob("m38_*.json")):
+        try:
+            meta = json.loads(path.read_text(encoding="utf-8")).get("meta", {})
+        except (OSError, json.JSONDecodeError):
+            continue
+        part = meta.get("part_number")
+        if part:
+            found[part] = path
+    return found
+
+
+def database_for_part(part: str) -> Path | None:
+    """The database built for this ECU part number, if one has been generated."""
+    return available_databases().get(part)
 
 
 # --------------------------------------------------------------------- word order
@@ -354,6 +380,24 @@ class ChannelSet:
     def __iter__(self):
         return iter(self.channels)
 
+    @property
+    def part_number(self) -> str | None:
+        """The ECU this database was built for, e.g. '06A906018CG'."""
+        return self.meta.get("part_number")
+
+    @property
+    def fingerprint(self) -> tuple[int, int, str] | None:
+        """(address, length, expected text) to identify a connected ECU, or None.
+
+        The responder serves any address, and every 018 image seen so far carries its
+        part number at the same place in the fixed flash area, so this is readable
+        live over the same link that does the logging.
+        """
+        fp = self.meta.get("fingerprint") or {}
+        if not fp.get("text") or fp.get("addr") is None:
+            return None
+        return int(fp["addr"]), int(fp.get("length", len(fp["text"]))), str(fp["text"])
+
     def get(self, name: str) -> Channel:
         try:
             return self.by_name[name]
@@ -382,12 +426,27 @@ class ChannelSet:
 
 
 def load_channels(path: Path | str = DEFAULT_DB) -> ChannelSet:
-    """Load the generated channel + conversion database."""
+    """Load the generated channel + conversion database.
+
+    Accepts either a path or an ECU part number, so '--database 06A906018AQ' works
+    as well as the full filename.
+    """
+    if isinstance(path, str) and not Path(path).is_file():
+        by_part = database_for_part(path.strip().upper())
+        if by_part is not None:
+            path = by_part
     path = Path(path)
     if not path.is_file():
+        known = available_databases()
+        listing = (
+            "\n".join(f"  {part}  ->  {p.name}" for part, p in sorted(known.items()))
+            if known
+            else "  (none generated yet)"
+        )
         raise FileNotFoundError(
             f"channel database not found: {path}\n"
-            "Generate it with:  py tools/build_database.py"
+            f"Databases on disk:\n{listing}\n"
+            "Generate one with:  py tools/build_database.py --image <ECU bin>"
         )
     blob = json.loads(path.read_text(encoding="utf-8"))
 

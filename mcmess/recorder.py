@@ -153,6 +153,8 @@ class Recorder:
         pulse_ms: float = 85.0,
         echo: bool | None = None,
         on_state_change: Callable[[str], None] | None = None,
+        channel_set: ChannelSet | None = None,
+        verify_ecu: bool = True,
     ) -> None:
         self.port = port
         self.highspeed = highspeed
@@ -161,6 +163,13 @@ class Recorder:
         self.pulse_ms = pulse_ms
         self.echo = echo
         self.on_state_change = on_state_change
+        #: The database the selected channels came from. Given one, every successful
+        #: handshake is followed by an 11-byte read of the ECU's part number, and a
+        #: mismatch fails the recorder instead of logging. Addresses are not shared
+        #: across the M3.8 family, and reading the wrong ones yields plausible
+        #: numbers rather than an error, so this cannot be left to the operator.
+        self.channel_set = channel_set
+        self.verify_ecu = verify_ecu
 
         self._lock = threading.Lock()
         self._channels: list[Channel] = list(channels)
@@ -385,6 +394,19 @@ class Recorder:
         if not result.ok:
             self._fail(result.note or "handshake failed")
             return False
+
+        if self.verify_ecu and self.channel_set is not None:
+            from .identify import identify
+
+            try:
+                identity = identify(session, self.channel_set)
+            except McMessError as exc:
+                self._fail(f"could not identify the ECU: {exc}")
+                return False
+            if not identity.safe_to_log:
+                self._fail(identity.describe().replace("\n", " "))
+                return False
+
         self._set_state("running")
         return True
 

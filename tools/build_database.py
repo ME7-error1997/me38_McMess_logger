@@ -46,14 +46,12 @@ RE_ROOT = Path(os.environ.get("M38_RE_ROOT", r"D:\Repos\Reverse Engineering\M3.8
 DEFAULT_DAM = RE_ROOT / "Damoses" / "8D0907558E.DAM"
 DEFAULT_FR = RE_ROOT / "FR" / "30O.FRM"
 DEFAULT_IMAGE = RE_ROOT / "Damoses" / "WinOLS(VW Golf (Original) 352127 csnone  ).bin"
-DEFAULT_OUT = Path(__file__).resolve().parent.parent / "mcmess" / "data" / "m38_018cg.json"
+#: Where generated databases live. One per ECU part number, named m38_<suffix>.json.
+DATA_DIR = Path(__file__).resolve().parent.parent / "mcmess" / "data"
 
 #: Channels found by reading code rather than by walking the VS20 table. Merged into
 #: the generated database by merge_extra(); see that function for why they are separate.
-DEFAULT_EXTRA = Path(__file__).resolve().parent.parent / "mcmess" / "data" / "extra_channels.json"
-
-#: Offset of the VS20 pseudo-address table in the 018CG image (from the Ghidra work).
-DEFAULT_VS20_TABLE = 0x0A76
+DEFAULT_EXTRA = DATA_DIR / "extra_channels.json"
 
 #: The image the DAMOS above actually describes, plus its own VS20 table offset. Used
 #: only to re-verify the FMT:2 byte-order rule at build time -- the DAMOS's addresses
@@ -526,6 +524,79 @@ def resolve_addresses(
     return out
 
 
+#: Where the Bosch part number sits in the fixed (unbanked) area of every 018 image
+#: seen so far, as both a file offset and a CPU data address -- below 0xC000 the two
+#: are the same. The McMESS responder serves any address, so this doubles as a live
+#: fingerprint: read 11 bytes here from a connected ECU and you know the variant.
+#: Confirmed at the same offset in the 018CG and 018AQ images.  [RE]
+PART_NUMBER_ADDR = 0xBF0A
+PART_NUMBER_LEN = 11
+PART_NUMBER_RE = re.compile(rb"06A ?906 ?018 ?[A-Z]{1,2}")
+
+
+def read_part_number(image: Path) -> str | None:
+    """The ECU part number out of an image, preferring the known fixed offset."""
+    buf = image.read_bytes()
+    at = PART_NUMBER_ADDR
+    window = buf[at : at + PART_NUMBER_LEN]
+    if PART_NUMBER_RE.fullmatch(window):
+        return window.decode("ascii")
+    # Fall back to a scan: a variant that moved it is still worth identifying, but
+    # say so, because PART_NUMBER_ADDR is what the live fingerprint check reads.
+    found = PART_NUMBER_RE.search(buf)
+    if not found:
+        return None
+    print(
+        f"        NOTE: part number at 0x{found.start():05X}, not the expected "
+        f"0x{PART_NUMBER_ADDR:05X} -- the live fingerprint check will not match"
+    )
+    return found.group().decode("ascii")
+
+
+def find_vs20_table(image: Path, entries: list[FrEntry]) -> int:
+    """Locate the VS20 table in an image, so a new variant needs no hand-found offset.
+
+    Scoring candidates on "do these look like RAM addresses" is useless: the region
+    is dense plausible little-endian u16s and a wide plateau of offsets ties. The
+    structural constraint separates cleanly instead -- the FR lists each 16-bit
+    channel as a pair, "X" and "X+1", and only at the true offset does every "+1"
+    entry resolve to exactly one past its base. Both known images score a perfect
+    12/12 at their real offset and at most 7/12 anywhere else.
+    """
+    buf = image.read_bytes()
+    by_name = {e.name: e.pseudo for e in entries}
+    pairs = [
+        (by_name[name[:-2]], pseudo)
+        for name, pseudo in by_name.items()
+        if name.endswith("+1") and name[:-2] in by_name
+    ]
+    if not pairs:
+        raise SystemExit("no '+1' word pairs in the FR list; cannot locate the table")
+
+    def at(off: int, pseudo: int) -> int | None:
+        pos = off + 2 * (pseudo - 0x2000)
+        if pos < 0 or pos + 2 > len(buf):
+            return None
+        return struct.unpack_from("<H", buf, pos)[0]
+
+    best, best_score = -1, 0
+    for off in range(0, min(len(buf), 0x8000), 2):
+        hits = 0
+        for base_pseudo, high_pseudo in pairs:
+            base, high = at(off, base_pseudo), at(off, high_pseudo)
+            if base and high == base + 1:
+                hits += 1
+        if hits > best_score:
+            best, best_score = off, hits
+    if best_score < len(pairs):
+        raise SystemExit(
+            f"could not locate the VS20 table in {image.name}: best offset "
+            f"0x{best:04X} satisfies only {best_score}/{len(pairs)} word pairs. "
+            "Pass --vs20-table explicitly if you have found it by hand."
+        )
+    return best
+
+
 # ============================================================ word-order evidence
 
 
@@ -630,8 +701,22 @@ def build(args: argparse.Namespace) -> int:
     )
 
     print(f"\nimage : {args.image}")
+    part = read_part_number(args.image)
+    print(f"        part number: {part or 'NOT FOUND'}")
+    if args.vs20_table is None:
+        args.vs20_table = find_vs20_table(args.image, entries)
+        print(f"        VS20 table located at 0x{args.vs20_table:04X}")
+    else:
+        print(f"        VS20 table at 0x{args.vs20_table:04X} (given on the command line)")
     addresses = resolve_addresses(args.image, args.vs20_table, entries)
-    print(f"        VS20 table at 0x{args.vs20_table:04X}")
+
+    if args.out is None:
+        if not part:
+            raise SystemExit(
+                "no part number in the image and no --out given: cannot name the "
+                "output database. Pass --out explicitly."
+            )
+        args.out = DATA_DIR / f"m38_{part[-5:].lower()}.json"
 
     channels = []
     rejected = []
@@ -732,22 +817,33 @@ def build(args: argparse.Namespace) -> int:
 
     payload = {
         "meta": {
-            "target": "06A906018CG (Bosch M3.8, VW/Audi 1.8T AGU)",
+            "target": f"{part or 'unknown'} (Bosch M3.8, VW/Audi 1.8T)",
+            "part_number": part,
             "generated_by": "tools/build_database.py",
+            # Basenames, not full paths: these are the operator's own local copies of
+            # Bosch/VAG files, and the generated JSON is committed to a public repo.
             "sources": {
-                "conversions": str(args.dam),
-                "channels": str(args.fr),
-                "addresses": str(args.image),
+                "conversions": args.dam.name,
+                "channels": args.fr.name,
+                "addresses": args.image.name,
                 "vs20_table_offset": args.vs20_table,
+            },
+            # How a connected ECU identifies itself. The McMESS responder serves any
+            # address, so the logger reads these bytes at connect and refuses to log
+            # through a database built for a different variant.
+            "fingerprint": {
+                "addr": PART_NUMBER_ADDR,
+                "length": PART_NUMBER_LEN,
+                "text": part,
             },
             "damos": dam_meta,
             "caveat": (
-                "There is no DAMOS for the 018CG. Conversion formulas are taken from "
-                "8D0907558E (Audi A4, M3.8.2, DAMOS 30N) while the channel list comes "
-                "from FR 30O and the addresses from the 018CG image. Conversion names "
-                "are shared across the M3.8 family, so the formulas are expected to "
-                "apply, but this is a cross-image inference and has not been measured "
-                "on the bench."
+                f"There is no DAMOS for the {part or 'target'}. Conversion formulas are "
+                "taken from 8D0907558E (Audi A4, M3.8.2, DAMOS 30N) while the channel "
+                "list comes from FR 30O and the addresses from this ECU's own image. "
+                "Conversion names are shared across the M3.8 family, so the formulas "
+                "are expected to apply, but this is a cross-image inference and has "
+                "not been measured on the bench."
             ),
             "counts": {
                 "conversions": len(conversions),
@@ -774,7 +870,7 @@ def build(args: argparse.Namespace) -> int:
         "rejected": rejected,
     }
 
-    merge_extra(payload, args.extra)
+    merge_extra(payload, args.extra, part)
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     # newline="" stops Python's text mode translating \n to \r\n on Windows. Without
@@ -821,7 +917,7 @@ def _print_report(conversions: dict[str, Conversion], channels: list[dict]) -> N
         print(f"  {name:<10} {width:<3} {conv.unit[:16]:<16} {shape}{flag}")
 
 
-def merge_extra(payload: dict, path: Path) -> None:
+def merge_extra(payload: dict, path: Path, part: str | None) -> None:
     """Fold hand-found channels and their conversions into the generated database.
 
     The VS20 pseudo-address table is a *naming* table, not a list of what the ECU will
@@ -834,6 +930,13 @@ def merge_extra(payload: dict, path: Path) -> None:
     Collisions are fatal rather than merged. An extra channel that shadows a VS20 name
     or address almost certainly means the VS20 table already had it and the hand entry
     is redundant or wrong, which is worth stopping for.
+
+    Each entry is pinned to the ECUs it was read out of, via an "ecus" list of part
+    numbers, and is skipped for any other. These addresses came from one image's
+    instruction stream, and RAM is NOT laid out the same across the family: 121 of the
+    249 VS20 channels sit at different addresses in 018CG and 018AQ. Carrying a
+    hand-found 0xCAxx address across variants would silently read the wrong cell --
+    the worst failure this tool can have, because the number still looks reasonable.
     """
     if not path.exists():
         print(f"\n        no extra-channel file at {path}")
@@ -852,8 +955,13 @@ def merge_extra(payload: dict, path: Path) -> None:
     payload["conversions"] = dict(sorted(convs.items()))
 
     added = []
+    skipped = []
     for row in doc.get("channels", []):
         row = {k: v for k, v in row.items() if not k.startswith("_")}
+        only = row.get("ecus")
+        if only and part not in only:
+            skipped.append((row["name"], only))
+            continue
         if row["name"] in names:
             raise SystemExit(f"extra channel {row['name']!r} collides with a VS20 name")
         if row["addr"] in addrs:
@@ -885,6 +993,8 @@ def merge_extra(payload: dict, path: Path) -> None:
     )
 
     print(f"\n        {len(added)} extra channels merged from {path.name}")
+    for name, only in skipped:
+        print(f"          skipped {name}: address read from {', '.join(only)}, not {part}")
     for row in added:
         print(f"          {row['name']:<8} 0x{row['addr']:04X}  {row.get('source', '')}")
 
@@ -894,7 +1004,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--dam", type=Path, default=DEFAULT_DAM)
     parser.add_argument("--fr", type=Path, default=DEFAULT_FR)
     parser.add_argument("--image", type=Path, default=DEFAULT_IMAGE)
-    parser.add_argument("--vs20-table", type=lambda s: int(s, 0), default=DEFAULT_VS20_TABLE)
+    parser.add_argument(
+        "--vs20-table",
+        type=lambda s: int(s, 0),
+        default=None,
+        help="offset of the VS20 table in the image; located automatically if omitted",
+    )
     parser.add_argument(
         "--extra",
         type=Path,
@@ -913,7 +1028,12 @@ def main(argv: list[str] | None = None) -> int:
         default=DEFAULT_DAMOS_VS20_TABLE,
         help="VS20 table offset in --damos-image",
     )
-    parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    parser.add_argument(
+        "--out",
+        type=Path,
+        default=None,
+        help="output JSON; defaults to mcmess/data/m38_<part suffix>.json",
+    )
     parser.add_argument("--report", action="store_true", help="dump every conversion used")
     args = parser.parse_args(argv)
 

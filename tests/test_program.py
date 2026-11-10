@@ -329,6 +329,37 @@ def main() -> int:
     for rate in (200, 300, 500):
         print(f"  at {rate} bytes/s: {rate / prog.wire_bytes:.1f} Hz")
 
+    print("\nPer-ECU databases")
+    from mcmess.channels import available_databases
+
+    known = available_databases()
+    check("018CG database present", "06A906018CG" in known, True)
+    check("018AQ database present", "06A906018AQ" in known, True)
+
+    cg, aq = load_channels("06A906018CG"), load_channels("06A906018AQ")
+    check("each knows its own part number", (cg.part_number, aq.part_number),
+          ("06A906018CG", "06A906018AQ"))
+    check("fingerprints differ", cg.fingerprint[2] != aq.fingerprint[2], True)
+
+    # The reason the identity check exists. If this ever comes out as 0, the two
+    # databases are interchangeable and the check is pointless -- far more likely
+    # it would mean the build silently used one image for both.
+    shared = set(cg.by_name) & set(aq.by_name)
+    moved = [n for n in shared if cg.by_name[n].addr != aq.by_name[n].addr]
+    check("many channels move between variants", len(moved) > 100, True)
+    print(f"  {len(moved)} of {len(shared)} shared channels are at different addresses")
+
+    # Page 0 is the fast set, and it happens to agree. Worth asserting, because if a
+    # future variant moves it, the throughput numbers in the README move with it.
+    page0_cg = {c.name: c.addr for c in cg if c.page == 0}
+    page0_aq = {c.name: c.addr for c in aq if c.page == 0}
+    check("page-0 block agrees across both", page0_cg, page0_aq)
+
+    # Hand-found Ghidra addresses are pinned to the image they were read from.
+    extra_only_in_cg = sorted(set(cg.by_name) - set(aq.by_name))
+    check("Ghidra-found channels stay CG-only", extra_only_in_cg,
+          ["MLROH", "TLR_16", "XKFPU", "XKFPUSL", "XNDIV"])
+
     print()
     if FAILURES:
         print(f"{len(FAILURES)} FAILURE(S): {', '.join(FAILURES)}")

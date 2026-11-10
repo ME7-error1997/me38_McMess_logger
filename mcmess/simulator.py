@@ -424,6 +424,15 @@ def make_demo_serial(
     Pass rtt_s=0 to answer instantly, which is what the tests want.
     """
     memory: dict[int, int] = {}
+    # Answer the identity read the way a real ECU does, by putting the part number
+    # into "flash" at the address the database says to look. Without this the demo
+    # would be rejected by the ECU check as an unidentifiable ECU -- correctly, but
+    # uselessly, since the whole point of --demo is to run with no hardware.
+    fingerprint = channels.fingerprint
+    if fingerprint is not None:
+        addr, _length, text = fingerprint
+        for offset, char in enumerate(text):
+            memory[addr + offset] = ord(char)
     fake = FakeEcuSerial(memory=memory, rtt_s=rtt_s, **kwargs)
     fake.model = EngineModel(channels, memory)
     return fake

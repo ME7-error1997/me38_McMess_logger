@@ -252,6 +252,50 @@ def main() -> int:
     tp.set_baudrate(BAUD_SLOW)
     check("frame time at 10417 is ~1056 us", round(tp.frame_time() * 1e6), 1056)
 
+    print("\nECU identity check")
+    from mcmess.channels import load_channels
+    from mcmess.identify import identify
+
+    cg = load_channels("06A906018CG")
+    addr, length, text = cg.fingerprint
+    check("database carries a fingerprint", (length, text), (11, "06A906018CG"))
+
+    # An ECU that says what the database expects.
+    ident_mem = dict(memory)
+    ident_mem.update({addr + i: ord(ch) for i, ch in enumerate(text)})
+    tp, session, fake = build(echo=True, memory=ident_mem)
+    session.connect(highspeed=True, **FAST)
+    check("reads the part number back", session.read_identity(addr, length), text)
+    check("matching ECU is accepted", identify(session, cg).status, "ok")
+
+    # The dangerous case: a real ECU of a DIFFERENT variant. It answers everything
+    # happily, so only the identity read catches it.
+    other = "06A906018AQ"
+    wrong_mem = dict(memory)
+    wrong_mem.update({addr + i: ord(ch) for i, ch in enumerate(other)})
+    tp, session, fake = build(echo=True, memory=wrong_mem)
+    session.connect(highspeed=True, **FAST)
+    verdict = identify(session, cg)
+    check("different ECU is rejected", verdict.status, "mismatch")
+    check("mismatch is not safe to log", verdict.safe_to_log, False)
+    check("suggests the right database", verdict.suggestion.name, "m38_018aq.json")
+    check("names both ECUs", other in verdict.describe() and text in verdict.describe(), True)
+
+    # Nothing readable there at all: a different complaint, not a false mismatch.
+    tp, session, fake = build(echo=True, memory=dict(memory))
+    session.connect(highspeed=True, **FAST)
+    check("unreadable identity is flagged", identify(session, cg).status, "unreadable")
+
+    print("\nsimulator answers the identity read")
+    from mcmess.simulator import make_demo_serial
+
+    demo = make_demo_serial(cg, rtt_s=0)
+    check(
+        "--demo would not be rejected",
+        "".join(chr(demo.memory[addr + i]) for i in range(length)),
+        text,
+    )
+
     print()
     if FAILURES:
         print(f"{len(FAILURES)} FAILURE(S): {', '.join(FAILURES)}")

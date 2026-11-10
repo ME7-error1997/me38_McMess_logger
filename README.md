@@ -1,7 +1,11 @@
-# McMESS logger — Bosch M3.8 (06A906018CG / 1.8T AGU)
+# McMESS logger — Bosch M3.8 (1.8T AGU)
 
 Fast ECU RAM logging over the K-line, for tuning modified engines. Replaces KW1281
 logging in VCDS, which tops out around 15–30 values/s.
+
+Supports **06A906018CG** and **06A906018AQ**, one channel database each, with the
+connected ECU checked against the loaded database before anything is logged — see
+[ECU variants](#ecu-variants).
 
 Runs from a **plain FTDI K-line cable** — no microcontroller adapter. The protocol needs
 9-bit serial frames, which are produced by pinning the UART's parity bit:
@@ -260,10 +264,65 @@ verify on the car.
 | `tests/test_recorder.py` | Sampling engine, ring buffer, CSV, engine model |
 | `tests/test_ramscan.py` | MCS-96 operand decoding in the RAM scanner |
 
+## ECU variants
+
+**The M3.8 family shares a channel list but not a RAM layout.** Comparing the two
+images on hand, **121 of the 244 shared channels sit at different addresses** in
+`06A906018AQ` than in `06A906018CG`. The whole `0xC9xx`–`0xCFxx` region is shifted.
+
+Page 0 happens to agree exactly — all 22 channels, including rpm, load, throttle,
+both temperatures and battery — so the fast starter set reads the same either way.
+Everything above it does not.
+
+That makes using the wrong database the most dangerous mistake available here,
+because **it does not fail**. The handshake succeeds, every read is answered, no
+timeout fires; you simply get the neighbouring RAM cell, converted through the right
+formula into a number in an entirely believable range. A log like that is fiction
+you cannot spot by looking at it.
+
+So the ECU is asked who it is. Every 018 image carries its part number as ASCII at
+`0xBF0A`, and the responder serves any address — below `0xC000` that address space
+is flash — so identifying the ECU is an 11-byte read over the same link that does
+the logging. On a mismatch the tools stop rather than warn:
+
+```
+ECU IDENTIFIES AS 06A906018AQ, but the loaded database is for 06A906018CG.
+Channel addresses differ across the M3.8 family, so logging now would read the
+wrong RAM cells and still look plausible.
+Use --database .../m38_018aq.json instead.
+```
+
+Pick a database by part number — `--database 06A906018AQ` — or by path. Both the
+window and `probe.py` print which one is loaded, and the window keeps it in the
+status bar. `--skip-id-check` exists for a variant that stores its part number
+elsewhere; it is not for getting past a real mismatch.
+
+### Adding another ECU
+
+Point the builder at its binary. Nothing else is needed — the part number and the
+VS20 table offset are both found in the image:
+
+```bash
+.venv\Scripts\python.exe tools\build_database.py --image path\to\that.bin
+```
+
+It writes `mcmess/data/m38_<suffix>.json`, which the logger then discovers on its
+own. The VS20 table is located by a structural property rather than a signature
+scan: the FR lists every 16-bit channel as a pair, `X` and `X+1`, and only at the
+true offset does each `+1` entry resolve to exactly one past its base. Both known
+images score 12/12 there and at most 7/12 at any other offset.
+
+Channels that came out of Ghidra rather than the VS20 table carry an `ecus` list in
+`mcmess/data/extra_channels.json` naming the images their addresses were read from,
+and are skipped for any other ECU. There is no way to carry a hand-found `0xCAxx`
+address to another variant safely.
+
 ## Channels and conversions
 
-**249 channels, 230 of them in physical units.** Built from the reverse-engineering
-files into one self-contained JSON:
+**018CG: 249 channels, 229 in physical units. 018AQ: 244 and 226** — the difference
+is the five hand-found channels, which are pinned to the CG image they were read
+from. Each database is built from the reverse-engineering files into one
+self-contained JSON:
 
 ```bash
 .venv\Scripts\python.exe tools\build_database.py --report
@@ -305,6 +364,11 @@ Four things worth knowing before you trust a log — all detailed in
   of channels.
 - **Not tested with the engine running.** Whether a session can be started, and held,
   with the engine turning is open.
+- **The 018AQ database has never seen an 018AQ.** It is generated from that ECU's own
+  image by the same code path that produced the CG one, and the VS20 offset it found
+  scores a perfect 12/12 on the word-pair test — but no 018AQ has been on the end of
+  a cable. The identity check means a wrong-database log is not a risk; an 018AQ that
+  does not answer at all, or answers differently, has simply not been ruled out.
 - **No channel-set presets.** `--channels` takes a list on the command line, but there
   is no save/load of named sets in the window yet.
 

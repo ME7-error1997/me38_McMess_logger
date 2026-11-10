@@ -196,6 +196,43 @@ against a page-0 run.
 sees RAM, not the code page. Reads of the SFR window and the `0xE0xx` block are untested —
 `[VERIFY]`.
 
+The table omits `0x0200`-`0xBFFF`, which is **flash, and readable as data**. The ECU
+reads its own calibration from there (`KONFCOM` at `0x6D19`), and the responder applies
+no range check, so the tester can read it too. Section 3.2 depends on that.
+
+### 3.2 Identifying the ECU over the link
+
+`[RE]`, `[VERIFY]` on hardware. Both images on hand carry the Bosch part number as
+plain ASCII at the same place:
+
+| | |
+|---|---|
+| Address | `0xBF0A` (file offset and CPU address are equal below `0xC000`) |
+| Length | 11 bytes |
+| Content | `06A906018CG` / `06A906018AQ` |
+
+So the tester can ask the ECU which variant it is, over the logging link, in 11 bytes
+and without any extra protocol. The logger does this on every successful handshake.
+
+This matters more than it first looks. **The family shares the channel list but not
+the RAM layout**: 121 of the 244 shared channels resolve to different addresses in
+`018AQ` than in `018CG`, the `0xC9xx`-`0xCFxx` region being shifted wholesale, while
+page `0x00` agrees exactly across all 22 of its channels.
+
+A wrong-database session therefore has no symptom. The handshake completes, every
+address is answered, nothing times out, and the conversion applied is the right one —
+it is simply reading the wrong cell. The output is plausible numbers, which is worse
+than no numbers at all. Hence the identity read, and hence the tools treating a
+mismatch as fatal rather than as a warning.
+
+Locating the VS20 table in a new image uses a related structural trick rather than a
+byte signature: the FR lists each 16-bit channel as the pair `X` and `X+1`, and only
+at the correct offset does every `+1` entry resolve to exactly one past its base. Both
+known images score 12/12 at their true offset (`0x0A76` for CG, `0x0A56` for AQ) and
+no more than 7/12 anywhere else. Scoring on "do these look like RAM addresses" instead
+does **not** work — that region is dense plausible little-endian `u16`s and a wide
+plateau of offsets ties at 246/257.
+
 ---
 
 ## 4. Throughput

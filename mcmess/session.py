@@ -554,3 +554,15 @@ class McMessSession:
                 out.append(self._step(addr & 0xFF, 1, timeout))
                 addr += 1
         return bytes(out)
+
+    def read_identity(self, addr: int, length: int) -> str:
+        """Read an ASCII identifier out of the ECU's fixed flash area.
+
+        The responder serves any 16-bit address, and below 0xC000 that is flash, so
+        the ECU's own part-number string is readable over the logging link. Bytes
+        outside printable ASCII become '?' instead of raising: a garbled read is the
+        very case this exists to report, so it must come back as data, not an
+        exception.
+        """
+        raw = self.read_block(addr, length)
+        return "".join(chr(b) if 0x20 <= b < 0x7F else "?" for b in raw)

@@ -1,12 +1,18 @@
 {
  "meta": {
-  "target": "06A906018CG (Bosch M3.8, VW/Audi 1.8T AGU)",
+  "target": "06A906018CG (Bosch M3.8, VW/Audi 1.8T)",
+  "part_number": "06A906018CG",
   "generated_by": "tools/build_database.py",
   "sources": {
-   "conversions": "D:\\Repos\\Reverse Engineering\\M3.8\\Damoses\\8D0907558E.DAM",
-   "channels": "D:\\Repos\\Reverse Engineering\\M3.8\\FR\\30O.FRM",
-   "addresses": "D:\\Repos\\Reverse Engineering\\M3.8\\Damoses\\WinOLS(VW Golf (Original) 352127 csnone  ).bin",
+   "conversions": "8D0907558E.DAM",
+   "channels": "30O.FRM",
+   "addresses": "WinOLS(VW Golf (Original) 352127 csnone  ).bin",
    "vs20_table_offset": 2678
+  },
+  "fingerprint": {
+   "addr": 48906,
+   "length": 11,
+   "text": "06A906018CG"
   },
   "damos": {
    "epk": "53/1/M3.82/05/400700/DAMOS30N/30N01/30N010101/110497/",
@@ -14,7 +20,7 @@
    "part_number": "8D0907558E",
    "conversion_count": 222
   },
-  "caveat": "There is no DAMOS for the 018CG. Conversion formulas are taken from 8D0907558E (Audi A4, M3.8.2, DAMOS 30N) while the channel list comes from FR 30O and the addresses from the 018CG image. Conversion names are shared across the M3.8 family, so the formulas are expected to apply, but this is a cross-image inference and has not been measured on the bench.",
+  "caveat": "There is no DAMOS for the 06A906018CG. Conversion formulas are taken from 8D0907558E (Audi A4, M3.8.2, DAMOS 30N) while the channel list comes from FR 30O and the addresses from this ECU's own image. Conversion names are shared across the M3.8 family, so the formulas are expected to apply, but this is a cross-image inference and has not been measured on the bench.",
   "counts": {
    "conversions": 223,
    "conversions_validated": 222,
@@ -7021,6 +7027,9 @@
    "umr": "FAK2L",
    "umr_displayed": "FAK2L",
    "word_base": 51810,
+   "ecus": [
+    "06A906018CG"
+   ],
    "source": "[RE] 0xCA62, operand of MULU at 0xD5BB",
    "description": "Pulsationskorrektur, interpoliert aus KFPU"
   },
@@ -7032,6 +7041,9 @@
    "umr": "MLQ025L",
    "umr_displayed": "MLQ025L",
    "word_base": 51812,
+   "ecus": [
+    "06A906018CG"
+   ],
    "source": "[RE] 0xCA64, stored by ST at 0xD5CE",
    "description": "durch den LMM erfasste Luftmasse je Zeiteinheit"
   },
@@ -7043,6 +7055,9 @@
    "umr": "TIQ16",
    "umr_displayed": "TIQ16",
    "word_base": 51814,
+   "ecus": [
+    "06A906018CG"
+   ],
    "source": "[RE] 0xCA66, stored by ST at 0xD5ED",
    "description": "Lastrohsignal 16 Bit, vor der Division durch 100"
   },
@@ -7053,6 +7068,9 @@
    "size": 1,
    "umr": null,
    "umr_displayed": null,
+   "ecus": [
+    "06A906018CG"
+   ],
    "source": "[RE] 0xC4A7, read by LDBZE at pA:0xD04F",
    "description": "Auswahl-Offset KFPU in der Zeigertabelle 0x7A40 (0=KFPU.0, 2=.1, 4=.2)"
   },
@@ -7064,6 +7082,9 @@
    "umr": null,
    "umr_displayed": null,
    "word_base": 51580,
+   "ecus": [
+    "06A906018CG"
+   ],
    "source": "[RE] 0xC97C, divisor of DIVU at 0xD5E3",
    "description": "Drehzahl-Divisor im Lastpfad, Rohwert (linear in n, Faktor ungeprueft)"
   }

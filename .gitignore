@@ -14,3 +14,7 @@ run.csv
 .idea/
 Thumbs.db
 desktop.ini
+
+# ECU flash images. Bosch/VAG material -- never distributed from this repo.
+bins/
+*.bin

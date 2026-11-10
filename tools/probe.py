@@ -43,6 +43,7 @@ from mcmess.channels import (  # noqa: E402
     set_byte_order,
     word_value,
 )
+from mcmess.identify import identify  # noqa: E402
 from mcmess.session import PING_ADDR, SESSION_REARM  # noqa: E402
 
 RULE = "-" * 72
@@ -59,6 +60,12 @@ def _load(args: argparse.Namespace) -> ChannelSet:
         set_byte_order(order)
     db_path = getattr(args, "database", None)
     channel_set = load_channels(db_path) if db_path else load_channels()
+    # Say which ECU this database is for, every time. Picking the wrong one is the
+    # failure that does not announce itself, so the answer should never be a guess.
+    print(
+        f"database: {channel_set.part_number or 'unknown ECU'} "
+        f"({len(channel_set)} channels)\n"
+    )
     no_conv = len(channel_set.without_conversion)
     if no_conv:
         print(
@@ -216,8 +223,15 @@ def make_transport(args: argparse.Namespace) -> KLineTransport:
     )
 
 
-def open_session(args: argparse.Namespace) -> tuple[KLineTransport, McMessSession]:
-    """Open the port, connect, and bail out loudly if the handshake fails."""
+def open_session(
+    args: argparse.Namespace, channels: ChannelSet | None = None
+) -> tuple[KLineTransport, McMessSession]:
+    """Open the port, connect, and bail out loudly if the handshake fails.
+
+    Then ask the ECU who it is. Channel addresses are not shared across the M3.8
+    family, and using the wrong database reads neighbouring RAM and returns numbers
+    that look fine, so a mismatch stops the run rather than warning and continuing.
+    """
     tp = make_transport(args)
     tp.open()
     session = McMessSession(tp)
@@ -231,6 +245,21 @@ def open_session(args: argparse.Namespace) -> tuple[KLineTransport, McMessSessio
     if not result.ok:
         tp.close()
         raise SystemExit("handshake failed - nothing further can run")
+
+    if not getattr(args, "skip_id_check", False):
+        if channels is None and hasattr(args, "database"):
+            db_path = getattr(args, "database", None)
+            channels = load_channels(db_path) if db_path else load_channels()
+        if channels is not None:
+            identity = identify(session, channels)
+            print(identity.describe())
+            print()
+            if not identity.safe_to_log:
+                tp.close()
+                raise SystemExit(
+                    "refusing to continue against an ECU the loaded database does "
+                    "not describe (--skip-id-check overrides, at your own risk)"
+                )
     return tp, session
 
 
@@ -248,6 +277,14 @@ def add_link_args(sub: argparse.ArgumentParser) -> None:
         help="init pulse width in ms (ECU window is ~70-99, default 85)",
     )
     sub.add_argument("--attempts", type=int, default=3, help="handshake attempts")
+    sub.add_argument(
+        "--skip-id-check",
+        action="store_true",
+        help=(
+            "do not verify the ECU's part number against the loaded database. "
+            "Only for a variant that stores its part number somewhere else"
+        ),
+    )
     sub.add_argument(
         "--stopbits", type=int, choices=(1, 2), default=1, help="stop bits we transmit"
     )
@@ -577,7 +614,7 @@ def cmd_word(args: argparse.Namespace) -> int:
         return 1
 
     conv = ch.conversion
-    tp, session = open_session(args)
+    tp, session = open_session(args, channel_set)
     try:
         print(RULE)
         print(f"{ch.name} @ 0x{ch.addr:04X}  ({ch.umr}) {ch.description}")
@@ -746,7 +783,7 @@ def cmd_watch(args: argparse.Namespace) -> int:
             print(f"             ^ reported raw: no formula for {ch.umr}")
     print()
 
-    tp, session = open_session(args)
+    tp, session = open_session(args, channel_set)
     writer = None
     handle = None
     start = time.perf_counter()

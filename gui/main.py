@@ -177,8 +177,12 @@ class MainWindow(QtWidgets.QMainWindow):
             bar.addPermanentWidget(widget)
         self._set_state_text("idle")
 
+        # Which ECU's map is loaded, always on screen. Addresses are not shared across
+        # the M3.8 family, so this is not decoration: with the wrong database every
+        # reading above page 0 is a different RAM cell, and still looks plausible.
+        part = self.channel_set.part_number or "unknown ECU"
         caveat = QtWidgets.QLabel(
-            "conversions inferred from the A4 M3.8.2 damos - see docs"
+            f"{part}  -  conversions inferred from the A4 M3.8.2 damos - see docs"
         )
         caveat.setObjectName("caveat")
         caveat.setToolTip(
@@ -255,6 +259,7 @@ class MainWindow(QtWidgets.QMainWindow):
             channels=self._selection,
             highspeed=bool(self.speed_combo.currentData()),
             serial_factory=factory,
+            channel_set=self.channel_set,
         )
         self.recorder.start()
         self.connect_button.setText("Disconnect")
