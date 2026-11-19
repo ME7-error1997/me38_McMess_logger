@@ -3,6 +3,10 @@
 Fast ECU RAM logging over the K-line, for tuning modified engines. Replaces KW1281
 logging in VCDS, which tops out around 15–30 values/s.
 
+Two windows: a **logger** that samples and records, and a **[viewer](#the-log-viewer)**
+that reads the result back — yours, or a VCDS, ME7Logger, OP-COM or MHD log from
+someone else.
+
 Supports **06A906018CG** and **06A906018AQ**, one channel database each, with the
 connected ECU checked against the loaded database before anything is logged — see
 [ECU variants](#ecu-variants).
@@ -104,7 +108,8 @@ behaves like the real thing with no hardware attached. Against a real cable:
 
 Useful flags: `--channels N40,TL,FR` to preselect a set, `--connect` to skip the
 Connect button, `--knock-base 0` for this ECU's cylinder numbering, `--database` to
-point at a different channel JSON.
+point at a different channel JSON, `--no-autorecord` to wait for the Record button
+instead of recording from the moment the link comes up.
 
 **Drawing costs sample rate, so the defaults favour rate.** Painting antialiased
 traces holds the GIL and measurably starves the sampling thread — on the bench,
@@ -137,6 +142,90 @@ two panels never share a colour. Identity comes from the direct label regardless
 after 2 s of silence — so sampling runs on its own thread in `mcmess/recorder.py` and
 the window only reads buffered snapshots on a timer. That engine is Qt-free and tested
 headlessly against the simulator, so the GUI is only responsible for drawing.
+
+## The log viewer
+
+**Double-click `view.bat`** and it opens the newest log in `logs/` — almost always
+the pull you have just driven. Drag a CSV onto it, or pass one: `view.bat
+logs\432.csv`. From the logger window, **View log…** opens the log this session is
+writing, in its own window, so the live traces stay on screen beside it.
+
+```bash
+.venv\Scripts\python.exe gui\viewer.py logs\432.csv
+```
+
+It is not limited to this logger's own CSVs. It reads **VCDS** measuring blocks and
+advanced measuring blocks, **ME7Logger**, **OP-COM**, and generic CSV from MHD,
+bootmod3 or anything else that writes text — so a customer's log opens in the same
+window as yours. `mcmess/logparse.py` does the reading and has no UI imports;
+`tests/test_logparse.py` is its acceptance suite, run against excerpts of real files
+from each tool.
+
+**It looks for the data, not for a header row.** None of these files is "names then
+numbers": they open with identification lines, VCDS splits a name over two rows with
+the units in a third, and OP-COM writes `Active` and `Not Programmed` in half the
+cells of every row. So the parser finds the first two lines whose *numbers are in the
+same columns* — that is the data — reads the up-to-three lines above it as the
+header, and only then asks which tool wrote the file. That one rule is what made
+OP-COM and VCDS work without a special case each.
+
+**Channels that share a unit share a Y scale.** Boost actual and boost requested land
+on the same axis, which is how you see that actual never reaches target. A channel
+with no unit gets its own scale — a bare number shares nothing meaningful with
+another bare number — and *Y: each on its own* gives every channel one. Y is fitted
+to **what is visible in the current zoom**, not to the whole log, or zooming into a
+pull leaves the trace flat at the bottom of a scale set by a rev limiter three
+minutes earlier. Right-click a channel for a fixed range instead (presets for boost,
+load, air flow, rpm, lambda, timing, knock retard) or for its colour.
+
+**The cursor is a log row, not a time.** Click to place it. That one choice makes it
+work in time mode, in scatter mode, and across VCDS logs where every group has its
+own clock, and it survives a change of X axis. `active row = mouse, else cursor, else
+the first sample`, and the status bar says which — a number on screen is never
+ambiguous about where it came from.
+
+**Every channel shows a value, plotted or not.** The panel reads the grid directly,
+so a 150-channel log costs 150 row lookups on a mouse move rather than 150 arrays,
+and you can scan the whole list at one instant of a pull without plotting anything. A
+channel with no sample on that row takes its nearest one within 25 rows, which is
+what makes ragged VCDS logs readable.
+
+| | |
+|---|---|
+| drag | zoom to the dragged span |
+| shift + drag | pan |
+| wheel | zoom at the mouse |
+| click | place the cursor |
+| double click | reset the zoom |
+| right click | colour, Y range, axis channel |
+
+**X can be any channel**, which turns the plot into a scatter: boost against rpm, or
+timing against load. In time mode a second row of labels along the top reads rpm at
+each tick. The plot stays against time deliberately — rpm falls on every gear change,
+so it is not a scale, only labels that follow the trace.
+
+**Decimation keeps the peaks.** pyqtgraph draws each pixel column's min and max, so a
+single-sample knock event survives; plain point-skipping loses exactly the events you
+opened the log to find. When a log is sparse instead — a 6 Hz VCDS log, zoomed in —
+every sample gets a small square, so you can see where the samples really are rather
+than reading meaning into straight interpolation.
+
+**Coded channels say what they mean.** `KLINFO` reads as *cylinder 2 (raw), knock
+detected* rather than `130`; a BMW MG1 log's `RF Max Index 5` reads as *intake
+temperature, knock or driving-behaviour retard*. The tables are in
+`mcmess/logenums.py`; another ECU family is one more table and one more name pattern.
+
+The **Table** tab is the raw grid, every column sortable; the sort reorders the whole
+log and the row header still says which log row each row was. Clicking a row places
+the cursor on it.
+
+The chart runs past the logger's eight validated hues, up to sixteen — an overlay
+chart of twelve traces needs them, and identity never rests on colour here: every
+plotted channel is named beside its swatch in the panel, in the stats table under the
+chart, and in the hover tooltip. See the note on `SERIES_EXTENDED` in `gui/theme.py`.
+
+Where it came from, and where it differs, is in
+[docs/datalog-viewer.md](docs/datalog-viewer.md).
 
 ## Setup
 
@@ -254,6 +343,7 @@ verify on the car.
 | Path | What |
 |---|---|
 | `docs/mcmess-018cg.md` | Protocol spec, every claim tagged `[RE]` / `[ME7]` / `[INF]` / `[VERIFY]` |
+| `docs/datalog-viewer.md` | Where the viewer was ported from, and where it differs |
 | `mcmess/transport.py` | 9-bit frames via parity, init pulse, echo handling, timing |
 | `mcmess/session.py` | Handshake, latch-aware reads, read scheduler |
 | `mcmess/channels.py` | Channels and physical conversions |
@@ -264,11 +354,16 @@ verify on the car.
 | `mcmess/simulator.py` | Simulated 018CG responder + engine model |
 | `mcmess/data/m38_018cg.json` | Generated channel + conversion database, one per ECU |
 | `mcmess/data/descriptions_en.json` | English description for every channel |
+| `mcmess/logparse.py` | Reads a datalog: VCDS, ME7Logger, OP-COM, any CSV. No UI |
+| `mcmess/logenums.py` | Channels that log a code: KLINFO, BMW MG1 limiters |
 | `gui/main.py` | The window |
 | `gui/plots.py` | Stacked small-multiple plot panels |
 | `gui/picker.py` | Channel tree with live cost estimate |
 | `gui/theme.py` | Validated dark palette and Qt styling |
-| `log.bat` | Double-click launcher: tuning set, auto-connect |
+| `gui/viewer.py` | The log viewer window: channel panel, stats, raw table |
+| `gui/logchart.py` | The viewer's chart: scale groups, row cursor, second X axis |
+| `log.bat` | Double-click launcher: tuning set, auto-connect, auto-record |
+| `view.bat` | Double-click launcher: opens the newest log in the viewer |
 | `tools/probe.py` | Bench bring-up and measurement |
 | `tools/build_database.py` | Rebuilds the database from the RE files |
 | `tools/ramscan.py` | Finds RAM the firmware never touches, for patch variables |
@@ -278,6 +373,8 @@ verify on the car.
 | `tests/test_ramscan.py` | MCS-96 operand decoding in the RAM scanner |
 | `tests/test_wideband.py` | Decoders, staleness, and the join onto the ECU clock |
 | `tests/test_derived.py` | Knock demultiplexer and derived-column plumbing |
+| `tests/test_logparse.py` | The datalog parser, against excerpts of real files |
+| `tests/test_viewer.py` | The viewer window and chart, on Qt's offscreen platform |
 
 ## Logging a wideband
 
@@ -308,8 +405,14 @@ The AFR gets its own panel in the window and its own column in the log.
 
 ## Logs name themselves
 
-**Record to CSV** writes straight away, no dialog, to a name that cannot collide
-with the last one:
+**Recording starts on connect.** You do not press anything. The moment the link
+comes up a CSV is open and rows are going into it, and the Record button is already
+showing *Stop recording*. A pull you forgot to press Record for is a pull you have
+to drive again; the only cost of a log you did not want is a small file, and since
+logs name themselves nothing is ever overwritten. `--no-autorecord` waits for the
+button instead.
+
+The name cannot collide with the last one:
 
 ```
 logs/2026-11-19_12-34-21_018CG_pull2.csv

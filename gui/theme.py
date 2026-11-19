@@ -58,6 +58,46 @@ SERIES = (
 #: recycled hue. Identity still comes from each panel's direct label.
 MAX_SERIES = len(SERIES)
 
+#: Eight further slots, for the log VIEWER only.
+#:
+#: The live logger draws small multiples -- one panel per channel, each directly
+#: labelled -- so colour is only an aid and eight validated hues are plenty. The
+#: viewer draws an overlay chart, where a tuner may reasonably want twelve traces
+#: at once, and neutral ink for traces nine onwards would make them unreadable.
+#:
+#: These eight are NOT part of the validated set: the lightness band, chroma
+#: floor and pairwise CVD separation were checked for SERIES against the #1a1a19
+#: surface, and adding these was not re-validated pairwise against all sixteen.
+#: They are the distinct half of the reference viewer's own sixteen, and they are
+#: only legal here because identity in the viewer never rests on colour at all:
+#: every plotted channel is named beside its swatch in the channel panel, named
+#: again in the stats table under the chart, and named in the hover tooltip. A
+#: reader who cannot tell slot 11 from slot 14 still has three places that say
+#: which is which. Past sixteen, a trace draws in neutral ink.
+SERIES_EXTENDED = SERIES + (
+    "#8e5bd0",  #  9 purple
+    "#17a2a2",  # 10 teal
+    "#c2308e",  # 11 pink
+    "#7a8a00",  # 12 olive
+    "#0b9bd8",  # 13 sky
+    "#8c564b",  # 14 brown
+    "#5f9ea0",  # 15 cadet
+    "#b0b0a4",  # 16 stone
+)
+
+MAX_SERIES_EXTENDED = len(SERIES_EXTENDED)
+
+
+def viewer_color(index: int) -> str:
+    """Colour for the nth trace on the viewer's overlay chart.
+
+    Slots 0..7 are the validated categorical order; 8..15 the extension above.
+    Beyond that, neutral ink rather than an invented hue.
+    """
+    if 0 <= index < MAX_SERIES_EXTENDED:
+        return SERIES_EXTENDED[index]
+    return TEXT_SECONDARY
+
 #: Recessive grid.
 GRID_ALPHA = 0.12
 

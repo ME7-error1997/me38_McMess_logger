@@ -63,6 +63,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self._selection = []
         self._paused = False
         self._reported_error = ""
+        self._viewers: list[QtWidgets.QMainWindow] = []
 
         # A wideband (or any second input) is not in the channel database and never
         # appears in the picker: it is not an ECU channel and cannot be ticked off
@@ -195,6 +196,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pause_button.clicked.connect(self._toggle_pause)
         row.addWidget(self.pause_button)
 
+        self.view_button = QtWidgets.QPushButton("View log...")
+        self.view_button.setToolTip(
+            "Open a recorded log in the viewer: traces against time, exact\n"
+            "values at a cursor, min/max/mean over a zoomed pull. Defaults to\n"
+            "the log this session is writing."
+        )
+        self.view_button.clicked.connect(self._open_viewer)
+        row.addWidget(self.view_button)
+
         row.addStretch(1)
         if self.args.demo:
             demo = QtWidgets.QLabel("DEMO - simulated ECU, emulated rates")
@@ -319,6 +329,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.port_combo.setEnabled(False)
         self.speed_combo.setEnabled(False)
 
+        # Record from the moment the link is up, unless told not to. A pull you
+        # did not press Record for is a pull you have to drive again, and the
+        # only cost of recording one you did not want is a small file: the log
+        # names itself from the date and time, so nothing is overwritten.
+        if self.args.autorecord and not self.record_button.isChecked():
+            self.record_button.setChecked(True)
+            self._toggle_recording()
+
     def _disconnect(self) -> None:
         if self.recorder is not None:
             self.recorder.stop()
@@ -361,6 +379,30 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def _toggle_pause(self) -> None:
         self._paused = self.pause_button.isChecked()
+
+    # -- the viewer --------------------------------------------------------
+
+    def _open_viewer(self) -> None:
+        """Open a recorded log in the viewer window.
+
+        The viewer is a separate window, not a tab: in a car you want the live
+        traces still on screen while you read the last pull, and on a bench you
+        want them side by side.
+        """
+        from gui.viewer import LogViewerWindow
+
+        window = LogViewerWindow()
+        # Qt owns a window only while something references it; without this the
+        # viewer is garbage-collected the moment this method returns.
+        self._viewers.append(window)
+        window.destroyed.connect(
+            lambda: self._viewers.remove(window) if window in self._viewers else None
+        )
+        window.show()
+        if self._log_path and self._log_path.exists():
+            window.open_path(self._log_path)
+        else:
+            window._open_dialog()
 
     # -- refresh -----------------------------------------------------------
 
@@ -469,6 +511,13 @@ def main(argv: list[str] | None = None) -> int:
         "--ask-filename",
         action="store_true",
         help="open a save dialog instead of naming the log automatically",
+    )
+    parser.add_argument(
+        "--no-autorecord",
+        dest="autorecord",
+        action="store_false",
+        help="do not start recording on connect; wait for the Record button "
+        "(by default a CSV is written from the moment the link comes up)",
     )
     add_wideband_args(parser)
     parser.add_argument(
