@@ -421,6 +421,11 @@ def main(argv: list[str] | None = None) -> int:
         "--screenshot", help="render the window to this PNG and exit (for checking)"
     )
     parser.add_argument(
+        "--connect",
+        action="store_true",
+        help="connect as soon as the window opens, instead of waiting for the button",
+    )
+    parser.add_argument(
         "--knock-base",
         default="auto",
         help=(
@@ -477,10 +482,20 @@ def main(argv: list[str] | None = None) -> int:
         index = window.port_combo.findData(args.port)
         if index >= 0:
             window.port_combo.setCurrentIndex(index)
+        elif args.connect:
+            print(
+                f"warning: {args.port} is not in the port list, so --connect has "
+                "nothing to connect to. Press Refresh once the cable is plugged in."
+            )
     window.show()
 
     if args.screenshot:
         return _screenshot(app, window, Path(args.screenshot))
+    if args.connect:
+        # Shortly after the window is up, not before: the handshake blocks its
+        # thread, and starting it inside main() would show an unpainted window for
+        # the second or two the init pulse and ack take.
+        QtCore.QTimer.singleShot(400, window._connect)
     return app.exec()
 
 

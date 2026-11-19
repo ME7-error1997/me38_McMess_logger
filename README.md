@@ -83,6 +83,13 @@ The design leans on two properties of this responder:
 
 ## The logger window
 
+**Double-click `log.bat`.** It opens the window on COM2 with the tuning channel set
+and connects on its own — no typing, which matters when the laptop is balanced on a
+wing. Pass a port to override: `log.bat COM5`. Edit the `CHANNELS` line in that file
+to change the set.
+
+Everything below is what the batch file does, spelled out.
+
 ```bash
 .venv\Scripts\python.exe gui\main.py --demo
 ```
@@ -95,8 +102,9 @@ behaves like the real thing with no hardware attached. Against a real cable:
 .venv\Scripts\python.exe gui\main.py --port COM3
 ```
 
-Useful flags: `--channels N40,TL,FR` to preselect a set, `--database` to point at a
-different channel JSON.
+Useful flags: `--channels N40,TL,FR` to preselect a set, `--connect` to skip the
+Connect button, `--knock-base 0` for this ECU's cylinder numbering, `--database` to
+point at a different channel JSON.
 
 **Drawing costs sample rate, so the defaults favour rate.** Painting antialiased
 traces holds the GIL and measurably starves the sampling thread — on the bench,
@@ -259,6 +267,7 @@ verify on the car.
 | `gui/plots.py` | Stacked small-multiple plot panels |
 | `gui/picker.py` | Channel tree with live cost estimate |
 | `gui/theme.py` | Validated dark palette and Qt styling |
+| `log.bat` | Double-click launcher: tuning set, auto-connect |
 | `tools/probe.py` | Bench bring-up and measurement |
 | `tools/build_database.py` | Rebuilds the database from the RE files |
 | `tools/ramscan.py` | Finds RAM the firmware never touches, for patch variables |

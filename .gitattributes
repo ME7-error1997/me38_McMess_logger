@@ -2,6 +2,9 @@
 # core.autocrlf=true on this machine would otherwise check these files out as CRLF.
 * text=auto eol=lf
 
+# cmd.exe parses batch files; LF-only can misparse multi-line if() blocks.
+*.bat text eol=crlf
+
 # Keep the generated channel database and screenshots byte-exact.
 *.json text eol=lf
 *.png binary
