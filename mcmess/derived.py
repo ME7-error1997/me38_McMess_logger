@@ -24,6 +24,15 @@ from .channels import Channel, ChannelSet
 
 NAN = float("nan")
 
+#: KLINFO packs the cylinder number and a knock indication into one byte. Bit 7 is
+#: the indication; the low bits are the number.  [INF]
+KNOCK_FLAG_BIT = 0x80
+#: Everything below the flag. Deliberately NOT 0x07: masking to three bits would
+#: turn a bogus 9 into cylinder 1 and quietly file a reading under the wrong
+#: cylinder. Only bit 7 has a documented meaning, so only bit 7 is stripped, and
+#: anything still out of range is counted as unmapped rather than guessed at.
+CYLINDER_MASK = 0x7F
+
 
 @dataclass(frozen=True)
 class DerivedChannel(Channel):
@@ -160,6 +169,8 @@ class KnockPerCylinder(Derivation):
     base: int | str = "auto"
 
     _hold: dict[int, float] = field(default_factory=dict, repr=False)
+    _flag: dict[int, float] = field(default_factory=dict, repr=False)
+    _knocked: dict[int, int] = field(default_factory=dict, repr=False)
     _resolved: int | None = field(default=None, repr=False)
     _seen: set[int] = field(default_factory=set, repr=False)
     _unmapped: int = field(default=0, repr=False)
@@ -178,10 +189,22 @@ class KnockPerCylinder(Derivation):
                 decimals=2,
             )
             for n in range(1, self.cylinders + 1)
+        ] + [
+            _column(
+                f"KNK_CYL{n}",
+                "",
+                f"Knock detected on cylinder {n} at the last knock-control event "
+                f"(KLINFO bit 7)",
+                self.key,
+                decimals=0,
+            )
+            for n in range(1, self.cylinders + 1)
         ]
 
     def reset(self) -> None:
         self._hold.clear()
+        self._flag.clear()
+        self._knocked.clear()
         self._seen.clear()
         self._unmapped = 0
         if self.base == "auto":
@@ -192,8 +215,17 @@ class KnockPerCylinder(Derivation):
         retard = values.get("DWKR_Z", NAN)
 
         if info is not None and not math.isnan(info):
-            raw = int(round(info))
-            self._seen.add(raw)
+            word = int(round(info))
+            # KLINFO is not just a cylinder number. The FR calls it "Aktuelle
+            # Zylindernummer, klopfen ja/nein" -- number AND whether that cylinder
+            # knocked -- and a car log caught 0x82: bit 7 set over cylinder 2.
+            # Treating the whole byte as a number made those samples look
+            # out-of-range and threw them away, which is precisely backwards: a
+            # sample flagged as knocking is the one you least want to drop.  [INF]
+            # on the bit position, which rests on that observation plus the FR text.
+            knocked = bool(word & KNOCK_FLAG_BIT)
+            raw = word & CYLINDER_MASK
+            self._seen.add(word)
             if self._resolved is None:
                 # Decide only on proof, never on the values seen so far being
                 # "probably" one convention.
@@ -206,13 +238,22 @@ class KnockPerCylinder(Derivation):
                 if 1 <= cylinder <= self.cylinders:
                     if retard is not None and not math.isnan(retard):
                         self._hold[cylinder] = retard
+                    if knocked:
+                        self._knocked[cylinder] = self._knocked.get(cylinder, 0) + 1
+                        self._flag[cylinder] = 1.0
+                    else:
+                        self._flag[cylinder] = 0.0
                 else:
                     self._unmapped += 1
 
-        return {
+        out: dict[str, float] = {
             f"KR_CYL{n}": self._hold.get(n, NAN)
             for n in range(1, self.cylinders + 1)
         }
+        out.update(
+            {f"KNK_CYL{n}": self._flag.get(n, NAN) for n in range(1, self.cylinders + 1)}
+        )
+        return out
 
     def note(self) -> str:
         if self._resolved is None:
@@ -222,6 +263,9 @@ class KnockPerCylinder(Derivation):
             )
         convention = "0..3" if self._resolved == 0 else "1..4"
         line = f"KLINFO reads {convention} (values seen: {sorted(self._seen)})"
+        if self._knocked:
+            hits = ", ".join(f"cyl{n}x{c}" for n, c in sorted(self._knocked.items()))
+            line += f"; knock flag caught on {hits}"
         if self._unmapped:
             line += f"; {self._unmapped} sample(s) outside that range were dropped"
         return line

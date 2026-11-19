@@ -4942,7 +4942,7 @@
    "umr": "DEZ",
    "umr_displayed": "DEZ",
    "description": "Akt. Zyl.Nr. der Klopfreg.",
-   "description_en": "Cylinder number knock control is currently processing, and whether it knocked"
+   "description_en": "Knock control: cylinder number in the low bits, knock-detected flag in bit 7"
   },
   {
    "name": "ALRST",

@@ -420,6 +420,32 @@ prints what it settled on:
 KLINFO reads 0..3 (values seen: [0, 1, 2, 3])
 ```
 
+### KLINFO is not only a cylinder number
+
+A car pull caught `KLINFO` reading **0x82** — bit 7 set over cylinder 2. The FR calls
+the variable *"Aktuelle Zylindernummer, klopfen ja/nein"*: the byte holds the cylinder
+**and** whether that cylinder knocked. Bit 7 is the indication `[INF]`.
+
+That matters because the demultiplexer used to read the whole byte as a number, so a
+flagged sample looked out of range and was discarded — the one sample you least want
+to lose. It is now stripped and routed, and the flag is available as its own columns:
+
+| Column | |
+|---|---|
+| `KR_CYL1`..`4` | retard held per cylinder |
+| `KNK_CYL1`..`4` | 1 when that cylinder knocked at the last knock-control event |
+
+Only bit 7 is stripped. Masking to three bits would turn a bogus 9 into cylinder 1
+and file a reading under the wrong cylinder, so anything still out of range is
+counted as unmapped rather than guessed at. The run reports what it caught:
+
+```
+KLINFO reads 0..3 (values seen: [0, 1, 2, 3, 130]); knock flag caught on cyl3x1
+```
+
+Sampling at tens of Hz against knock control running per combustion, the flag is
+caught only occasionally — it is a spot check, not a knock count.
+
 **That is the answer, measured on a running 018CG:** `KLINFO` counts cylinders from
 zero. So `--knock-base 0` skips the wait on this ECU. Values outside the resolved
 range are dropped rather than written to a cylinder, and counted in that same line.

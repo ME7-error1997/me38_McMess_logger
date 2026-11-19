@@ -32,7 +32,6 @@
   "name is also present it holds the whole word and the '+1' entry is just its high",
   "byte; where it is not, the '+1' entry is the value itself."
  ],
-
  "descriptions": {
   "ALRST": "Flag byte for lambda control and the evaporative purge system",
   "ASA": "Segment time correction, segment 1 (rpm-interpolated adaptation factor A)",
@@ -137,7 +136,7 @@
   "KATRDYZ+1": "Time counter for the readiness code",
   "KATSPRZ": "Filter-stop lock-out time, catalyst 1",
   "KKAGW": "Number of limit value exceedances",
-  "KLINFO": "Cylinder number knock control is currently processing, and whether it knocked",
+  "KLINFO": "Knock control: cylinder number in the low bits, knock-detected flag in bit 7",
   "KLOPFB": "Flag register for knock control",
   "LDEF": "Air mass control: magnitude of the deviation",
   "LDSHK": "Boost control load setpoint, from map KFLDSHK",
@@ -283,11 +282,14 @@
   "ZYFLGE_": "Cycle flag byte: emissions-relevant misfires, high byte",
   "ZYFLGF": "Cycle flag byte: OBD-II diagnosis",
   "ZYFLGF_": "Cycle flag byte: OBD-II diagnosis, high byte",
-
   "ML_GS": "Air mass flow in g/s, computed from ML (kg/h divided by 3.6)",
   "KR_CYL1": "Knock retard held for cylinder 1, demultiplexed from DWKR_Z and KLINFO",
   "KR_CYL2": "Knock retard held for cylinder 2, demultiplexed from DWKR_Z and KLINFO",
   "KR_CYL3": "Knock retard held for cylinder 3, demultiplexed from DWKR_Z and KLINFO",
-  "KR_CYL4": "Knock retard held for cylinder 4, demultiplexed from DWKR_Z and KLINFO"
+  "KR_CYL4": "Knock retard held for cylinder 4, demultiplexed from DWKR_Z and KLINFO",
+  "KNK_CYL1": "1 when cylinder 1 knocked at the last knock-control event, from KLINFO bit 7",
+  "KNK_CYL2": "1 when cylinder 2 knocked at the last knock-control event, from KLINFO bit 7",
+  "KNK_CYL3": "1 when cylinder 3 knocked at the last knock-control event, from KLINFO bit 7",
+  "KNK_CYL4": "1 when cylinder 4 knocked at the last knock-control event, from KLINFO bit 7"
  }
 }

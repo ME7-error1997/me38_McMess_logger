@@ -92,6 +92,31 @@ def main() -> int:
     out = k.compute({"KLINFO": NAN, "DWKR_Z": -7.0})
     check("NaN KLINFO changes nothing", out["KR_CYL2"], -2.0)
 
+    print("\nKLINFO carries a knock flag in bit 7")
+    # Caught on a real pull: KLINFO read 0x82, bit 7 over cylinder 2. The FR calls
+    # the variable "Zylindernummer, klopfen ja/nein", so the byte holds both. Before
+    # this, such a sample looked out-of-range and was discarded -- the one sample you
+    # least want to lose.
+    k = KnockPerCylinder(base=0)
+    for info, retard in ((0, -1.0), (1, -2.0), (2, -3.0), (3, -4.0)):
+        k.compute({"KLINFO": float(info), "DWKR_Z": retard})
+    out = k.compute({"KLINFO": float(0x82), "DWKR_Z": -2.25})
+    check("flagged sample is still routed", out["KR_CYL3"], -2.25)
+    check("and its cylinder is flagged", out["KNK_CYL3"], 1.0)
+    check("others are not", [out["KNK_CYL1"], out["KNK_CYL2"], out["KNK_CYL4"]],
+          [0.0, 0.0, 0.0])
+    check("the note counts it", "knock flag caught on cyl3x1" in k.note(), True)
+    out = k.compute({"KLINFO": 2.0, "DWKR_Z": -2.25})
+    check("flag clears on a clean event", out["KNK_CYL3"], 0.0)
+
+    # Only bit 7 is stripped. Masking to three bits would turn a bogus 9 into
+    # cylinder 1 and file a reading under the wrong cylinder.
+    k = KnockPerCylinder(base=1)
+    k.compute({"KLINFO": 2.0, "DWKR_Z": -2.0})
+    out = k.compute({"KLINFO": 9.0, "DWKR_Z": -99.0})
+    check("a bogus value is still rejected, not masked into range",
+          out["KR_CYL2"], -2.0)
+
     print("\nreset() forgets the base and the held values")
     k.reset()
     out = k.compute({"KLINFO": 2.0, "DWKR_Z": -2.0})
