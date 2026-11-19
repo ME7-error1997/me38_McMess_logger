@@ -637,7 +637,7 @@ def cmd_word(args: argparse.Namespace) -> int:
     tp, session = open_session(args, channel_set)
     try:
         print(RULE)
-        print(f"{ch.name} @ 0x{ch.addr:04X}  ({ch.umr}) {ch.description}")
+        print(f"{ch.name} @ 0x{ch.addr:04X}  ({ch.umr}) {ch.about}")
         if ch.has_physical and conv.decl_min is not None:
             print(
                 f"valid range per DAMOS: {conv.decl_min:g} .. {conv.decl_max:g} "
@@ -896,7 +896,7 @@ def cmd_watch(args: argparse.Namespace) -> int:
             where = f"0x{ch.addr:04X}"
         print(
             f"  {ch.name:<10} {where}  {ch.size}B  {ch.umr:<9} "
-            f"{unit:<10} {ch.description}"
+            f"{unit:<10} {ch.about}"
         )
         if ch.suspect:
             print(f"             ^ reported raw: {ch.suspect}")
@@ -1044,7 +1044,7 @@ def cmd_channels(args: argparse.Namespace) -> int:
         unit = ch.unit or "-raw-"
         print(
             f"  {ch.name:<12} 0x{ch.addr:04X}  {ch.size:<3} {ch.umr:<10} "
-            f"{unit:<10} {ch.description}"
+            f"{unit:<10} {ch.about}"
         )
     print()
     pages: dict[int, int] = {}

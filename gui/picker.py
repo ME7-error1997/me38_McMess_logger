@@ -120,7 +120,11 @@ class ChannelPicker(QtWidgets.QWidget):
                 item.setCheckState(0, QtCore.Qt.CheckState.Unchecked)
                 item.setData(0, QtCore.Qt.ItemDataRole.UserRole, channel.name)
 
-                tip = [channel.description or channel.name]
+                tip = [channel.about or channel.name]
+                # The German stays visible underneath: it is the source text, and
+                # anyone cross-checking against the FR or a DAMOS needs the original.
+                if channel.description_en and channel.description:
+                    tip.append(f"FR/DAMOS: {channel.description}")
                 tip.append(f"address 0x{channel.addr:04X}, {channel.size} byte(s)")
                 if channel.size == 2:
                     tip.append(f"word at 0x{channel.base:04X}..0x{channel.base + 1:04X}")
@@ -244,6 +248,7 @@ class ChannelPicker(QtWidgets.QWidget):
                         channel.name,
                         channel.unit,
                         channel.description,
+                        channel.description_en,
                         channel.umr,
                         f"{channel.addr:04x}",
                     )

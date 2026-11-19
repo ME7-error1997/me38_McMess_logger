@@ -329,6 +329,30 @@ def main() -> int:
     for rate in (200, 300, 500):
         print(f"  at {rate} bytes/s: {rate / prog.wire_bytes:.1f} Hz")
 
+    print("\nEvery channel has an English description")
+    import json as _json
+
+    from mcmess.channels import DATA_DIR
+    from mcmess.derived import expand_selection as _expand
+
+    table = _json.loads(
+        (DATA_DIR / "descriptions_en.json").read_text(encoding="utf-8")
+    )["descriptions"]
+    for part in ("06A906018CG", "06A906018AQ"):
+        db = load_channels(part)
+        check(f"{part}: none missing", [c.name for c in db if not c.description_en], [])
+    cg = load_channels("06A906018CG")
+    # Additive, never destructive: the German source text has to survive, because it
+    # is what anyone cross-checking against the FR or a DAMOS needs to see.
+    check("German source kept", cg.get("N40").description, "Drehzahl")
+    check("English added beside it",
+          cg.get("N40").description_en.startswith("Engine speed"), True)
+    check("about() prefers English", cg.get("TL").about, cg.get("TL").description_en)
+    check("no blank entries in the file", [n for n in table if not table[n].strip()], [])
+    cols, _ = _expand(cg, ["ML_GS", "KR_CYL1"])
+    check("derived columns are described",
+          all(c.about for c in cols if c.is_derived), True)
+
     print("\nTimer quantisations are on this ECU's clock, not the A4's")
     cg = load_channels("06A906018CG")
     # The injection-time family counts CPU timer ticks, so the A4 DAMOS's figures

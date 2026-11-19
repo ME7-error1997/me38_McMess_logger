@@ -120,7 +120,7 @@ class AirMassGramsPerSecond(Derivation):
             _column(
                 "ML_GS",
                 "g/s",
-                "Luftmassendurchsatz, aus ML (kg/h / 3.6)",
+                "Air mass flow in g/s, computed from ML (kg/h divided by 3.6)",
                 self.key,
                 decimals=2,
             )
@@ -173,7 +173,7 @@ class KnockPerCylinder(Derivation):
             _column(
                 f"KR_CYL{n}",
                 "grad KW",
-                f"Klopf-Spaetverstellung Zylinder {n}, aus DWKR_Z/KLINFO",
+                f"Knock retard held for cylinder {n}, demultiplexed from DWKR_Z and KLINFO",
                 self.key,
                 decimals=2,
             )

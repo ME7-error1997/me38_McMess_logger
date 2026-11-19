@@ -27,7 +27,8 @@
    "channels": 249,
    "channels_rejected": 13,
    "channels_with_conversion": 230,
-   "channels_extra": 5
+   "channels_extra": 5,
+   "channels_described": 249
   },
   "conversions_missing": [
    "LUQ",
@@ -4756,7 +4757,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Status-Zelle"
+   "description": "Status-Zelle",
+   "description_en": "Status register of the VS20 measurement interface"
   },
   {
    "name": "N40",
@@ -4765,7 +4767,8 @@
    "size": 1,
    "umr": "NQ40",
    "umr_displayed": "NQ40",
-   "description": "Drehzahl"
+   "description": "Drehzahl",
+   "description_en": "Engine speed, 40 rpm per bit"
   },
   {
    "name": "N10",
@@ -4774,7 +4777,8 @@
    "size": 1,
    "umr": "NQ10",
    "umr_displayed": "NQ10",
-   "description": "Drehzahl in 10 UPM"
+   "description": "Drehzahl in 10 UPM",
+   "description_en": "Engine speed, 10 rpm per bit"
   },
   {
    "name": "NSOL",
@@ -4783,7 +4787,8 @@
    "size": 1,
    "umr": "NQ10",
    "umr_displayed": "NQ10",
-   "description": "Soll-Drehzahl"
+   "description": "Soll-Drehzahl",
+   "description_en": "Target engine speed for idle speed control"
   },
   {
    "name": "ZWOUT",
@@ -4792,7 +4797,8 @@
    "size": 1,
    "umr": "ZWVEK",
    "umr_displayed": "ZWVEK",
-   "description": "Zuendwinkel"
+   "description": "Zuendwinkel",
+   "description_en": "Ignition angle actually output, after traction, gearbox and drag-torque trims"
   },
   {
    "name": "TL",
@@ -4801,7 +4807,8 @@
    "size": 1,
    "umr": "TIQ",
    "umr_displayed": "TIQ",
-   "description": "Lastsignal"
+   "description": "Lastsignal",
+   "description_en": "Engine load signal -- air mass per revolution, the fuelling base quantity"
   },
   {
    "name": "UB",
@@ -4810,7 +4817,8 @@
    "size": 1,
    "umr": "UBQ",
    "umr_displayed": "UBQ",
-   "description": "UB"
+   "description": "UB",
+   "description_en": "Battery voltage at terminal 15"
   },
   {
    "name": "TANS",
@@ -4819,7 +4827,8 @@
    "size": 1,
    "umr": "TEMPQ",
    "umr_displayed": "TEMPQ",
-   "description": "Tans"
+   "description": "Tans",
+   "description_en": "Intake air temperature"
   },
   {
    "name": "TMOT",
@@ -4828,7 +4837,8 @@
    "size": 1,
    "umr": "TEMPQ",
    "umr_displayed": "TEMPQ",
-   "description": "Tmot"
+   "description": "Tmot",
+   "description_en": "Engine coolant temperature"
   },
   {
    "name": "VRL",
@@ -4837,7 +4847,8 @@
    "size": 1,
    "umr": "WQ1536",
    "umr_displayed": "WQ1536",
-   "description": "Vorlagerung"
+   "description": "Vorlagerung",
+   "description_en": "Ignition advance lead angle"
   },
   {
    "name": "QSOLL+1",
@@ -4847,7 +4858,8 @@
    "umr": "KGHQX",
    "umr_displayed": "KQHQ",
    "description": "Solluftmenge",
-   "word_base": 52068
+   "word_base": 52068,
+   "description_en": "Total target air flow"
   },
   {
    "name": "QAD+1",
@@ -4857,7 +4869,8 @@
    "umr": "IVQX",
    "umr_displayed": "IVQX",
    "description": "Luftvorsteuerungskorrektur",
-   "word_base": 50164
+   "word_base": 50164,
+   "description_en": "Idle air pre-control correction (adaptation)"
   },
   {
    "name": "DKPOT",
@@ -4866,7 +4879,8 @@
    "size": 1,
    "umr": "WDK",
    "umr_displayed": "WDK",
-   "description": "Drosselklappenpoti"
+   "description": "Drosselklappenpoti",
+   "description_en": "Throttle position sensor angle"
   },
   {
    "name": "TIMLDP",
@@ -4876,7 +4890,8 @@
    "umr": "TQ100L",
    "umr_displayed": "TQ100L",
    "description": "Timer für max. Diagn.zeit DLDP",
-   "word_base": 51698
+   "word_base": 51698,
+   "description_en": "Timer for the maximum tank leak diagnosis duration"
   },
   {
    "name": "FR2+1",
@@ -4886,7 +4901,8 @@
    "umr": "FAK2L",
    "umr_displayed": "FAK2L",
    "description": "LR-Integrator Bank2",
-   "word_base": 51324
+   "word_base": 51324,
+   "description_en": "Lambda control integrator, bank 2"
   },
   {
    "name": "DWKR_Z",
@@ -4895,7 +4911,8 @@
    "size": 1,
    "umr": "ZWNEG",
    "umr_displayed": "ZWNEG",
-   "description": "Spaetverstellung akt. ZW"
+   "description": "Spaetverstellung akt. ZW",
+   "description_en": "Knock retard currently applied to the cylinder knock control is on"
   },
   {
    "name": "RFPG_Z",
@@ -4904,7 +4921,8 @@
    "size": 1,
    "umr": "UQ5",
    "umr_displayed": "UQ5",
-   "description": "Zylinderselektive Referenzp."
+   "description": "Zylinderselektive Referenzp.",
+   "description_en": "Knock reference level for the current cylinder"
   },
   {
    "name": "VER_Z",
@@ -4913,7 +4931,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Verstaerkung CC192"
+   "description": "Verstaerkung CC192",
+   "description_en": "Knock amplifier gain stage for the current cylinder"
   },
   {
    "name": "KLINFO",
@@ -4922,7 +4941,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Akt. Zyl.Nr. der Klopfreg."
+   "description": "Akt. Zyl.Nr. der Klopfreg.",
+   "description_en": "Cylinder number knock control is currently processing, and whether it knocked"
   },
   {
    "name": "ALRST",
@@ -4931,7 +4951,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Flags: LR und TAE"
+   "description": "Flags: LR und TAE",
+   "description_en": "Flag byte for lambda control and the evaporative purge system"
   },
   {
    "name": "FTEA+1",
@@ -4941,7 +4962,8 @@
    "umr": "FAK2L",
    "umr_displayed": "FKT128",
    "description": "TE-Gemischadaptionsfaktor",
-   "word_base": 52292
+   "word_base": 52292,
+   "description_en": "Injection-time mixture adaptation factor"
   },
   {
    "name": "TATE",
@@ -4950,7 +4972,8 @@
    "size": 1,
    "umr": "FKT256",
    "umr_displayed": "FKT256",
-   "description": "Tastverhaeltnis Tankentl."
+   "description": "Tastverhaeltnis Tankentl.",
+   "description_en": "Purge valve duty cycle"
   },
   {
    "name": "FRA+1",
@@ -4960,7 +4983,8 @@
    "umr": "FAK2L",
    "umr_displayed": "FKT128",
    "description": "LR-Adapt. mult. Faktor, Bereich 2",
-   "word_base": 51236
+   "word_base": 51236,
+   "description_en": "Multiplicative lambda adaptation, range 2 -- long-term fuel trim"
   },
   {
    "name": "TRA+1",
@@ -4970,7 +4994,8 @@
    "umr": "TEQSL",
    "umr_displayed": "TEQS",
    "description": "LR-Adapt. add. Faktor, Bereich 1",
-   "word_base": 51240
+   "word_base": 51240,
+   "description_en": "Time-dependent additive lambda adaptation, range 1"
   },
   {
    "name": "TRADTV+1",
@@ -4980,7 +5005,8 @@
    "umr": "TEQSL",
    "umr_displayed": "TEQS",
    "description": "LR-Adapt. add. Faktor gesamt",
-   "word_base": 51246
+   "word_base": 51246,
+   "description_en": "Total additive lambda adaptation, ranges 1 and 3"
   },
   {
    "name": "UDKLLMN",
@@ -4989,7 +5015,8 @@
    "size": 1,
    "umr": "UQ5",
    "umr_displayed": "UQ5",
-   "description": "Minimalanschlag"
+   "description": "Minimalanschlag",
+   "description_en": "Throttle minimum stop, A/D voltage"
   },
   {
    "name": "UDKLLMX",
@@ -4998,7 +5025,8 @@
    "size": 1,
    "umr": "UQ5",
    "umr_displayed": "UQ5",
-   "description": "Maximalanschlag"
+   "description": "Maximalanschlag",
+   "description_en": "Throttle maximum stop, A/D voltage"
   },
   {
    "name": "UDKNL",
@@ -5007,7 +5035,8 @@
    "size": 1,
    "umr": "UQ5",
    "umr_displayed": "UQ5",
-   "description": "Notluftquerschnitt"
+   "description": "Notluftquerschnitt",
+   "description_en": "Throttle limp-home air cross-section, A/D voltage"
   },
   {
    "name": "XDTLW",
@@ -5016,7 +5045,8 @@
    "size": 1,
    "umr": "TIQ",
    "umr_displayed": "TIQ",
-   "description": "Lastdifferenz fuer DK-BA"
+   "description": "Lastdifferenz fuer DK-BA",
+   "description_en": "Positive load difference taken from map KFTLW, for throttle acceleration"
   },
   {
    "name": "ZWBEG",
@@ -5025,7 +5055,8 @@
    "size": 1,
    "umr": "ZWVEK",
    "umr_displayed": "ZWVEK",
-   "description": "Zuendwinkel"
+   "description": "Zuendwinkel",
+   "description_en": "Ignition angle limiting value"
   },
   {
    "name": "REFBER_Z",
@@ -5034,7 +5065,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Referenzpegel-Bereich"
+   "description": "Referenzpegel-Bereich",
+   "description_en": "Knock reference level range for the current cylinder"
   },
   {
    "name": "XFR_TE",
@@ -5043,7 +5075,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Tankentlueftungsflags"
+   "description": "Tankentlueftungsflags",
+   "description_en": "Evaporative purge flags"
   },
   {
    "name": "FTEAD+1",
@@ -5053,7 +5086,8 @@
    "umr": "SIG32L",
    "umr_displayed": "SIG32",
    "description": "TE-Beladungsfaktor(High Byte)",
-   "word_base": 52290
+   "word_base": 52290,
+   "description_en": "Injection-time purge-load factor, high byte"
   },
   {
    "name": "TEVPER",
@@ -5062,7 +5096,8 @@
    "size": 1,
    "umr": "TQ1",
    "umr_displayed": "TQ1",
-   "description": "TEV-Periodenlaenge"
+   "description": "TEV-Periodenlaenge",
+   "description_en": "Purge valve period length"
   },
   {
    "name": "MLUFT",
@@ -5071,7 +5106,8 @@
    "size": 1,
    "umr": "MLQ4",
    "umr_displayed": "MLQ4",
-   "description": "Luftmassendurchsatz UMR: MLQ4"
+   "description": "Luftmassendurchsatz UMR: MLQ4",
+   "description_en": "Air mass flow, 8-bit coarse version (conversion MLQ4)"
   },
   {
    "name": "XKFKEF_Z",
@@ -5080,7 +5116,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Klopferkennungsschwelle"
+   "description": "Klopferkennungsschwelle",
+   "description_en": "Knock detection threshold for the current cylinder"
   },
   {
    "name": "TEMEAN",
@@ -5090,7 +5127,8 @@
    "umr": "TEQL",
    "umr_displayed": "TEQL",
    "description": "mittlere eff. Einspritzzeit",
-   "word_base": 1028
+   "word_base": 1028,
+   "description_en": "Mean effective injection time"
   },
   {
    "name": "TEMEAN+1",
@@ -5099,7 +5137,8 @@
    "size": 1,
    "umr": "",
    "umr_displayed": "",
-   "description": ""
+   "description": "",
+   "description_en": "High byte of TEMEAN, the mean effective injection time"
   },
   {
    "name": "TI0",
@@ -5109,7 +5148,8 @@
    "umr": "TEQL",
    "umr_displayed": "TEQL",
    "description": "Einspritzzeit Bank0",
-   "word_base": 1024
+   "word_base": 1024,
+   "description_en": "Commanded injection time, bank 0. Includes the injector opening correction"
   },
   {
    "name": "TI0+1",
@@ -5118,7 +5158,8 @@
    "size": 1,
    "umr": "",
    "umr_displayed": "",
-   "description": ""
+   "description": "",
+   "description_en": "High byte of TI0, the bank 0 injection time"
   },
   {
    "name": "DVL_LL+1",
@@ -5128,7 +5169,8 @@
    "umr": "UQ5L",
    "umr_displayed": "UQ5L",
    "description": "Spannungsverh. IPA Leerlaufbedarf",
-   "word_base": 52062
+   "word_base": 52062,
+   "description_en": "Voltage ratio of the idle actuator demand"
   },
   {
    "name": "DVL_VS+1",
@@ -5138,7 +5180,8 @@
    "umr": "UQ5L",
    "umr_displayed": "UQ5L",
    "description": "Spannungsverh. IPA Sollwert",
-   "word_base": 52064
+   "word_base": 52064,
+   "description_en": "Voltage ratio of the idle actuator setpoint, unlimited"
   },
   {
    "name": "TL_16",
@@ -5148,7 +5191,8 @@
    "umr": "TEQL",
    "umr_displayed": "TEQL",
    "description": "gefiltertes Lastsignal (16bit)",
-   "word_base": 51584
+   "word_base": 51584,
+   "description_en": "Filtered load signal, 16-bit"
   },
   {
    "name": "TL_16+1",
@@ -5157,7 +5201,8 @@
    "size": 1,
    "umr": "",
    "umr_displayed": "",
-   "description": ""
+   "description": "",
+   "description_en": "High byte of TL_16, the filtered load signal"
   },
   {
    "name": "ML",
@@ -5167,7 +5212,8 @@
    "umr": "MLQ025L",
    "umr_displayed": "MLQ025L",
    "description": "Luftmassendurchsatz",
-   "word_base": 78
+   "word_base": 78,
+   "description_en": "Air mass flow measured by the hot-film meter"
   },
   {
    "name": "ML+1",
@@ -5176,7 +5222,8 @@
    "size": 1,
    "umr": "",
    "umr_displayed": "",
-   "description": ""
+   "description": "",
+   "description_en": "High byte of ML, the air mass flow"
   },
   {
    "name": "FR",
@@ -5186,7 +5233,8 @@
    "umr": "FAK2L",
    "umr_displayed": "FAK2L",
    "description": "Lambdaregler Bank1",
-   "word_base": 51202
+   "word_base": 51202,
+   "description_en": "Lambda control integrator, bank 1 -- short-term fuel trim. 1.000 is neutral"
   },
   {
    "name": "FR+1",
@@ -5195,7 +5243,8 @@
    "size": 1,
    "umr": "",
    "umr_displayed": "",
-   "description": ""
+   "description": "",
+   "description_en": "High byte of FR, the lambda control integrator"
   },
   {
    "name": "DVL_SYNA+1",
@@ -5206,7 +5255,8 @@
    "umr_displayed": "UQ5",
    "description": "Speicher DVL_SYN + DDVLSYN",
    "word_base": 52008,
-   "suspect": "FMT:2 but UQ5 is an 8-bit conversion -- likely two packed 8-bit values in one entry, not a 16-bit word"
+   "suspect": "FMT:2 but UQ5 is an 8-bit conversion -- likely two packed 8-bit values in one entry, not a 16-bit word",
+   "description_en": "Stored DVL_SYN plus its increment DDVLSYN"
   },
   {
    "name": "DVL_SYN",
@@ -5215,7 +5265,8 @@
    "size": 1,
    "umr": "UQ5",
    "umr_displayed": "UQ5",
-   "description": "Spannung Lagerückmeldepoti"
+   "description": "Spannung Lagerückmeldepoti",
+   "description_en": "Idle actuator feedback pot voltage, from the synchronisation curve"
   },
   {
    "name": "QREGP+1",
@@ -5225,7 +5276,8 @@
    "umr": "IVQX",
    "umr_displayed": "IVQX",
    "description": "Leerlauf-Proportionalanteil",
-   "word_base": 52098
+   "word_base": 52098,
+   "description_en": "Proportional term of the idle speed controller"
   },
   {
    "name": "QREGI+1",
@@ -5235,7 +5287,8 @@
    "umr": "IVQX",
    "umr_displayed": "IVQX",
    "description": "Leerlauf-Integrator",
-   "word_base": 52096
+   "word_base": 52096,
+   "description_en": "Integral term of the idle speed controller"
   },
   {
    "name": "QREG",
@@ -5245,7 +5298,8 @@
    "umr": "IVQX",
    "umr_displayed": "IVQX",
    "description": "LL- Reglerausgang",
-   "word_base": 52092
+   "word_base": 52092,
+   "description_en": "Idle speed controller output"
   },
   {
    "name": "QREG+1",
@@ -5254,7 +5308,8 @@
    "size": 1,
    "umr": "",
    "umr_displayed": "",
-   "description": ""
+   "description": "",
+   "description_en": "High byte of QREG, the idle speed controller output"
   },
   {
    "name": "ISPEI0",
@@ -5263,7 +5318,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Input Schalter 0..7, PE0"
+   "description": "Input Schalter 0..7, PE0",
+   "description_en": "Input mirror PE0: switch inputs 0 to 7"
   },
   {
    "name": "ISPEI1",
@@ -5272,7 +5328,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Input Schalter 8,9, PE1"
+   "description": "Input Schalter 8,9, PE1",
+   "description_en": "Input mirror PE1: switch inputs 8 and 9"
   },
   {
    "name": "USVK",
@@ -5281,7 +5338,8 @@
    "size": 1,
    "umr": "ULSQ",
    "umr_displayed": "ULSQ",
-   "description": "Spannung Lambdasonde v.Kat, korr."
+   "description": "Spannung Lambdasonde v.Kat, korr.",
+   "description_en": "Pre-catalyst lambda sensor voltage, trimmed"
   },
   {
    "name": "USHK",
@@ -5290,7 +5348,8 @@
    "size": 1,
    "umr": "ULSQ",
    "umr_displayed": "ULSQ",
-   "description": "Spannung Lambdasonde h.Kat, korr."
+   "description": "Spannung Lambdasonde h.Kat, korr.",
+   "description_en": "Post-catalyst lambda sensor voltage, trimmed"
   },
   {
    "name": "TIMTRPLL+1",
@@ -5300,7 +5359,8 @@
    "umr": "TQ40L",
    "umr_displayed": "TQ40L",
    "description": "Zeit im LL für Trip",
-   "word_base": 51744
+   "word_base": 51744,
+   "description_en": "Stopwatch: time spent at idle, for the trip"
   },
   {
    "name": "TIMTRPDC+1",
@@ -5310,7 +5370,8 @@
    "umr": "TQ40L",
    "umr_displayed": "TQ40L",
    "description": "Zeit seit Driving cycle",
-   "word_base": 51746
+   "word_base": 51746,
+   "description_en": "Stopwatch: time since a driving cycle was recognised, for the trip"
   },
   {
    "name": "QVSB+1",
@@ -5320,7 +5381,8 @@
    "umr": "KGHQX",
    "umr_displayed": "KGHQX",
    "description": "Bereitstellung Luftsteuerwert",
-   "word_base": 52110
+   "word_base": 52110,
+   "description_en": "Air control value provision"
   },
   {
    "name": "TABGM",
@@ -5329,7 +5391,8 @@
    "size": 1,
    "umr": "TEMPQ4",
    "umr_displayed": "TEMPQ4",
-   "description": "modellierte Abgastemperatur"
+   "description": "modellierte Abgastemperatur",
+   "description_en": "Modelled exhaust gas temperature"
   },
   {
    "name": "TVLRH",
@@ -5338,7 +5401,8 @@
    "size": 1,
    "umr": "TQ10OF",
    "umr_displayed": "TQ10OF",
-   "description": "TV-Sperrzeit S1HK"
+   "description": "TV-Sperrzeit S1HK",
+   "description_en": "Changeover lock-out time from the post-catalyst sensor"
   },
   {
    "name": "TVLR",
@@ -5347,7 +5411,8 @@
    "size": 1,
    "umr": "TQ10OF",
    "umr_displayed": "TQ10OF",
-   "description": "Summe TV-Sperrzeiten"
+   "description": "Summe TV-Sperrzeiten",
+   "description_en": "Sum of the lambda controller changeover lock-out times"
   },
   {
    "name": "AVKAT",
@@ -5356,7 +5421,8 @@
    "size": 1,
    "umr": "FKT256",
    "umr_displayed": "FKT256",
-   "description": "Kat-Konvertierungsfaktor"
+   "description": "Kat-Konvertierungsfaktor",
+   "description_en": "Catalyst conversion factor: the post-cat over pre-cat sensor ratio"
   },
   {
    "name": "WDKPOT",
@@ -5365,7 +5431,8 @@
    "size": 1,
    "umr": "UQ5",
    "umr_displayed": "UQ5",
-   "description": "A/D-Wert DK-Poti"
+   "description": "A/D-Wert DK-Poti",
+   "description_en": "Throttle position sensor, raw A/D voltage"
   },
   {
    "name": "TEUKL",
@@ -5375,7 +5442,8 @@
    "umr": "TEQ32SL",
    "umr_displayed": "TEQ32S",
    "description": "UK Langzeitspeicher",
-   "word_base": 52392
+   "word_base": 52392,
+   "description_en": "Transient compensation, long-term store"
   },
   {
    "name": "TEUKK",
@@ -5385,7 +5453,8 @@
    "umr": "TEQ32SL",
    "umr_displayed": "TEQ32S",
    "description": "UK Kurzzeitspeicher",
-   "word_base": 52390
+   "word_base": 52390,
+   "description_en": "Transient compensation, short-term store"
   },
   {
    "name": "TEUKWM",
@@ -5395,7 +5464,8 @@
    "umr": "SIGTEQL",
    "umr_displayed": "SIGTEQL",
    "description": "UK DK-Anteil",
-   "word_base": 52410
+   "word_base": 52410,
+   "description_en": "Transient compensation, throttle-derived share"
   },
   {
    "name": "TEUKG",
@@ -5405,7 +5475,8 @@
    "umr": "TEQSL",
    "umr_displayed": "TEQS",
    "description": "UK effektives TE",
-   "word_base": 52394
+   "word_base": 52394,
+   "description_en": "Effective transient-compensation injection time"
   },
   {
    "name": "KATSPRZ",
@@ -5415,7 +5486,8 @@
    "umr": "TQ20L",
    "umr_displayed": "TQ20",
    "description": "Sperrzeit Filterstop Kat1",
-   "word_base": 51300
+   "word_base": 51300,
+   "description_en": "Filter-stop lock-out time, catalyst 1"
   },
   {
    "name": "TFPPULS",
@@ -5424,7 +5496,8 @@
    "size": 1,
    "umr": "TQ10",
    "umr_displayed": "TQ10",
-   "description": "Pulsdauer-Timer für Fast Pulse"
+   "description": "Pulsdauer-Timer für Fast Pulse",
+   "description_en": "Pulse duration timer for fast pulse operation"
   },
   {
    "name": "TIMALUST+1",
@@ -5434,7 +5507,8 @@
    "umr": "TQ20L",
    "umr_displayed": "TQ20L",
    "description": "ASE: Sperrzeit nach Start",
-   "word_base": 51608
+   "word_base": 51608,
+   "description_en": "Misfire detection: roughness lock-out timer after start"
   },
   {
    "name": "LURS+1",
@@ -5444,7 +5518,8 @@
    "umr": "LUQX",
    "umr_displayed": "LUQ",
    "description": "ASE: Laufunruhe-Ref.",
-   "word_base": 51614
+   "word_base": 51614,
+   "description_en": "Running roughness, reference value"
   },
   {
    "name": "LUMS+1",
@@ -5454,7 +5529,8 @@
    "umr": "LUQX",
    "umr_displayed": "LUQ",
    "description": "ASE: LU-Mittelwert",
-   "word_base": 51616
+   "word_base": 51616,
+   "description_en": "Running roughness, mean value"
   },
   {
    "name": "FZKATS",
@@ -5464,7 +5540,8 @@
    "umr": "DEZL",
    "umr_displayed": "DEZ",
    "description": "ASE: Aussetzer Summe",
-   "word_base": 51638
+   "word_base": 51638,
+   "description_en": "Catalyst-damaging misfire counter, sum over all cylinders"
   },
   {
    "name": "IVZKAT",
@@ -5474,7 +5551,8 @@
    "umr": "DEZL",
    "umr_displayed": "DEZ",
    "description": "Zaehler Statistik-Intervall",
-   "word_base": 51636
+   "word_base": 51636,
+   "description_en": "Block counter for the catalyst statistics interval"
   },
   {
    "name": "FLGASE",
@@ -5483,7 +5561,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Flags: ASE"
+   "description": "Flags: ASE",
+   "description_en": "Flag byte for misfire detection"
   },
   {
    "name": "STPTR",
@@ -5492,7 +5571,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Zustandspointer der DLDP"
+   "description": "Zustandspointer der DLDP",
+   "description_en": "State pointer of the tank leak diagnosis"
   },
   {
    "name": "FZABG1",
@@ -5502,7 +5582,8 @@
    "umr": "DEZL",
    "umr_displayed": "DEZ",
    "description": "Aussetzer-Zaehler Zyl.1",
-   "word_base": 51628
+   "word_base": 51628,
+   "description_en": "Emissions-relevant misfire counter, cylinder 1"
   },
   {
    "name": "FZABG2",
@@ -5512,7 +5593,8 @@
    "umr": "DEZL",
    "umr_displayed": "DEZ",
    "description": "Aussetzer-Zaehler Zyl.2",
-   "word_base": 51634
+   "word_base": 51634,
+   "description_en": "Emissions-relevant misfire counter, cylinder 2"
   },
   {
    "name": "FZABG3",
@@ -5522,7 +5604,8 @@
    "umr": "DEZL",
    "umr_displayed": "DEZ",
    "description": "Aussetzer-Zaehler Zyl.3",
-   "word_base": 51630
+   "word_base": 51630,
+   "description_en": "Emissions-relevant misfire counter, cylinder 3"
   },
   {
    "name": "FZABG4",
@@ -5532,7 +5615,8 @@
    "umr": "DEZL",
    "umr_displayed": "DEZ",
    "description": "Aussetzer-Zaehler Zyl.4",
-   "word_base": 51632
+   "word_base": 51632,
+   "description_en": "Emissions-relevant misfire counter, cylinder 4"
   },
   {
    "name": "FLGDLDP",
@@ -5541,7 +5625,8 @@
    "size": 1,
    "umr": "FLAG",
    "umr_displayed": "DEZ",
-   "description": "Flagregister 1 der DLDP"
+   "description": "Flagregister 1 der DLDP",
+   "description_en": "Flag register 1 of the tank leak diagnosis pump"
   },
   {
    "name": "FLGDLDP3",
@@ -5550,7 +5635,8 @@
    "size": 1,
    "umr": "FLAG",
    "umr_displayed": "DEZ",
-   "description": "Flagregister 3 der DLDP"
+   "description": "Flagregister 3 der DLDP",
+   "description_en": "Flag register 3 of the tank leak diagnosis pump"
   },
   {
    "name": "TKATM",
@@ -5559,7 +5645,8 @@
    "size": 1,
    "umr": "TEMPQ4",
    "umr_displayed": "TEMPQ4",
-   "description": "theor. Abgastemperatur NK"
+   "description": "theor. Abgastemperatur NK",
+   "description_en": "Theoretical post-catalyst exhaust gas temperature"
   },
   {
    "name": "ASA",
@@ -5569,7 +5656,8 @@
    "umr": "FAK2L",
    "umr_displayed": "FAK2L",
    "description": "Segmentzeitkorrektur Seg 1",
-   "word_base": 51604
+   "word_base": 51604,
+   "description_en": "Segment time correction, segment 1 (rpm-interpolated adaptation factor A)"
   },
   {
    "name": "ASA+1",
@@ -5578,7 +5666,8 @@
    "size": 1,
    "umr": "",
    "umr_displayed": "",
-   "description": ""
+   "description": "",
+   "description_en": "High byte of ASA, the segment 1 time correction"
   },
   {
    "name": "ASB",
@@ -5588,7 +5677,8 @@
    "umr": "FAK2L",
    "umr_displayed": "FAK2L",
    "description": "Segmentzeitkorrektur Seg 2",
-   "word_base": 51606
+   "word_base": 51606,
+   "description_en": "Segment time correction, segment 2 (rpm-interpolated adaptation factor B)"
   },
   {
    "name": "ASB+1",
@@ -5597,7 +5687,8 @@
    "size": 1,
    "umr": "",
    "umr_displayed": "",
-   "description": ""
+   "description": "",
+   "description_en": "High byte of ASB, the segment 2 time correction"
   },
   {
    "name": "FESB",
@@ -5607,7 +5698,8 @@
    "umr": "FAK2L",
    "umr_displayed": "FKT128",
    "description": "Einschwingabstand fuer ZAD",
-   "word_base": 49164
+   "word_base": 49164,
+   "description_en": "Settling distance for cylinder balancing adaptation, range 1"
   },
   {
    "name": "FLGHSV",
@@ -5616,7 +5708,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Flags: Sondenheizung VK"
+   "description": "Flags: Sondenheizung VK",
+   "description_en": "Flag byte for the pre-catalyst lambda sensor heater"
   },
   {
    "name": "FLGHSH",
@@ -5625,7 +5718,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Flags: Sondenheizung HK"
+   "description": "Flags: Sondenheizung HK",
+   "description_en": "Flag byte for the post-catalyst lambda sensor heater"
   },
   {
    "name": "FZKAT1",
@@ -5635,7 +5729,8 @@
    "umr": "DEZL",
    "umr_displayed": "DEZL",
    "description": "KAT-Aussetzerzähler Zylinder 1",
-   "word_base": 51640
+   "word_base": 51640,
+   "description_en": "Catalyst-damaging misfire counter, cylinder 1"
   },
   {
    "name": "FZKAT2",
@@ -5645,7 +5740,8 @@
    "umr": "DEZL",
    "umr_displayed": "DEZL",
    "description": "KAT-Aussetzerzähler Zylinder 2",
-   "word_base": 51646
+   "word_base": 51646,
+   "description_en": "Catalyst-damaging misfire counter, cylinder 2"
   },
   {
    "name": "FZKAT3",
@@ -5655,7 +5751,8 @@
    "umr": "DEZL",
    "umr_displayed": "DEZL",
    "description": "KAT-Aussetzerzähler Zylinder 3",
-   "word_base": 51642
+   "word_base": 51642,
+   "description_en": "Catalyst-damaging misfire counter, cylinder 3"
   },
   {
    "name": "FZKAT4",
@@ -5665,7 +5762,8 @@
    "umr": "DEZL",
    "umr_displayed": "DEZL",
    "description": "KAT-Aussetzerzähler Zylinder 4",
-   "word_base": 51644
+   "word_base": 51644,
+   "description_en": "Catalyst-damaging misfire counter, cylinder 4"
   },
   {
    "name": "TI1",
@@ -5675,7 +5773,8 @@
    "umr": "TEQL",
    "umr_displayed": "TEQL",
    "description": "Einspritzzeit Bank1",
-   "word_base": 1026
+   "word_base": 1026,
+   "description_en": "Commanded injection time, bank 1. Includes the injector opening correction"
   },
   {
    "name": "TI1+1",
@@ -5684,7 +5783,8 @@
    "size": 1,
    "umr": "",
    "umr_displayed": "",
-   "description": ""
+   "description": "",
+   "description_en": "High byte of TI1, the bank 1 injection time"
   },
   {
    "name": "XSUMSPV",
@@ -5693,7 +5793,8 @@
    "size": 1,
    "umr": "ZWNEG",
    "umr_displayed": "ZWNEG",
-   "description": "Summenspätverstellung"
+   "description": "Summenspätverstellung",
+   "description_en": "Total knock retard summed across all cylinders"
   },
   {
    "name": "F_KR0",
@@ -5702,7 +5803,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Flagregister KR"
+   "description": "Flagregister KR",
+   "description_en": "Flag register for knock control"
   },
   {
    "name": "KLOPFB",
@@ -5711,7 +5813,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Flagregister KR"
+   "description": "Flagregister KR",
+   "description_en": "Flag register for knock control"
   },
   {
    "name": "DDRZ",
@@ -5720,7 +5823,8 @@
    "size": 1,
    "umr": "NGRDP",
    "umr_displayed": "NGRDP",
-   "description": "Delta-Drehzahl"
+   "description": "Delta-Drehzahl",
+   "description_en": "Rate of change of engine speed"
   },
   {
    "name": "FZW+1",
@@ -5730,7 +5834,8 @@
    "umr": "AFAK2L",
    "umr_displayed": "AFAK2",
    "description": "Einspritzfaktor ZW, Kat.schutz",
-   "word_base": 51758
+   "word_base": 51758,
+   "description_en": "Injection factor from ignition angle, for catalyst protection"
   },
   {
    "name": "TVAGR",
@@ -5739,7 +5844,8 @@
    "size": 1,
    "umr": "FKT256",
    "umr_displayed": "FKT256",
-   "description": "AGR-Tastverhaeltnis"
+   "description": "AGR-Tastverhaeltnis",
+   "description_en": "Exhaust gas recirculation valve duty cycle"
   },
   {
    "name": "FWKH",
@@ -5748,7 +5854,8 @@
    "size": 1,
    "umr": "FKT256",
    "umr_displayed": "FKT256",
-   "description": "Winkel-Faktor Katheizen"
+   "description": "Winkel-Faktor Katheizen",
+   "description_en": "Ignition angle factor for catalyst heating"
   },
   {
    "name": "FEKH",
@@ -5757,7 +5864,8 @@
    "size": 1,
    "umr": "FKT256",
    "umr_displayed": "FKT256",
-   "description": "Einspritz-Faktor Katheizen"
+   "description": "Einspritz-Faktor Katheizen",
+   "description_en": "Injection factor for catalyst heating"
   },
   {
    "name": "LUTS_AP",
@@ -5766,7 +5874,8 @@
    "size": 1,
    "umr": "LUQ",
    "umr_displayed": "LUQ",
-   "description": "Laufunruhe-Monitor"
+   "description": "Laufunruhe-Monitor",
+   "description_en": "Running roughness term, monitor copy"
   },
   {
    "name": "LURS_AP",
@@ -5775,7 +5884,8 @@
    "size": 1,
    "umr": "LUQ",
    "umr_displayed": "LUQ",
-   "description": "Laufunruhe Referenzwert"
+   "description": "Laufunruhe Referenzwert",
+   "description_en": "Running roughness reference value, monitor copy"
   },
   {
    "name": "IMLPR",
@@ -5784,7 +5894,8 @@
    "size": 1,
    "umr": "FKT256",
    "umr_displayed": "FKT256",
-   "description": "IMLATM/MLSUS (Filterw.)"
+   "description": "IMLATM/MLSUS (Filterw.)",
+   "description_en": "Ratio IMLATM over MLSUS, filtered"
   },
   {
    "name": "TVM",
@@ -5793,7 +5904,8 @@
    "size": 1,
    "umr": "PCENT",
    "umr_displayed": "PCENT",
-   "description": "LDR-Ausgabe-Tastverhältnis"
+   "description": "LDR-Ausgabe-Tastverhältnis",
+   "description_en": "Boost control output duty cycle -- what drives the N75 valve"
   },
   {
    "name": "LDSHK",
@@ -5802,7 +5914,8 @@
    "size": 1,
    "umr": "TIQ",
    "umr_displayed": "TIQ",
-   "description": "TL-Sollwert nach KFLDSHK"
+   "description": "TL-Sollwert nach KFLDSHK",
+   "description_en": "Boost control load setpoint, from map KFLDSHK"
   },
   {
    "name": "LDSKF",
@@ -5811,7 +5924,8 @@
    "size": 1,
    "umr": "TIQ",
    "umr_displayed": "TIQ",
-   "description": "TL-Sollwert gefiltert"
+   "description": "TL-Sollwert gefiltert",
+   "description_en": "Boost control load setpoint, filtered"
   },
   {
    "name": "LDEF",
@@ -5820,7 +5934,8 @@
    "size": 1,
    "umr": "TIQ",
    "umr_displayed": "TIQ",
-   "description": "Luftmassenregelung Betrag Abweichung"
+   "description": "Luftmassenregelung Betrag Abweichung",
+   "description_en": "Air mass control: magnitude of the deviation"
   },
   {
    "name": "DTVLD",
@@ -5829,7 +5944,8 @@
    "size": 1,
    "umr": "PCENT",
    "umr_displayed": "PCENT",
-   "description": "LDR-LD-Reglerausgang"
+   "description": "LDR-LD-Reglerausgang",
+   "description_en": "Boost control PID regulator output"
   },
   {
    "name": "LDTVK",
@@ -5838,7 +5954,8 @@
    "size": 1,
    "umr": "PCENT",
    "umr_displayed": "PCENT",
-   "description": "LDR-TV-Vorsteuerwert"
+   "description": "LDR-TV-Vorsteuerwert",
+   "description_en": "Boost control duty-cycle pre-control value, without adaptation"
   },
   {
    "name": "FTVLDA",
@@ -5847,7 +5964,8 @@
    "size": 1,
    "umr": "FKT128",
    "umr_displayed": "FKT128",
-   "description": "LDR aktueller Adaptionswert"
+   "description": "LDR aktueller Adaptionswert",
+   "description_en": "Boost control adaptation factor, current value"
   },
   {
    "name": "TVLDVA",
@@ -5856,7 +5974,8 @@
    "size": 1,
    "umr": "PCENT",
    "umr_displayed": "PCENT",
-   "description": "LDR-Vorsteuerwert mit FTVLDA"
+   "description": "LDR-Vorsteuerwert mit FTVLDA",
+   "description_en": "Boost control pre-control duty cycle including the adaptation FTVLDA"
   },
   {
    "name": "FNKH",
@@ -5865,7 +5984,8 @@
    "size": 1,
    "umr": "FKT256",
    "umr_displayed": "FKT256",
-   "description": "Drehzahl-Faktor-Katheizen"
+   "description": "Drehzahl-Faktor-Katheizen",
+   "description_en": "Engine speed factor for catalyst heating"
   },
   {
    "name": "DTVKAI",
@@ -5874,7 +5994,8 @@
    "size": 1,
    "umr": "TQ100FP",
    "umr_displayed": "TQ100FP",
-   "description": "Delta-TV für Kat ausräumen"
+   "description": "Delta-TV für Kat ausräumen",
+   "description_en": "Delta duty cycle for clearing the catalyst, from curve DTVKAML"
   },
   {
    "name": "TZLSATV+1",
@@ -5884,7 +6005,8 @@
    "umr": "TQ10L",
    "umr_displayed": "TQ10L",
    "description": "Zeitzähler Zyklus-Flag Z_LATV",
-   "word_base": 51286
+   "word_base": 51286,
+   "description_en": "Time counter for cycle flag Z_LATV"
   },
   {
    "name": "TPSVKMF",
@@ -5893,7 +6015,8 @@
    "size": 1,
    "umr": "",
    "umr_displayed": "",
-   "description": ""
+   "description": "",
+   "description_en": "Filtered period duration, pre-catalyst lambda sensor"
   },
   {
    "name": "TPSVKMF+1",
@@ -5903,7 +6026,8 @@
    "umr": "TQ10L",
    "umr_displayed": "TQ10L",
    "description": "Gefilterte Periodendauer",
-   "word_base": 51284
+   "word_base": 51284,
+   "description_en": "Filtered period duration, pre-catalyst lambda sensor"
   },
   {
    "name": "ZLSATP",
@@ -5912,7 +6036,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Periodenz. Zyklus-Flag Z_LATP"
+   "description": "Periodenz. Zyklus-Flag Z_LATP",
+   "description_en": "Period counter for cycle flag Z_LATP"
   },
   {
    "name": "XBFLSA",
@@ -5921,7 +6046,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Flagbyte DLSA Abgasstrang 1"
+   "description": "Flagbyte DLSA Abgasstrang 1",
+   "description_en": "Flag byte for lambda sensor ageing diagnosis, exhaust bank 1"
   },
   {
    "name": "XBFLSAG",
@@ -5930,7 +6056,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Globales Flagbyte DLSA"
+   "description": "Globales Flagbyte DLSA",
+   "description_en": "Global flag byte for lambda sensor ageing diagnosis"
   },
   {
    "name": "TLROH",
@@ -5939,7 +6066,8 @@
    "size": 1,
    "umr": "TIQ",
    "umr_displayed": "TIQ",
-   "description": "Lastrohwert (ungefiltert)"
+   "description": "Lastrohwert (ungefiltert)",
+   "description_en": "Load signal, raw and unfiltered"
   },
   {
    "name": "XDWDK",
@@ -5948,7 +6076,8 @@
    "size": 1,
    "umr": "WDK",
    "umr_displayed": "WDK",
-   "description": "pos. DKPOT-Aenderung"
+   "description": "pos. DKPOT-Aenderung",
+   "description_en": "Positive rate of change of throttle angle"
   },
   {
    "name": "XDWDKN",
@@ -5957,7 +6086,8 @@
    "size": 1,
    "umr": "WDK",
    "umr_displayed": "WDK",
-   "description": "neg. DKPOT-Aenderung"
+   "description": "neg. DKPOT-Aenderung",
+   "description_en": "Negative rate of change of throttle angle"
   },
   {
    "name": "FST+1",
@@ -5967,7 +6097,8 @@
    "umr": "FAK32L",
    "umr_displayed": "FKT8",
    "description": "Startfaktor Einspritzung",
-   "word_base": 51750
+   "word_base": 51750,
+   "description_en": "Cranking enrichment factor for injection"
   },
   {
    "name": "FNS+1",
@@ -5977,7 +6108,8 @@
    "umr": "AFAK2L",
    "umr_displayed": "AFAK2",
    "description": "Nachstartfaktor Einspritzung",
-   "word_base": 52206
+   "word_base": 52206,
+   "description_en": "Post-start enrichment factor for injection"
   },
   {
    "name": "WKOR+1",
@@ -5987,7 +6119,8 @@
    "umr": "AFAK2L",
    "umr_displayed": "AFAK2",
    "description": "Warmlauffaktor Einspritzung",
-   "word_base": 52548
+   "word_base": 52548,
+   "description_en": "Warm-up enrichment factor for injection"
   },
   {
    "name": "DVL_LLMN",
@@ -5996,7 +6129,8 @@
    "size": 1,
    "umr": "UQ5",
    "umr_displayed": "UQ5",
-   "description": "DVL-Minimalanschlag"
+   "description": "DVL-Minimalanschlag",
+   "description_en": "Idle actuator minimum stop voltage"
   },
   {
    "name": "DVL_LLMX",
@@ -6005,7 +6139,8 @@
    "size": 1,
    "umr": "UQ5",
    "umr_displayed": "UQ5",
-   "description": "DVL-Maximalanschlag"
+   "description": "DVL-Maximalanschlag",
+   "description_en": "Idle actuator maximum stop voltage"
   },
   {
    "name": "DVL_NL",
@@ -6014,7 +6149,8 @@
    "size": 1,
    "umr": "UQ5",
    "umr_displayed": "UQ5",
-   "description": "DVL-Notluftposition"
+   "description": "DVL-Notluftposition",
+   "description_en": "Idle actuator limp-home air position voltage"
   },
   {
    "name": "DVL_IST",
@@ -6024,7 +6160,8 @@
    "umr": "DEZL",
    "umr_displayed": "UQ5",
    "description": "DVL-Istwert",
-   "word_base": 52043
+   "word_base": 52043,
+   "description_en": "Idle actuator position, actual value"
   },
   {
    "name": "DVL_SOL",
@@ -6034,7 +6171,8 @@
    "umr": "DEZL",
    "umr_displayed": "UQ5",
    "description": "DVL-Sollwert",
-   "word_base": 52023
+   "word_base": 52023,
+   "description_en": "Idle actuator position, setpoint"
   },
   {
    "name": "FLGDVL",
@@ -6043,7 +6181,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Flagregister DVL"
+   "description": "Flagregister DVL",
+   "description_en": "Internal flag register of the idle actuator position loop"
   },
   {
    "name": "IWERT+1",
@@ -6053,7 +6192,8 @@
    "umr": "DEZL",
    "umr_displayed": "DEZ",
    "description": "DVL-I-Anteil Lageregler",
-   "word_base": 52048
+   "word_base": 52048,
+   "description_en": "Integral term of the idle actuator position controller"
   },
   {
    "name": "TNST+1",
@@ -6063,7 +6203,8 @@
    "umr": "TQ10L",
    "umr_displayed": "TQ10L",
    "description": "Zeitzähler nach Startende",
-   "word_base": 51544
+   "word_base": 51544,
+   "description_en": "Time counter since the end of start"
   },
   {
    "name": "ZDSLSE",
@@ -6073,7 +6214,8 @@
    "umr": "TQ10L",
    "umr_displayed": "TQ10L",
    "description": "Zeitzähler Einschaltverz.",
-   "word_base": 51736
+   "word_base": 51736,
+   "description_en": "Time counter for the secondary air diagnosis switch-on delay"
   },
   {
    "name": "ZDSLSI",
@@ -6083,7 +6225,8 @@
    "umr": "TQ10L",
    "umr_displayed": "TQ10L",
    "description": "Zeitzähler Intervall",
-   "word_base": 51738
+   "word_base": 51738,
+   "description_en": "Time counter for the interval between two secondary air samples"
   },
   {
    "name": "ZMSLS",
@@ -6092,7 +6235,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Anzahl erfolgter Tests"
+   "description": "Anzahl erfolgter Tests",
+   "description_en": "Number of completed tests in the secondary air system diagnosis"
   },
   {
    "name": "ZIOSLS",
@@ -6101,7 +6245,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Anzahl der i. O.-Tests"
+   "description": "Anzahl der i. O.-Tests",
+   "description_en": "Number of passed tests in the secondary air system diagnosis"
   },
   {
    "name": "TLDPP",
@@ -6111,7 +6256,8 @@
    "umr": "TQ10L",
    "umr_displayed": "TQ10L",
    "description": "Gemess. Per.dauer bei Leckdia.",
-   "word_base": 49742
+   "word_base": 49742,
+   "description_en": "Measured period duration during the tank leak diagnosis"
   },
   {
    "name": "TLDPP+1",
@@ -6121,7 +6267,8 @@
    "umr": "TQ10L",
    "umr_displayed": "TQ10L",
    "description": "\" \" \" \"",
-   "word_base": 49742
+   "word_base": 49742,
+   "description_en": "Measured period duration during the tank leak diagnosis, continued"
   },
   {
    "name": "TLDPPMW",
@@ -6131,7 +6278,8 @@
    "umr": "TQ10L",
    "umr_displayed": "TQ10L",
    "description": "Periodendauermittelwert DLDP",
-   "word_base": 51700
+   "word_base": 51700,
+   "description_en": "Rolling mean of the period duration during the tank leak diagnosis"
   },
   {
    "name": "TLDPPMW+1",
@@ -6141,7 +6289,8 @@
    "umr": "TQ10L",
    "umr_displayed": "TQ10L",
    "description": "\" \"",
-   "word_base": 51700
+   "word_base": 51700,
+   "description_en": "Rolling mean of the leak diagnosis period duration, continued"
   },
   {
    "name": "PTV",
@@ -6150,7 +6299,8 @@
    "size": 1,
    "umr": "TQ10S",
    "umr_displayed": "TQ10S",
-   "description": "Proportionalanteil der LRHK Bank1"
+   "description": "Proportionalanteil der LRHK Bank1",
+   "description_en": "Proportional term of post-catalyst lambda control, bank 1"
   },
   {
    "name": "FRSLSA",
@@ -6159,7 +6309,8 @@
    "size": 1,
    "umr": "FAK2",
    "umr_displayed": "FAK2",
-   "description": "Regelfaktor zu Beginn der Dia."
+   "description": "Regelfaktor zu Beginn der Dia.",
+   "description_en": "Lambda control factor reference taken at the start of the SLS diagnosis"
   },
   {
    "name": "PTV2",
@@ -6168,7 +6319,8 @@
    "size": 1,
    "umr": "TQ10S",
    "umr_displayed": "TQ10S",
-   "description": "Proportionalanteil der LRHK Bank2"
+   "description": "Proportionalanteil der LRHK Bank2",
+   "description_en": "Proportional term of post-catalyst lambda control, bank 2"
   },
   {
    "name": "XTDSLP",
@@ -6177,7 +6329,8 @@
    "size": 1,
    "umr": "TQ100",
    "umr_displayed": "TQ100",
-   "description": "Zeitzähler für TDSLP"
+   "description": "Zeitzähler für TDSLP",
+   "description_en": "Time counter for TDSLP"
   },
   {
    "name": "FTEFVA+1",
@@ -6187,7 +6340,8 @@
    "umr": "FAK05L",
    "umr_displayed": "FKT512",
    "description": "Spuelrate TEA",
-   "word_base": 52306
+   "word_base": 52306,
+   "description_en": "Purge rate used by the injection-time adaptation"
   },
   {
    "name": "VFZ",
@@ -6196,7 +6350,8 @@
    "size": 1,
    "umr": "VQ",
    "umr_displayed": "VQ",
-   "description": "Fahrzeug-Geschwindigkeit"
+   "description": "Fahrzeug-Geschwindigkeit",
+   "description_en": "Vehicle speed"
   },
   {
    "name": "TLWK",
@@ -6205,7 +6360,8 @@
    "size": 1,
    "umr": "TIQ",
    "umr_displayed": "TIQ",
-   "description": "kor. tlw-Nebenlastsignal"
+   "description": "kor. tlw-Nebenlastsignal",
+   "description_en": "Corrected throttle-derived secondary load signal"
   },
   {
    "name": "TLW",
@@ -6214,7 +6370,8 @@
    "size": 1,
    "umr": "TIQ",
    "umr_displayed": "TIQ",
-   "description": "Kennfeldwert KFTLW (alpha/n)"
+   "description": "Kennfeldwert KFTLW (alpha/n)",
+   "description_en": "Throttle-derived load from map KFTLW (alpha/n)"
   },
   {
    "name": "ZDKHAX+1",
@@ -6224,7 +6381,8 @@
    "umr": "THAINTLG",
    "umr_displayed": "THAINTLG",
    "description": "Zeitkonst. f. Integr. FDKHA",
-   "word_base": 51546
+   "word_base": 51546,
+   "description_en": "Time constant for the altitude adaptation integrator FDKHA"
   },
   {
    "name": "WLLR",
@@ -6233,7 +6391,8 @@
    "size": 1,
    "umr": "ZWVEK",
    "umr_displayed": "ZWVEK",
-   "description": "Winkel LLR-Regelabweichung"
+   "description": "Winkel LLR-Regelabweichung",
+   "description_en": "Ignition angle contribution from the idle speed controller deviation"
   },
   {
    "name": "IXKKFM",
@@ -6242,7 +6401,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Index fuer Filtermatrix"
+   "description": "Index fuer Filtermatrix",
+   "description_en": "Index into the filter matrix"
   },
   {
    "name": "DAV",
@@ -6251,7 +6411,8 @@
    "size": 1,
    "umr": "SIG05",
    "umr_displayed": "SIG05",
-   "description": "Grenzwert Abstand"
+   "description": "Grenzwert Abstand",
+   "description_en": "Limit value distance"
   },
   {
    "name": "FSKKR",
@@ -6260,7 +6421,8 @@
    "size": 1,
    "umr": "FKT256",
    "umr_displayed": "FKT256",
-   "description": "akt.Wert LDR-Sollwertkorrektur"
+   "description": "akt.Wert LDR-Sollwertkorrektur",
+   "description_en": "Current boost setpoint correction applied by knock control"
   },
   {
    "name": "WF+1",
@@ -6270,7 +6432,8 @@
    "umr": "TEQ32L",
    "umr_displayed": "TEQ32L",
    "description": "abs. Gesamt-Wandfilmmasse",
-   "word_base": 52380
+   "word_base": 52380,
+   "description_en": "Current absolute total wall-film mass"
   },
   {
    "name": "FDKHA+1",
@@ -6280,7 +6443,8 @@
    "umr": "FAK2L",
    "umr_displayed": "FKT128",
    "description": "Faktor Hoehenadaption",
-   "word_base": 49156
+   "word_base": 49156,
+   "description_en": "Altitude adaptation factor"
   },
   {
    "name": "FRA2+1",
@@ -6290,7 +6454,8 @@
    "umr": "FAK2L",
    "umr_displayed": "FKT128",
    "description": "LR-Adapt. mult. Faktor Bank2",
-   "word_base": 51358
+   "word_base": 51358,
+   "description_en": "Multiplicative lambda adaptation, range 2, bank 2"
   },
   {
    "name": "TRA2+1",
@@ -6300,7 +6465,8 @@
    "umr": "TEQSL",
    "umr_displayed": "TEQS",
    "description": "LR-Adapt. add. Faktor Bank2",
-   "word_base": 51362
+   "word_base": 51362,
+   "description_en": "Time-dependent additive lambda adaptation, range 1, bank 2"
   },
   {
    "name": "TRADTV2+1",
@@ -6310,7 +6476,8 @@
    "umr": "TEQSL",
    "umr_displayed": "TEQS",
    "description": "LR-Adapt. add. Faktor gesamt Bank2",
-   "word_base": 51368
+   "word_base": 51368,
+   "description_en": "Total additive lambda adaptation, ranges 1 and 3, bank 2"
   },
   {
    "name": "DZWLDY",
@@ -6319,7 +6486,8 @@
    "size": 1,
    "umr": "ZWNEG",
    "umr_displayed": "ZWNEG",
-   "description": "Delta-ZW bei Lastdynamik"
+   "description": "Delta-ZW bei Lastdynamik",
+   "description_en": "Ignition angle correction for load dynamics"
   },
   {
    "name": "KKAGW",
@@ -6328,7 +6496,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Anz. Grenzwert-Ueberschr."
+   "description": "Anz. Grenzwert-Ueberschr.",
+   "description_en": "Number of limit value exceedances"
   },
   {
    "name": "F_LLR",
@@ -6337,7 +6506,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Flagregister LL-Regelung"
+   "description": "Flagregister LL-Regelung",
+   "description_en": "Flag register for idle speed control"
   },
   {
    "name": "KATRDYZ+1",
@@ -6347,7 +6517,8 @@
    "umr": "TQ20L",
    "umr_displayed": "TQ5120",
    "description": "Zeitzaehler Readiness-Code",
-   "word_base": 51298
+   "word_base": 51298,
+   "description_en": "Time counter for the readiness code"
   },
   {
    "name": "ERFLG0",
@@ -6356,7 +6527,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Error-Flagbyte Digitalteil"
+   "description": "Error-Flagbyte Digitalteil",
+   "description_en": "Error flag byte: digital section"
   },
   {
    "name": "ERFLG1",
@@ -6365,7 +6537,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Error-Flagbyte Temperatur-Sensoren"
+   "description": "Error-Flagbyte Temperatur-Sensoren",
+   "description_en": "Error flag byte: temperature sensors"
   },
   {
    "name": "ERFLG2",
@@ -6374,7 +6547,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Error-Flagbyte restliche AD-Kanäle"
+   "description": "Error-Flagbyte restliche AD-Kanäle",
+   "description_en": "Error flag byte: the remaining A/D channels"
   },
   {
    "name": "ERFLG3",
@@ -6383,7 +6557,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Error-Flagbyte Lambdaregelung"
+   "description": "Error-Flagbyte Lambdaregelung",
+   "description_en": "Error flag byte: lambda control"
   },
   {
    "name": "ERFLG4",
@@ -6392,7 +6567,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Error-Flagbyte Endstufen 1"
+   "description": "Error-Flagbyte Endstufen 1",
+   "description_en": "Error flag byte: output stages 1 (MJ44 driver diagnosis)"
   },
   {
    "name": "ERFLG5",
@@ -6401,7 +6577,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Error-Flagbyte Endstufen 2"
+   "description": "Error-Flagbyte Endstufen 2",
+   "description_en": "Error flag byte: output stages 2 (CA3272 driver diagnosis)"
   },
   {
    "name": "ERFLG6",
@@ -6410,7 +6587,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Error-Flagbyte LLS-Endstufen"
+   "description": "Error-Flagbyte LLS-Endstufen",
+   "description_en": "Error flag byte: idle actuator output stages"
   },
   {
    "name": "ERFLG7",
@@ -6419,7 +6597,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Error-Flagbyte EV-Endstufen"
+   "description": "Error-Flagbyte EV-Endstufen",
+   "description_en": "Error flag byte: injector output stages"
   },
   {
    "name": "ERFLG8",
@@ -6428,7 +6607,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Error-Flagbyte Impuls-Eingänge"
+   "description": "Error-Flagbyte Impuls-Eingänge",
+   "description_en": "Error flag byte: pulse inputs"
   },
   {
    "name": "ERFLG9",
@@ -6437,7 +6617,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Error-Flagbyte Schalter-Eingänge"
+   "description": "Error-Flagbyte Schalter-Eingänge",
+   "description_en": "Error flag byte: switch inputs"
   },
   {
    "name": "ERFLGA",
@@ -6446,7 +6627,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Error-Flagbyte Lambdasonden"
+   "description": "Error-Flagbyte Lambdasonden",
+   "description_en": "Error flag byte: lambda sensors"
   },
   {
    "name": "ERFLGB",
@@ -6455,7 +6637,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Error-Flagbyte Sondentechnik"
+   "description": "Error-Flagbyte Sondentechnik",
+   "description_en": "Error flag byte: lambda sensor circuitry"
   },
   {
    "name": "ERFLGC",
@@ -6464,7 +6647,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Error-Flagbyte Klopfregelung"
+   "description": "Error-Flagbyte Klopfregelung",
+   "description_en": "Error flag byte: knock control"
   },
   {
    "name": "ERFLGD",
@@ -6473,7 +6657,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Error-Flagbyte katschäd. Aussetzer"
+   "description": "Error-Flagbyte katschäd. Aussetzer",
+   "description_en": "Error flag byte: catalyst-damaging misfires"
   },
   {
    "name": "ERFLGE",
@@ -6482,7 +6667,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Error-Flagbyte Abg. Aussetzer"
+   "description": "Error-Flagbyte Abg. Aussetzer",
+   "description_en": "Error flag byte: emissions-relevant misfires"
   },
   {
    "name": "ERFLGF",
@@ -6491,7 +6677,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Error-Flagbyte OBDII-Diagnose"
+   "description": "Error-Flagbyte OBDII-Diagnose",
+   "description_en": "Error flag byte: OBD-II diagnosis"
   },
   {
    "name": "ZYFLG0",
@@ -6500,7 +6687,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Zyklus-Flagbyte Digitalteil"
+   "description": "Zyklus-Flagbyte Digitalteil",
+   "description_en": "Cycle flag byte: digital section"
   },
   {
    "name": "ZYFLG1",
@@ -6509,7 +6697,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Zyklus-Flagbyte Temperatur-Sensoren"
+   "description": "Zyklus-Flagbyte Temperatur-Sensoren",
+   "description_en": "Cycle flag byte: temperature sensors"
   },
   {
    "name": "ZYFLG2",
@@ -6518,7 +6707,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Zyklus-Flagbyte restl. AD-Kanäle"
+   "description": "Zyklus-Flagbyte restl. AD-Kanäle",
+   "description_en": "Cycle flag byte: the remaining A/D channels"
   },
   {
    "name": "ZYFLG3",
@@ -6527,7 +6717,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Zyklus-Flagbyte Lambdaregelung"
+   "description": "Zyklus-Flagbyte Lambdaregelung",
+   "description_en": "Cycle flag byte: lambda control"
   },
   {
    "name": "ZYFLG4",
@@ -6536,7 +6727,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Zyklus-Flagbyte Endstufen 1"
+   "description": "Zyklus-Flagbyte Endstufen 1",
+   "description_en": "Cycle flag byte: output stages 1"
   },
   {
    "name": "ZYFLG5",
@@ -6545,7 +6737,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Zyklus-Flagbyte Endstufen 2"
+   "description": "Zyklus-Flagbyte Endstufen 2",
+   "description_en": "Cycle flag byte: output stages 2"
   },
   {
    "name": "ZYFLG6",
@@ -6554,7 +6747,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Zyklus-Flagbyte LLS-Endstufen"
+   "description": "Zyklus-Flagbyte LLS-Endstufen",
+   "description_en": "Cycle flag byte: idle actuator output stages"
   },
   {
    "name": "ZYFLG7",
@@ -6563,7 +6757,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Zyklus-Flagbyte EV-Endstufen"
+   "description": "Zyklus-Flagbyte EV-Endstufen",
+   "description_en": "Cycle flag byte: injector output stages"
   },
   {
    "name": "ZYFLG8",
@@ -6572,7 +6767,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Zyklus-Flagbyte Impuls-Eingänge"
+   "description": "Zyklus-Flagbyte Impuls-Eingänge",
+   "description_en": "Cycle flag byte: pulse inputs"
   },
   {
    "name": "ZYFLG9",
@@ -6581,7 +6777,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Zyklus-Flagbyte Schalter-Eingänge"
+   "description": "Zyklus-Flagbyte Schalter-Eingänge",
+   "description_en": "Cycle flag byte: switch inputs"
   },
   {
    "name": "ZYFLGA",
@@ -6590,7 +6787,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Zyklus-Flagbyte Lambdasonden"
+   "description": "Zyklus-Flagbyte Lambdasonden",
+   "description_en": "Cycle flag byte: lambda sensors"
   },
   {
    "name": "ZYFLGB",
@@ -6599,7 +6797,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Zyklus-Flagbyte Sondentechnik"
+   "description": "Zyklus-Flagbyte Sondentechnik",
+   "description_en": "Cycle flag byte: lambda sensor circuitry"
   },
   {
    "name": "ZYFLGC",
@@ -6608,7 +6807,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Zyklus-Flagbyte Klopfregelung"
+   "description": "Zyklus-Flagbyte Klopfregelung",
+   "description_en": "Cycle flag byte: knock control"
   },
   {
    "name": "ZYFLGD",
@@ -6617,7 +6817,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Zyklus-Flagbyte katschäd. Aussetzer"
+   "description": "Zyklus-Flagbyte katschäd. Aussetzer",
+   "description_en": "Cycle flag byte: catalyst-damaging misfires"
   },
   {
    "name": "ZYFLGE",
@@ -6626,7 +6827,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Zyklus-Flagbyte Abg. Aussetzer"
+   "description": "Zyklus-Flagbyte Abg. Aussetzer",
+   "description_en": "Cycle flag byte: emissions-relevant misfires"
   },
   {
    "name": "ZYFLGF",
@@ -6635,7 +6837,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Zyklus-Flagbyte OBDII-Diagnose"
+   "description": "Zyklus-Flagbyte OBDII-Diagnose",
+   "description_en": "Cycle flag byte: OBD-II diagnosis"
   },
   {
    "name": "TIMTRPST+1",
@@ -6645,7 +6848,8 @@
    "umr": "TQ40L",
    "umr_displayed": "TQ40L",
    "description": "Zeit seit Start für Trip",
-   "word_base": 51742
+   "word_base": 51742,
+   "description_en": "Stopwatch: time since start, for the trip"
   },
   {
    "name": "OBDSTAT",
@@ -6654,7 +6858,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Flagbyte OBD-Status"
+   "description": "Flagbyte OBD-Status",
+   "description_en": "Flag byte: OBD status"
   },
   {
    "name": "ERFLGC_",
@@ -6663,7 +6868,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Error-Flagbyte Klopfregelung"
+   "description": "Error-Flagbyte Klopfregelung",
+   "description_en": "Error flag byte: knock control diagnosis, high byte"
   },
   {
    "name": "ZYFLGC_",
@@ -6672,7 +6878,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Zyklus-Flagbyte Klopfregelung"
+   "description": "Zyklus-Flagbyte Klopfregelung",
+   "description_en": "Cycle flag byte: knock control, high byte"
   },
   {
    "name": "ERFLGD_",
@@ -6681,7 +6888,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Error-Flagbyte katsch. Aussetzer"
+   "description": "Error-Flagbyte katsch. Aussetzer",
+   "description_en": "Error flag byte: catalyst-damaging misfires, high byte"
   },
   {
    "name": "ZYFLGD_",
@@ -6690,7 +6898,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Zyklus-Flagbyte katsch. Aussetzer"
+   "description": "Zyklus-Flagbyte katsch. Aussetzer",
+   "description_en": "Cycle flag byte: catalyst-damaging misfires, high byte"
   },
   {
    "name": "ERFLGE_",
@@ -6699,7 +6908,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Error-Flagbyte Abg. Aussetzer"
+   "description": "Error-Flagbyte Abg. Aussetzer",
+   "description_en": "Error flag byte: emissions-relevant misfires, high byte"
   },
   {
    "name": "ZYFLGE_",
@@ -6708,7 +6918,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Zyklus-Flagbyte Abg. Aussetzer"
+   "description": "Zyklus-Flagbyte Abg. Aussetzer",
+   "description_en": "Cycle flag byte: emissions-relevant misfires, high byte"
   },
   {
    "name": "ERFLGF_",
@@ -6717,7 +6928,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Error-Flagbyte OBDII-Diagnose"
+   "description": "Error-Flagbyte OBDII-Diagnose",
+   "description_en": "Error flag byte: OBD-II diagnosis, high byte"
   },
   {
    "name": "ZYFLGF_",
@@ -6726,7 +6938,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Zyklus-Flagbyte OBDII-Diagnose"
+   "description": "Zyklus-Flagbyte OBDII-Diagnose",
+   "description_en": "Cycle flag byte: OBD-II diagnosis, high byte"
   },
   {
    "name": "READY",
@@ -6735,7 +6948,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Readiness-Byte"
+   "description": "Readiness-Byte",
+   "description_en": "Readiness status byte"
   },
   {
    "name": "TEPHC+1",
@@ -6745,7 +6959,8 @@
    "umr": "TQ100L",
    "umr_displayed": "TQ100L",
    "description": "Zeitzähler für Spül-/Lernphase",
-   "word_base": 52314
+   "word_base": 52314,
+   "description_en": "Time counter for the purge and learning phase"
   },
   {
    "name": "XFLGDVL",
@@ -6754,7 +6969,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Flagregister für DVL-Adaption"
+   "description": "Flagregister für DVL-Adaption",
+   "description_en": "Flag register for the idle actuator adaptation"
   },
   {
    "name": "XFLGDVL2",
@@ -6763,7 +6979,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Flagregister für DVL-Adaption"
+   "description": "Flagregister für DVL-Adaption",
+   "description_en": "Flag register for the idle actuator adaptation, second byte"
   },
   {
    "name": "XFANS",
@@ -6772,7 +6989,8 @@
    "size": 1,
    "umr": "FKT128",
    "umr_displayed": "FKT128",
-   "description": "Ansaugluftkorrektur für TLW"
+   "description": "Ansaugluftkorrektur für TLW",
+   "description_en": "Intake air temperature correction applied to the throttle load TLW"
   },
   {
    "name": "F_LAST",
@@ -6781,7 +6999,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Flagbyte DK Höhenadaption"
+   "description": "Flagbyte DK Höhenadaption",
+   "description_en": "Flag byte for throttle altitude adaptation"
   },
   {
    "name": "VREGO+1",
@@ -6790,7 +7009,8 @@
    "size": 1,
    "umr": "VOL",
    "umr_displayed": "VOL_L",
-   "description": "TEV-Volumenstrom"
+   "description": "TEV-Volumenstrom",
+   "description_en": "High byte of the purge valve volume flow"
   },
   {
    "name": "XFKAT",
@@ -6799,7 +7019,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Flags f. Katkonv. u. Sondenüb."
+   "description": "Flags f. Katkonv. u. Sondenüb.",
+   "description_en": "Flags for catalyst conversion and lambda sensor monitoring"
   },
   {
    "name": "MLNKA+1",
@@ -6809,7 +7030,8 @@
    "umr": "IMLQL",
    "umr_displayed": "IMLQL",
    "description": "Luftmassen-Integrator",
-   "word_base": 51270
+   "word_base": 51270,
+   "description_en": "Air mass integrator"
   },
   {
    "name": "ATV",
@@ -6818,7 +7040,8 @@
    "size": 1,
    "umr": "TQ10S",
    "umr_displayed": "TQ10S",
-   "description": "TV-Regler hinter Kat"
+   "description": "TV-Regler hinter Kat",
+   "description_en": "Duty-cycle controller output, post-catalyst lambda control"
   },
   {
    "name": "ATV2",
@@ -6827,7 +7050,8 @@
    "size": 1,
    "umr": "TQ10S",
    "umr_displayed": "TQ10S",
-   "description": "TV-Regler hinter Kat Bank2"
+   "description": "TV-Regler hinter Kat Bank2",
+   "description_en": "Duty-cycle controller output, post-catalyst lambda control, bank 2"
   },
   {
    "name": "FLGLRH",
@@ -6836,7 +7060,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Flagbyte LRHK f. Abgasstrang 1"
+   "description": "Flagbyte LRHK f. Abgasstrang 1",
+   "description_en": "Flag byte for post-cat lambda control, exhaust bank 1"
   },
   {
    "name": "QSDTEHP+1",
@@ -6846,7 +7071,8 @@
    "umr": "KGHQX",
    "umr_displayed": "KGHQX",
    "description": "Hochpaßgef. LLS-Luft",
-   "word_base": 51456
+   "word_base": 51456,
+   "description_en": "High-pass filtered idle actuator air"
   },
   {
    "name": "DTEVPHC+1",
@@ -6856,7 +7082,8 @@
    "umr": "TQ40L",
    "umr_displayed": "TQ40L",
    "description": "Diagnoseverbot nach Start",
-   "word_base": 51446
+   "word_base": 51446,
+   "description_en": "Counter for the diagnosis lock-out period after start"
   },
   {
    "name": "TDTEWT",
@@ -6865,7 +7092,8 @@
    "size": 1,
    "umr": "TQOV",
    "umr_displayed": "TQOV",
-   "description": "Wartezeit bis LR eingeschw."
+   "description": "Wartezeit bis LR eingeschw.",
+   "description_en": "Wait time until lambda control has settled"
   },
   {
    "name": "TADTEA",
@@ -6874,7 +7102,8 @@
    "size": 1,
    "umr": "FKT256",
    "umr_displayed": "FKT256",
-   "description": "TV aus Tankentlüftungsdiagnose"
+   "description": "TV aus Tankentlüftungsdiagnose",
+   "description_en": "Purge valve duty cycle coming from the evaporative diagnosis"
   },
   {
    "name": "DFRDTE",
@@ -6883,7 +7112,8 @@
    "size": 1,
    "umr": "2KMP1",
    "umr_displayed": "2KMP1",
-   "description": "FR Regelfaktoränderung der LR"
+   "description": "FR Regelfaktoränderung der LR",
+   "description_en": "Change in the lambda control factor FR, used for the purge load test"
   },
   {
    "name": "DQSDTE+1",
@@ -6893,7 +7123,8 @@
    "umr": "KGHQX",
    "umr_displayed": "KGHQX",
    "description": "Änderung LLS-Luft bei TEV-Auf.",
-   "word_base": 51468
+   "word_base": 51468,
+   "description_en": "Change in idle actuator air when the purge valve opens"
   },
   {
    "name": "FDTEV_W",
@@ -6902,7 +7133,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Flagregister DTEV"
+   "description": "Flagregister DTEV",
+   "description_en": "Flag register for the purge valve diagnosis, read as a word"
   },
   {
    "name": "XUHV",
@@ -6911,7 +7143,8 @@
    "size": 1,
    "umr": "UHSQ",
    "umr_displayed": "UHSQ",
-   "description": "DPRAM-Kopie von UHV"
+   "description": "DPRAM-Kopie von UHV",
+   "description_en": "Dual-port RAM copy of the pre-cat sensor heater shunt voltage"
   },
   {
    "name": "XUHH",
@@ -6920,7 +7153,8 @@
    "size": 1,
    "umr": "UHSQ",
    "umr_displayed": "UHSQ",
-   "description": "DPRAM-Kopie von UHH"
+   "description": "DPRAM-Kopie von UHH",
+   "description_en": "Dual-port RAM copy of the post-cat sensor heater shunt voltage"
   },
   {
    "name": "IMLATM+1",
@@ -6930,7 +7164,8 @@
    "umr": "IMLQL",
    "umr_displayed": "IMLQL",
    "description": "Luftmassen-Integrator, ATM",
-   "word_base": 51516
+   "word_base": 51516,
+   "description_en": "Air mass integrator for the exhaust temperature model"
   },
   {
    "name": "DFLGABG",
@@ -6939,7 +7174,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Dauerflags Abgasanlage"
+   "description": "Dauerflags Abgasanlage",
+   "description_en": "Persistent flag byte for the exhaust system"
   },
   {
    "name": "FLGAGR",
@@ -6948,7 +7184,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Flagbyte AGR"
+   "description": "Flagbyte AGR",
+   "description_en": "Flag byte for exhaust gas recirculation"
   },
   {
    "name": "TIMTRA",
@@ -6958,7 +7195,8 @@
    "umr": "TQ200L",
    "umr_displayed": "TQ200L",
    "description": "Überwachungstimer für TRA",
-   "word_base": 51308
+   "word_base": 51308,
+   "description_en": "Supervision timer for the additive lambda adaptation TRA"
   },
   {
    "name": "TRAZS+1",
@@ -6968,7 +7206,8 @@
    "umr": "TIQSL",
    "umr_displayed": "TIQSL",
    "description": "Anfangswert TRA bei Start",
-   "word_base": 51316
+   "word_base": 51316,
+   "description_en": "Value TRA starts from at engine start"
   },
   {
    "name": "TIMFRA",
@@ -6978,7 +7217,8 @@
    "umr": "TQ200L",
    "umr_displayed": "TQ200L",
    "description": "Überwachungstimer für FRA",
-   "word_base": 51310
+   "word_base": 51310,
+   "description_en": "Supervision timer for the multiplicative lambda adaptation FRA"
   },
   {
    "name": "FRAZS+1",
@@ -6988,7 +7228,8 @@
    "umr": "FAK2L",
    "umr_displayed": "FAK2L",
    "description": "Anfangswert FRA bei Start",
-   "word_base": 51318
+   "word_base": 51318,
+   "description_en": "Value FRA starts from at engine start"
   },
   {
    "name": "FLGDKVS",
@@ -6997,7 +7238,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Flagregister der DKVS"
+   "description": "Flagregister der DKVS",
+   "description_en": "Flag register for throttle pre-control"
   },
   {
    "name": "FLGDSLS",
@@ -7006,7 +7248,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Flags für SLS-Diagnose"
+   "description": "Flags für SLS-Diagnose",
+   "description_en": "Flag byte for the secondary air system diagnosis"
   },
   {
    "name": "FLGSLS",
@@ -7015,7 +7258,8 @@
    "size": 1,
    "umr": "DEZ",
    "umr_displayed": "DEZ",
-   "description": "Flagregister SLS"
+   "description": "Flagregister SLS",
+   "description_en": "Flag register of the secondary air system"
   },
   {
    "name": "IVZABG",
@@ -7025,7 +7269,8 @@
    "umr": "DEZL",
    "umr_displayed": "DEZL",
    "description": "ABG-Zähler 500 Arbeitsspiele",
-   "word_base": 51624
+   "word_base": 51624,
+   "description_en": "Block counter for the exhaust statistics interval (500 working cycles)"
   },
   {
    "name": "XKFPU",
@@ -7039,7 +7284,8 @@
     "06A906018CG"
    ],
    "source": "[RE] 0xCA62, operand of MULU at 0xD5BB",
-   "description": "Pulsationskorrektur, interpoliert aus KFPU"
+   "description": "Pulsationskorrektur, interpoliert aus KFPU",
+   "description_en": "Pulsation correction, interpolated out of map KFPU"
   },
   {
    "name": "MLROH",
@@ -7053,7 +7299,8 @@
     "06A906018CG"
    ],
    "source": "[RE] 0xCA64, stored by ST at 0xD5CE",
-   "description": "durch den LMM erfasste Luftmasse je Zeiteinheit"
+   "description": "durch den LMM erfasste Luftmasse je Zeiteinheit",
+   "description_en": "Air mass per unit time as captured by the air mass meter"
   },
   {
    "name": "TLR_16",
@@ -7067,7 +7314,8 @@
     "06A906018CG"
    ],
    "source": "[RE] 0xCA66, stored by ST at 0xD5ED",
-   "description": "Lastrohsignal 16 Bit, vor der Division durch 100"
+   "description": "Lastrohsignal 16 Bit, vor der Division durch 100",
+   "description_en": "Raw load signal, 16-bit, before the division by 100"
   },
   {
    "name": "XKFPUSL",
@@ -7080,7 +7328,8 @@
     "06A906018CG"
    ],
    "source": "[RE] 0xC4A7, read by LDBZE at pA:0xD04F",
-   "description": "Auswahl-Offset KFPU in der Zeigertabelle 0x7A40 (0=KFPU.0, 2=.1, 4=.2)"
+   "description": "Auswahl-Offset KFPU in der Zeigertabelle 0x7A40 (0=KFPU.0, 2=.1, 4=.2)",
+   "description_en": "Selection offset for KFPU in the pointer table at 0x7A40 (0=.0, 2=.1, 4=.2)"
   },
   {
    "name": "XNDIV",
@@ -7094,7 +7343,8 @@
     "06A906018CG"
    ],
    "source": "[RE] 0xC97C, divisor of DIVU at 0xD5E3",
-   "description": "Drehzahl-Divisor im Lastpfad, Rohwert (linear in n, Faktor ungeprueft)"
+   "description": "Drehzahl-Divisor im Lastpfad, Rohwert (linear in n, Faktor ungeprueft)",
+   "description_en": "Engine speed divisor in the load path, raw. The factor is unverified"
   }
  ],
  "rejected": [

@@ -263,6 +263,7 @@ verify on the car.
 | `mcmess/recorder.py` | Sampling thread, ring buffer, CSV — Qt-free |
 | `mcmess/simulator.py` | Simulated 018CG responder + engine model |
 | `mcmess/data/m38_018cg.json` | Generated channel + conversion database, one per ECU |
+| `mcmess/data/descriptions_en.json` | English description for every channel |
 | `gui/main.py` | The window |
 | `gui/plots.py` | Stacked small-multiple plot panels |
 | `gui/picker.py` | Channel tree with live cost estimate |

@@ -245,7 +245,11 @@ class Channel:
     addr: int
     size: int
     umr: str
+    #: The German text from the FR and the DAMOS, kept verbatim as the primary source.
     description: str
+    #: English translation of it, from mcmess/data/descriptions_en.json. Additive --
+    #: it never replaces `description`, so the source text stays checkable.
+    description_en: str = ""
     # None for a channel that has no VS20 entry because it was found by reading code
     # rather than by walking the pseudo-address table. See mcmess/data/extra_channels.json.
     pseudo: int | None = 0
@@ -335,6 +339,11 @@ class Channel:
         if not self.has_physical:
             return f"raw {raw}"
         return self._conversion.format(raw)
+
+    @property
+    def about(self) -> str:
+        """What to show a human: English where it exists, the German otherwise."""
+        return self.description_en or self.description
 
     @property
     def is_aux(self) -> bool:
@@ -553,6 +562,7 @@ def load_channels(path: Path | str = DEFAULT_DB) -> ChannelSet:
                 size=int(row.get("size", 1)),
                 umr=umr,
                 description=row.get("description", "") or "",
+                description_en=row.get("description_en", "") or "",
                 pseudo=None if row.get("pseudo") is None else int(row["pseudo"]),
                 umr_displayed=row.get("umr_displayed", "") or "",
                 suspect=row.get("suspect", "") or "",

@@ -53,6 +53,11 @@ DATA_DIR = Path(__file__).resolve().parent.parent / "mcmess" / "data"
 #: the generated database by merge_extra(); see that function for why they are separate.
 DEFAULT_EXTRA = DATA_DIR / "extra_channels.json"
 
+#: English descriptions, merged onto every channel as 'description_en'. Kept out
+#: of the generator because they are editorial, not derived: the German from the
+#: FR and the DAMOS stays in 'description' and is never overwritten.
+DEFAULT_DESCRIPTIONS = DATA_DIR / "descriptions_en.json"
+
 #: The image the DAMOS above actually describes, plus its own VS20 table offset. Used
 #: only to re-verify the FMT:2 byte-order rule at build time -- the DAMOS's addresses
 #: are meaningless against the 018CG image.
@@ -934,6 +939,7 @@ def build(args: argparse.Namespace) -> int:
     }
 
     merge_extra(payload, args.extra, part)
+    merge_descriptions(payload, args.descriptions)
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     # newline="" stops Python's text mode translating \n to \r\n on Windows. Without
@@ -978,6 +984,33 @@ def _print_report(conversions: dict[str, Conversion], channels: list[dict]) -> N
             shape = f"rational, coeffs {conv.coeffs}"
         flag = "" if conv.validated else "  [UNVALIDATED]"
         print(f"  {name:<10} {width:<3} {conv.unit[:16]:<16} {shape}{flag}")
+
+
+def merge_descriptions(payload: dict, path: Path) -> None:
+    """Attach an English description to every channel.
+
+    Additive: 'description' keeps the German from the FR and the DAMOS, and
+    'description_en' is the translation beside it. A channel with no entry is
+    reported rather than silently left blank -- the point of the file is that it
+    covers everything, so a gap is a bug in the file, not an acceptable state.
+    """
+    if not path.exists():
+        print(f"\n        no description file at {path}")
+        return
+    table = json.loads(path.read_text(encoding="utf-8")).get("descriptions", {})
+    missing = []
+    for row in payload["channels"]:
+        text = table.get(row["name"])
+        if text:
+            row["description_en"] = text
+        else:
+            missing.append(row["name"])
+    payload["meta"]["counts"]["channels_described"] = len(payload["channels"]) - len(missing)
+    described = len(payload["channels"]) - len(missing)
+    print(f"\n        {described} channels given an English description "
+          f"from {path.name}")
+    if missing:
+        print(f"        WARNING: no description for {', '.join(missing)}")
 
 
 def merge_extra(payload: dict, path: Path, part: str | None) -> None:
@@ -1078,6 +1111,12 @@ def main(argv: list[str] | None = None) -> int:
         type=Path,
         default=DEFAULT_EXTRA,
         help="channels found by reading code, merged into the generated set",
+    )
+    parser.add_argument(
+        "--descriptions",
+        type=Path,
+        default=DEFAULT_DESCRIPTIONS,
+        help="English descriptions, attached to every channel as description_en",
     )
     parser.add_argument(
         "--damos-image",
