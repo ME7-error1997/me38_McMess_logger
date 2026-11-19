@@ -67,11 +67,20 @@ class MainWindow(QtWidgets.QMainWindow):
         # appears in the picker: it is not an ECU channel and cannot be ticked off
         # without also closing its port. It is appended to whatever is selected.
         self.derived_channels, self.derivations = [], []
+        #: ECU channels a derivation needs that were not asked for by name. These
+        #: MUST end up ticked in the picker: a derived column is computed from the
+        #: sample, so if its inputs are never read it silently stays blank. That is
+        #: exactly what happened to KR_CYL1..4 on the first car pull -- the expanded
+        #: list was computed here and then thrown away.
+        self.derivation_inputs: list[str] = []
         if getattr(args, "channels", None):
             asked = [n.strip() for n in args.channels.split(",") if n.strip()]
-            _, self.derivations = expand_selection(
+            expanded, self.derivations = expand_selection(
                 channels, asked, knock_base=args.knock_base
             )
+            self.derivation_inputs = [
+                c.name for c in expanded if not c.is_virtual and c.name not in asked
+            ]
             self.derived_channels = [
                 c for d in self.derivations for c in d.channels()
                 if c.name in asked
@@ -102,7 +111,9 @@ class MainWindow(QtWidgets.QMainWindow):
             ]
             if unknown:
                 self._warn("Unknown channels", "Not in the database: " + ", ".join(unknown))
-            self.picker.set_selection([n for n in wanted if n in channels.by_name])
+            selected = [n for n in wanted if n in channels.by_name]
+            selected += [n for n in self.derivation_inputs if n not in selected]
+            self.picker.set_selection(selected)
         else:
             self.picker.select_starter_set()
 

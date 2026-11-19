@@ -329,6 +329,34 @@ def main() -> int:
     for rate in (200, 300, 500):
         print(f"  at {rate} bytes/s: {rate / prog.wire_bytes:.1f} Hz")
 
+    print("\nTimer quantisations are on this ECU's clock, not the A4's")
+    cg = load_channels("06A906018CG")
+    # The injection-time family counts CPU timer ticks, so the A4 DAMOS's figures
+    # are 4/3 too large here. Corrected, they land on round microsecond quanta --
+    # which is the point: 1.3333 us/bit is not a quantum anyone designs.
+    # Within rounding, not exactly: the DAMOS declares the range to two decimals
+    # (87.38 ms over 16 bits), so the quantum lands on 0.999975 us rather than a
+    # clean 1. That it lands within 0.1% of a round figure at all is the signal.
+    for name, want_us in (("TI0", 1.0), ("TI1", 1.0), ("TEMEAN", 1.0)):
+        scale_us = cg.get(name).conversion.scale * 1000.0
+        check(f"{name} is ~{want_us:g} us/bit", abs(scale_us - want_us) < 0.001, True)
+
+    # Verified against VCDS group 002 on a running engine: after the correction the
+    # gap to the tester is a CONSTANT injector dead time rather than a drifting
+    # ratio. A wrong factor could not do that.
+    ti0 = cg.get("TI0").conversion
+    pairs = [(2070, 1.09), (10095, 9.15), (10290, 9.28), (9930, 9.02), (9750, 8.83)]
+    residuals = [ti0.apply(raw) - vcds for raw, vcds in pairs]
+    spread = max(residuals) - min(residuals)
+    check("residual vs VCDS is constant", spread < 0.25, True)
+    check("and it is about one dead time",
+          0.8 < sum(residuals) / len(residuals) < 1.2, True)
+
+    # Conversions whose quantum is not a timer tick must NOT be touched: TL and air
+    # mass already agreed with VCDS, and scaling them would have broken that.
+    check("TL stays 0.05 ms/bit", round(cg.get("TL").conversion.scale, 6), 0.05)
+    check("ML stays 0.25 kg/h", round(cg.get("ML").conversion.scale, 6), 0.25)
+
     print("\nSelection cost charges for parity switches")
     from mcmess.recorder import selection_cost
 

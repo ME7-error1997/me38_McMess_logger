@@ -674,3 +674,81 @@ not been checked against real hardware here, and a mis-framing decoder reports a
 confident wrong AFR rather than an error — the one outcome this project spends most
 of its effort avoiding. `tools/probe.py wideband` dumps what a device actually
 sends and classifies it, which is the honest first step.
+
+
+---
+
+## 10. The A4 DAMOS is on a different clock
+
+`[MEASURED]` against a running 018CG and a VCDS log of the same engine.
+
+Section 7.1 warns that the conversion formulas come from `8D0907558E` (Audi A4,
+M3.8.2) while the addresses come from the 018CG, and that this is an inference. This
+is the first case where the inference was **wrong**, and it is worth recording how it
+was caught, because every conversion passed the build-time range check regardless.
+
+### What disagreed
+
+VCDS display group 002 reports an injection period. Logged side by side on the same
+engine, our `TI0` read consistently higher, and the *ratio drifted* — 1.53 at idle,
+1.47 at wide-open throttle. A drifting ratio rules out a plain scale error, which is
+what made it interesting rather than dismissable.
+
+| rpm | VCDS inj. period | `TI0` as logged | ratio |
+|---|---|---|---|
+| 1440 | 1.09 ms | 2.76 ms | 1.53 |
+| 2920 | 9.15 ms | 13.46 ms | 1.47 |
+| 3600 | 9.02 ms | 13.24 ms | 1.47 |
+| 3960 | 8.83 ms | 13.00 ms | 1.47 |
+
+### The DAMOS contradicts itself
+
+The injection-time quantisations count a CPU timer tick, so their scale follows the
+crystal. The DAMOS states both a name and a range for each, and they disagree by a
+constant factor:
+
+| Conversion | name implies | range implies | ratio |
+|---|---|---|---|
+| `TEQ32L` | 32 µs | 42.667 µs | 1.3333 |
+| `TEQ32SL` | 32 µs | 21.333 µs (signed, half) | 1.3333 |
+| `TEQ2048` | 2048 µs | 2730.667 µs | 1.3333 |
+| `TEQST` | 8 µs | 10.667 µs | 1.3333 |
+| `TEQL` | 1 µs | 1.3333 µs | 1.3333 |
+
+**4/3 is 16 MHz / 12 MHz.** The 018CG runs a 16 MHz crystal `[RE]`; the A4's SP_BAUD
+values imply 12 MHz. Every te-family quantisation in that DAMOS is therefore 4/3 too
+large when applied here.
+
+### Why this is settled and not merely plausible
+
+Scaling `TI0` by 0.75 turns the drifting ratio into a **constant offset**:
+
+| `TI0` × 0.75 | VCDS | residual |
+|---|---|---|
+| 2.07 ms | 1.09 ms | 0.98 |
+| 10.09 ms | 9.15 ms | 0.94 |
+| 10.29 ms | 9.28 ms | 1.01 |
+| 9.93 ms | 9.02 ms | 0.91 |
+| 9.75 ms | 8.83 ms | 0.92 |
+
+Mean 0.98 ms, spread 0.19 ms over a fivefold range of values. That residual is
+injector dead time — VCDS reports the computed period, `TI0` holds the commanded one
+including the opening correction. **A wrong factor cannot turn a drifting ratio into
+a flat offset**, so the 0.75 is right independently of the crystal story that
+explains it.
+
+### What is and is not corrected
+
+Corrected: `TEQL`, `TEQL2`, `TEQSL`, `SIGTEQL`, `TEQ32L`, `TEQ32SL`, `TEQST`,
+`TEQ2048` — the whole "Quantisierung von te" family.
+
+**Not** corrected, and verified against the same VCDS log: `TIQ` is a clean
+0.05 ms/bit and `TL` matched the tester's "Actual load" to within 0.05 ms at every
+point; `MLQ025L` is a clean 0.25 kg/h and air mass matched within 1%; `PCENT` is
+100/256 and `TVM` matched "Valve cycle" exactly. A quantum that is already a round
+decimal is not clock-derived, and scaling it would have broken agreement that
+already existed.
+
+The lesson generalises: **a conversion reproducing its own declared range proves
+only internal consistency.** Both the wrong and the right scaling pass that check.
+Only an independent measurement separates them.

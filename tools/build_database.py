@@ -377,6 +377,62 @@ def parse_dam(path: Path) -> tuple[dict[str, Conversion], dict]:
 # ================================================================== validation
 
 
+#: The injection-time quantisations are counts of a CPU timer tick, so their scale
+#: follows the crystal. The DAMOS is an Audi A4 M3.8.2 and the target is a 16 MHz
+#: 018CG, and every one of these comes out 4/3 too large. Two independent proofs:
+#:
+#: 1. The DAMOS contradicts itself. TEQ32L and TEQ32SL are *named* "32us" and
+#:    declared at 42.667 us/bit; TEQ2048 is named "2048" and declared at 2730.67;
+#:    TEQST implies 10.667 where 8 is the round figure. Every ratio is exactly
+#:    4/3, and 4/3 is 16 MHz / 12 MHz -- the 018CG's crystal over the A4's, the
+#:    latter inferred from its SP_BAUD values in the Ghidra notes.
+#:
+#: 2. VCDS disagrees with us about injection time, and stops disagreeing after
+#:    this correction. Logged against group 002 on a running 018CG, TI0 read
+#:    1.47x the tester's "Inj. period" with the ratio drifting from 1.53 at idle
+#:    to 1.47 at wide-open throttle -- not a clean scale error. Scaled by 0.75 the
+#:    residual becomes a *constant* 0.98 ms across a 5x range (spread 0.19 ms),
+#:    which is injector dead time: VCDS shows the computed time, TI0 the commanded
+#:    one. A wrong factor could not turn a drifting ratio into a flat offset.
+#:
+#: Conversions whose quantum is NOT a timer tick are untouched and were checked
+#: the same way: TIQ is a clean 0.05 ms/bit and TL matched VCDS's "Actual load" to
+#: 0.05 ms, MLQ025L is a clean 0.25 kg/h and matched air mass within 1%.
+CLOCK_CORRECTION = 0.75
+
+#: Quantisations that follow the CPU clock. All are "Quantisierung von te" family.
+CLOCK_SCALED = (
+    "TEQL", "TEQL2", "TEQSL", "SIGTEQL", "TEQ32L", "TEQ32SL", "TEQST", "TEQ2048",
+)
+
+
+def apply_clock_correction(conversions: dict[str, Conversion]) -> list[str]:
+    """Scale the timer-derived quantisations onto this ECU's clock.
+
+    Scales the declared range with the formula, so validate_conversions() still
+    checks a self-consistent pair rather than silently losing its grip on these.
+    """
+    done: list[str] = []
+    for name in CLOCK_SCALED:
+        conv = conversions.get(name)
+        if conv is None or conv.kind != "formula" or len(conv.coeffs) != 6:
+            continue
+        # value = (p2 - p4*x) / (p3*x - p1): scaling the numerator scales the
+        # result, and keeps working for the signed forms where p6 is set.
+        conv.coeffs[1] *= CLOCK_CORRECTION
+        conv.coeffs[3] *= CLOCK_CORRECTION
+        if conv.decl_min is not None:
+            conv.decl_min *= CLOCK_CORRECTION
+        if conv.decl_max is not None:
+            conv.decl_max *= CLOCK_CORRECTION
+        conv.note = (
+            (conv.note + "; " if conv.note else "")
+            + f"scaled by {CLOCK_CORRECTION} from the A4 DAMOS onto this ECU's clock"
+        )
+        done.append(name)
+    return done
+
+
 def validate_conversions(conversions: dict[str, Conversion], verbose: bool = False) -> dict:
     """Infer each conversion's raw width and check it reproduces its declared range.
 
@@ -682,6 +738,13 @@ def build(args: argparse.Namespace) -> int:
     ump = parse_ump(args.dam)
     print(f"        {len(conversions)} conversions, {len(ump)} variable records")
     print(f"        EPK {dam_meta.get('epk', '?')}")
+
+    corrected = apply_clock_correction(conversions)
+    if corrected:
+        print(
+            f"\n        {len(corrected)} te-quantisation(s) scaled by "
+            f"{CLOCK_CORRECTION} for this ECU's clock: {', '.join(sorted(corrected))}"
+        )
 
     print("\nvalidating formulas against their declared ranges")
     stats = validate_conversions(conversions, verbose=args.report)
