@@ -394,6 +394,23 @@ class AuxChannel(Channel):
         )
 
 
+def column_label(channel: "Channel") -> str:
+    """Column heading for a CSV or a plot axis.
+
+    Both writers previously spelled this as `f"{name} [{unit}]" if unit else
+    f"{name} [raw]"`, which is wrong for a converted but *dimensionless* channel:
+    FR is the lambda integrator, physical and meaningful, with no unit -- and it
+    came out of a car log headed "FR [raw]" beside values of 1.000 and 1.25. That
+    is precisely the confusion `unit_label` exists to prevent, so use it:
+
+        N40   -> "N40 [Upm]"      converted, has a unit
+        FR    -> "FR"             converted, dimensionless
+        XNDIV -> "XNDIV [raw]"    no usable conversion
+    """
+    label = channel.unit_label
+    return f"{channel.name} [{label}]" if label else channel.name
+
+
 def csv_number(value: float, digits: int = 6) -> str:
     """Format a physical value for a CSV cell.
 

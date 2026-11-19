@@ -29,7 +29,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from .channels import Channel, ChannelSet, csv_number
+from .channels import Channel, ChannelSet, column_label, csv_number
 
 if TYPE_CHECKING:  # import cycle: wideband builds AuxChannels from channels.py
     from .wideband import WidebandSource
@@ -551,7 +551,7 @@ class Recorder:
         for line in lines:
             handle.write(f"# {line}\n")
         writer.writerow(
-            ["t_s"] + [f"{c.name} [{c.unit}]" if c.unit else f"{c.name} [raw]" for c in channels]
+            ["t_s"] + [column_label(c) for c in channels]
         )
 
     def _write_row(self, writer, timestamp: float) -> None:

@@ -37,6 +37,7 @@ from mcmess.channels import (  # noqa: E402
     BYTE_ORDERS,
     PAGE0_STARTER,
     ChannelSet,
+    column_label,
     csv_number,
     get_byte_order,
     load_channels,
@@ -887,8 +888,7 @@ def cmd_watch(args: argparse.Namespace) -> int:
             handle = Path(args.csv).open("w", newline="", encoding="utf-8")
             writer = csv.writer(handle)
             writer.writerow(
-                ["t"]
-                + [f"{c.name} [{c.unit}]" if c.unit else f"{c.name} [raw]" for c in channels]
+                ["t"] + [column_label(c) for c in channels]
             )
 
         print("Ctrl+C to stop\n")
