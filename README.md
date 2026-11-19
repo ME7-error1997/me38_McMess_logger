@@ -376,12 +376,31 @@ one shows up the columns report blank — a fraction of a second at idle. The ru
 prints what it settled on:
 
 ```
-KLINFO reads 1..4 (values seen: [1, 2, 3, 4])
+KLINFO reads 0..3 (values seen: [0, 1, 2, 3])
 ```
 
-Pass `--knock-base 0` or `1` to skip the wait once you know which it is. Values
-outside the resolved range are dropped rather than written to a cylinder, and
-counted in that same line.
+**That is the answer, measured on a running 018CG:** `KLINFO` counts cylinders from
+zero. So `--knock-base 0` skips the wait on this ECU. Values outside the resolved
+range are dropped rather than written to a cylinder, and counted in that same line.
+
+### Page grouping costs more than you think
+
+A parity switch is not free. Flipping the 9th bit means draining and reprogramming
+the UART between frames, and measured on a running car it costs **about one
+byte-time of round trip**. Three runs, predicted against actual:
+
+| Selection | wire bytes | switches | actual | bytes only | bytes + switches |
+|---|---|---|---|---|---|
+| 10 channels, 2 pages | 12.1 | 2 | 26.2 ms | 22.6 ms | 26.3 ms |
+| 9 channels, 2 pages | 11.0 | 2 | 23.0 ms | 19.7 ms | 23.3 ms |
+| 22 channels, 5 pages | 25.2 | 8 | 53.8 ms | 39.5 ms | **52.1 ms** |
+
+Charging only for bytes is 27% optimistic on the five-page set — the difference
+between the picker promising 26 Hz and the car giving 18.6 — so the estimate now
+charges one byte-time per switch as well. The practical consequence: **a channel
+added inside a page you already read is nearly free, and one that opens a new page
+costs roughly two bytes, not one.** Page `0x00` is cheapest of all: no latch byte
+and no parity switch at all.
 
 ## ECU variants
 
