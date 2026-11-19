@@ -793,11 +793,16 @@ def format_value(v: float | None) -> str:
     return "0" if s in ("-0", "") else s
 
 
-def scale_group_key(s: LogSeries, own_scale: bool = False) -> str:
+def group_key_for(key: str, unit: str, own_scale: bool = False) -> str:
     """The scale a channel is drawn on: one per unit, or one per channel.
 
     Sharing by unit is what puts boost actual against boost requested on the same
     axis. A channel with no unit always gets its own -- a bare number shares
     nothing meaningful with another bare number.
     """
-    return f"k:{s.key}" if own_scale or not s.unit else f"u:{s.unit}"
+    return f"k:{key}" if own_scale or not unit else f"u:{unit}"
+
+
+def scale_group_key(s, own_scale: bool = False) -> str:
+    """group_key_for, for anything carrying a ``key`` and a ``unit``."""
+    return group_key_for(s.key, s.unit, own_scale)

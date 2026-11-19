@@ -37,6 +37,7 @@ from mcmess.wideband import (  # noqa: E402
 from gui import theme  # noqa: E402
 from gui.picker import ChannelPicker  # noqa: E402
 from gui import plots  # noqa: E402
+from gui.live import LivePlot  # noqa: E402
 from gui.plots import PlotStack  # noqa: E402
 
 #: Redraw rate. Drawing is NOT independent of the sampling thread: measured on
@@ -98,6 +99,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self._build_ui()
         self._build_timer()
+        if getattr(args, "stacked", False):
+            self.view_combo.setCurrentIndex(1)
 
         if args.demo:
             self.setWindowTitle(self.windowTitle() + "   [DEMO - simulated ECU]")
@@ -125,7 +128,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.picker = ChannelPicker(self.channel_set)
         self.picker.selection_changed.connect(self._on_selection_changed)
 
+        # Two views of the same data. Overlay is the default: channels that
+        # share a unit share a scale, which is what lets you see that TL never
+        # reaches LDSHK rather than comparing two numbers across a gap. Stacked
+        # stays one click away -- twenty traces on one plot is a lot, and small
+        # multiples are still the better read when you have that many.
         self.plots = PlotStack()
+        self.live = LivePlot(antialias=plots.ANTIALIAS)
+        self.live.readout_changed.connect(self._on_readout_changed)
+        self.view_stack = QtWidgets.QStackedWidget()
+        self.view_stack.addWidget(self.live)
+        self.view_stack.addWidget(self.plots)
 
         splitter = QtWidgets.QSplitter(QtCore.Qt.Orientation.Horizontal)
         left = QtWidgets.QWidget()
@@ -133,7 +146,7 @@ class MainWindow(QtWidgets.QMainWindow):
         left_box.setContentsMargins(0, 0, 0, 0)
         left_box.addWidget(self.picker)
         splitter.addWidget(left)
-        splitter.addWidget(self.plots)
+        splitter.addWidget(self.view_stack)
         splitter.setStretchFactor(0, 0)
         splitter.setStretchFactor(1, 1)
         splitter.setSizes([400, 1080])
@@ -211,6 +224,27 @@ class MainWindow(QtWidgets.QMainWindow):
             demo.setStyleSheet(f"color: {theme.STATUS_WARNING};")
             row.addWidget(demo)
             row.addSpacing(12)
+        row.addWidget(QtWidgets.QLabel("View"))
+        self.view_combo = QtWidgets.QComboBox()
+        self.view_combo.addItem("overlay", True)
+        self.view_combo.addItem("stacked", False)
+        self.view_combo.setToolTip(
+            "Overlay: one plot, one Y scale per unit, a cursor you can place.\n"
+            "Stacked: one panel per channel, which reads better past a dozen."
+        )
+        self.view_combo.currentIndexChanged.connect(self._on_view_changed)
+        row.addWidget(self.view_combo)
+
+        self.auto_y_button = QtWidgets.QPushButton("Auto Y")
+        self.auto_y_button.setEnabled(False)
+        self.auto_y_button.setToolTip(
+            "Drop every fixed Y range back to auto-fit. Right-click a channel\n"
+            "on the chart or in the value table to fix one."
+        )
+        self.auto_y_button.clicked.connect(self._auto_ranges)
+        row.addWidget(self.auto_y_button)
+
+        row.addSpacing(12)
         row.addWidget(QtWidgets.QLabel("Window"))
         self.window_combo = QtWidgets.QComboBox()
         for label, seconds in WINDOWS:
@@ -227,7 +261,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.rate_label = QtWidgets.QLabel()
         self.link_label = QtWidgets.QLabel()
         self.record_label = QtWidgets.QLabel()
-        for widget in (self.state_label, self.rate_label, self.link_label, self.record_label):
+        # Which sample the value table is showing: live, your cursor, or the
+        # mouse. A number on screen should never be ambiguous about that.
+        self.cursor_label = QtWidgets.QLabel()
+        # Wide enough that "reading last sample" is not elided to "reading la..."
+        self.cursor_label.setMinimumWidth(150)
+        for widget in (self.state_label, self.cursor_label, self.rate_label,
+                       self.link_label, self.record_label):
             bar.addPermanentWidget(widget)
         self._set_state_text("idle")
 
@@ -283,6 +323,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # order does not shuffle when ECU channels are ticked on and off.
         self._selection = list(channels) + self._extra_columns
         self.plots.rebuild(self._selection)
+        self.live.rebuild(self._selection)
+        self._update_following()
         if self.recorder is not None:
             self.recorder.set_channels(self._selection)
 
@@ -336,6 +378,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.args.autorecord and not self.record_button.isChecked():
             self.record_button.setChecked(True)
             self._toggle_recording()
+        self._update_following()
 
     def _disconnect(self) -> None:
         if self.recorder is not None:
@@ -347,6 +390,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.port_combo.setEnabled(True)
         self.speed_combo.setEnabled(True)
         self._set_state_text("idle")
+        # Disconnected: the data has stopped moving, so the cursor is the
+        # reader's. Click anywhere on the chart to read the values there.
+        self._update_following()
 
     # -- recording ---------------------------------------------------------
 
@@ -379,6 +425,38 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def _toggle_pause(self) -> None:
         self._paused = self.pause_button.isChecked()
+        # Freezing is the same bargain as disconnecting: the view stops
+        # advancing, so the cursor stops following and becomes yours. A frozen
+        # chart you cannot read a value off would be a frozen chart for nothing.
+        self._update_following()
+
+    def _on_readout_changed(self, source: str) -> None:
+        self.cursor_label.setText(
+            f'<span style="color:{theme.TEXT_MUTED}">reading</span> '
+            f'<span style="color:{theme.TEXT_SECONDARY}">{source}</span>'
+            if self._overlay else ""
+        )
+
+    def _on_view_changed(self) -> None:
+        self.view_stack.setCurrentIndex(0 if self._overlay else 1)
+        self._on_readout_changed(self.live.source())
+        self._update_following()
+        self.auto_y_button.setEnabled(self._overlay and self.live.has_fixed_ranges)
+
+    @property
+    def _overlay(self) -> bool:
+        return bool(self.view_combo.currentData())
+
+    def _auto_ranges(self) -> None:
+        self.live.auto_ranges()
+        self.auto_y_button.setEnabled(False)
+
+    def _update_following(self) -> None:
+        """The cursor follows the newest sample only while data is arriving."""
+        running = self.recorder is not None and self.recorder.state == "running"
+        following = running and not self._paused
+        if following != self.live.following:
+            self.live.set_following(following)
 
     # -- the viewer --------------------------------------------------------
 
@@ -433,6 +511,8 @@ class MainWindow(QtWidgets.QMainWindow):
             f"recording {stats.recording_rows} rows -> {name}" if name else ""
         )
         self.picker.set_measured_rate(stats.bytes_per_second)
+        self._update_following()
+        self.auto_y_button.setEnabled(self._overlay and self.live.has_fixed_ranges)
 
         if self._paused:
             return
@@ -441,11 +521,15 @@ class MainWindow(QtWidgets.QMainWindow):
         times, data, channels = self.recorder.snapshot(
             seconds=seconds, max_points=MAX_PLOT_POINTS
         )
-        if not len(times) or data.shape[1] != len(self.plots.panels):
+        if not len(times):
             return
-        self.plots.update_data(times, data)
-        self.plots.set_window(seconds, float(times[-1]))
-        self.plots.update_readouts(times, data, self.recorder.last_raw())
+        if self._overlay:
+            self.live.update_data(times, data)
+            self.live.set_window(seconds, float(times[-1]))
+        elif data.shape[1] == len(self.plots.panels):
+            self.plots.update_data(times, data)
+            self.plots.set_window(seconds, float(times[-1]))
+            self.plots.update_readouts(times, data, self.recorder.last_raw())
 
     def _set_state_text(self, state: str) -> None:
         color = theme.state_color(state)
@@ -511,6 +595,13 @@ def main(argv: list[str] | None = None) -> int:
         "--ask-filename",
         action="store_true",
         help="open a save dialog instead of naming the log automatically",
+    )
+    parser.add_argument(
+        "--stacked",
+        action="store_true",
+        help="open in the small-multiples view (one panel per channel) instead "
+        "of the overlay. Easier to read past a dozen channels, and about 8%% "
+        "cheaper in sample rate",
     )
     parser.add_argument(
         "--no-autorecord",

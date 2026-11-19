@@ -1,13 +1,16 @@
-"""The log viewer's chart: an overlay plot with one Y scale per unit.
+"""The overlay chart, shared by the log viewer and the live logger.
 
-This is not the live logger's plot stack. That one draws small multiples -- one
-panel per channel -- because a live session is read by glancing at it. A log is
-read by *comparing* traces: boost actual against boost requested, knock retard
-against ignition angle. So here the traces share one plot area, and channels that
-share a unit share a Y scale, which is what lets you see that actual never
-reaches target.
+Traces share one plot area, and channels that share a unit share a Y scale. That
+is what lets you see that `TL` never reaches `LDSHK`, or that boost actual never
+reaches requested -- two numbers in a table do not show you that, and two
+separate panels make you measure it by eye across a gap.
 
-Five behaviours are worth stating, because they are the ones a charting library
+The chart knows nothing about where its points came from. The viewer hands it
+columns out of a parsed CSV; the logger hands it slices of the recorder's ring
+buffer. Both get the same cursor, the same scale groups, the same axes. One
+chart means there is no second implementation to drift.
+
+Six behaviours are worth stating, because they are the ones a charting library
 will not give without a fight:
 
 **One Y scale per unit.** The scale group key is ``u:<unit>``, or ``k:<key>`` for
@@ -26,7 +29,12 @@ its range.
 **A cursor is a row, not an x value.** That one choice makes it work in time
 mode, in scatter mode, and across VCDS logs where every group has its own clock;
 and it survives a change of X axis. Finding "the sample for row r" is a
-nearest-value search in a series' ascending ``rows`` array.
+nearest-value search in a trace's ascending ``rows`` array.
+
+**Live, the cursor follows the newest sample.** ``follow_latest`` pins it to the
+right-hand end, so the readouts are the live values and there is nothing to
+click. Turn it off -- which the logger does the moment it disconnects or freezes
+-- and the cursor is the reader's to place.
 
 **The second X axis follows the trace.** A row of rpm labels along the top, read
 at each time tick by interpolation. The plot stays against *time*: rpm is not a
@@ -50,13 +58,7 @@ import pyqtgraph as pg
 from PySide6 import QtCore, QtWidgets
 
 from mcmess.logenums import describe_value, enum_for
-from mcmess.logparse import (
-    LogSeries,
-    ParsedLog,
-    format_value,
-    scale_group_key,
-    series_points,
-)
+from mcmess.logparse import format_value, scale_group_key
 
 from . import theme
 
@@ -66,6 +68,10 @@ SPARSE_PX = 9
 #: Y padding around a group's visible range.
 Y_PAD = 0.06
 
+#: How far a refitted Y range has to move, as a fraction of its own span,
+#: before it is worth applying. See the note in _refit_y.
+Y_HYSTERESIS = 0.005
+
 #: Never zoom below this fraction of the whole log.
 MIN_ZOOM_FRACTION = 1 / 5000
 
@@ -74,22 +80,65 @@ HOVER_RATE_S = 0.02
 
 
 @dataclass
-class Plotted:
-    """One trace on the chart: a channel, its colour, and its points."""
+class Trace:
+    """One channel's points, ready to draw. The chart's only input.
 
-    series: LogSeries
+    ``rows`` is what the cursor sits on: the log row a point came from in the
+    viewer, the sample index in the logger. It must ascend. Keeping it beside
+    the points is what lets a cursor placed on one trace find the matching
+    sample on every other one, however ragged their clocks are.
+    """
+
+    key: str
+    label: str
+    unit: str
     color: str
     xs: np.ndarray
     ys: np.ndarray
     rows: np.ndarray
+
+
+@dataclass
+class Plotted:
+    """A Trace on the chart: which scale group it landed in, and its curve."""
+
+    trace: Trace
     group: str
     curve: pg.PlotDataItem | None = None
     #: True when x is ascending, so a hover can binary-search it. False in
     #: scatter mode, where the nearest point has to be found in pixel space.
     sorted_x: bool = True
 
+    @property
+    def key(self) -> str:
+        return self.trace.key
+
+    @property
+    def label(self) -> str:
+        return self.trace.label
+
+    @property
+    def unit(self) -> str:
+        return self.trace.unit
+
+    @property
+    def color(self) -> str:
+        return self.trace.color
+
+    @property
+    def xs(self) -> np.ndarray:
+        return self.trace.xs
+
+    @property
+    def ys(self) -> np.ndarray:
+        return self.trace.ys
+
+    @property
+    def rows(self) -> np.ndarray:
+        return self.trace.rows
+
     def index_for_row(self, row: int) -> int | None:
-        """The position in this trace of the sample nearest a given log row."""
+        """The position in this trace of the sample nearest a given row."""
         if not len(self.rows):
             return None
         i = int(np.searchsorted(self.rows, row))
@@ -102,7 +151,7 @@ class Plotted:
 
 @dataclass
 class Hover:
-    """What the mouse is over: an x position and the log row under it."""
+    """What the mouse is over: an x position and the row under it."""
 
     x: float
     row: int
@@ -186,26 +235,33 @@ class ChartViewBox(pg.ViewBox):
 
 
 class LogChart(QtWidgets.QWidget):
-    """The chart. Give it a log and a list of (series, colour); it draws."""
+    """The chart. Give it a list of Traces; it draws."""
 
     #: The mouse moved over a trace: a Hover, or None when it left.
     hovered = QtCore.Signal(object)
-    #: A click placed the cursor on this log row.
+    #: A click placed the cursor on this row. Not emitted while following.
     cursor_placed = QtCore.Signal(int)
-    #: A right click, with the scene position and the series under it (or None).
+    #: A right click, with the global position and the channel key under it.
     context_requested = QtCore.Signal(object, object)
 
-    def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
+    def __init__(
+        self,
+        parent: QtWidgets.QWidget | None = None,
+        *,
+        antialias: bool = True,
+        placeholder: str = "Open a log to draw it.",
+    ) -> None:
         super().__init__(parent)
-        self.log: ParsedLog | None = None
         self.plotted: list[Plotted] = []
         self.axis_key: str | None = None
         self.fixed_ranges: dict[str, tuple[float, float]] = {}
         self.cursor_row: int | None = None
-        self._x_col: int | None = None
+        #: Live mode: the cursor is pinned to the newest sample and clicks are
+        #: ignored. The logger turns this off when it disconnects or freezes.
+        self.follow_latest = False
+        self._antialias = antialias
         self._scatter = False
         self._groups: dict[str, pg.ViewBox] = {}
-        self._points_cache: dict[tuple[str, object], tuple] = {}
         self._sparse = False
 
         self._widget = pg.GraphicsLayoutWidget()
@@ -245,7 +301,7 @@ class LogChart(QtWidgets.QWidget):
         self._tooltip.setVisible(False)
         self.plot.addItem(self._tooltip, ignoreBounds=True)
 
-        self.placeholder = QtWidgets.QLabel("Open a log to draw it.")
+        self.placeholder = QtWidgets.QLabel(placeholder)
         self.placeholder.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.placeholder.setStyleSheet(f"color: {theme.TEXT_MUTED};")
 
@@ -266,98 +322,78 @@ class LogChart(QtWidgets.QWidget):
         )
         self._widget.scene().sigMouseClicked.connect(self._on_scene_click)
 
-    # -- data --------------------------------------------------------------
+    # -- drawing -----------------------------------------------------------
 
-    def set_log(self, log: ParsedLog | None) -> None:
-        self.log = log
-        self._points_cache.clear()
-        self.cursor_row = None
-        self.fixed_ranges.clear()
+    def clear(self) -> None:
         self.plotted = []
-
-    def points_for(self, series: LogSeries, x_col: int | None | object) -> tuple:
-        """Cached (xs, ys, rows) for one channel against one x column."""
-        key = (series.key, x_col)
-        hit = self._points_cache.get(key)
-        if hit is None:
-            xs, ys, rows = series_points(self.log, series, x_col)
-            hit = (
-                np.asarray(xs, dtype=float),
-                np.asarray(ys, dtype=float),
-                np.asarray(rows, dtype=int),
-            )
-            self._points_cache[key] = hit
-        return hit
+        self.cursor_row = None
+        self._clear_groups()
+        self.plot.clear()
+        self._re_add_overlays()
+        self.placeholder.setVisible(True)
+        self._widget.setVisible(False)
 
     def draw(
         self,
-        series: list[tuple[LogSeries, str]],
+        traces: list[Trace],
         *,
-        axis_key: str | None,
-        x_col: int | None | str = "own",
+        axis_key: str | None = None,
+        scatter: bool = False,
         x_label: str = "seconds",
         own_scales: bool = False,
-        second_x: LogSeries | None = None,
+        second_x: Trace | None = None,
         keep_view: bool = False,
     ) -> None:
-        """Rebuild the chart.
+        """Rebuild the chart from scratch.
 
-        Called on any change the reader makes -- the selection, the axis channel,
-        the X axis, the scale mode. Rebuilding rather than patching keeps one
-        invariant that is otherwise fiddly: the axis channel's scale group IS the
-        main ViewBox, so the left axis always belongs to it and the right axis to
-        the next group along.
+        Called whenever the *set* of channels or the scale mode changes.
+        Rebuilding rather than patching keeps one invariant that is otherwise
+        fiddly: the axis channel's scale group IS the main ViewBox, so the left
+        axis always belongs to it and the right axis to the next group along.
+
+        For new points on the same channels use update(), which is cheap enough
+        to run at the logger's redraw rate.
         """
-        if self.log is None or not series:
-            self.plotted = []
-            self._clear_groups()
-            self.plot.clear()
-            self._re_add_overlays()
-            self.placeholder.setVisible(True)
-            self._widget.setVisible(False)
+        if not traces:
+            self.clear()
             return
 
         self.placeholder.setVisible(False)
         self._widget.setVisible(True)
-        # Only keep a view there actually is one: on the first draw the ViewBox
-        # still reads its default 0..1, and keeping THAT leaves a chart that is
-        # correct in every detail except that the data is off-screen.
+        # Only keep a view when there actually is one: on the first draw the
+        # ViewBox still reads its default 0..1, and keeping THAT leaves a chart
+        # that is correct in every detail except that the data is off-screen.
         view = self._vb.viewRange()[0] if keep_view and self.plotted else None
 
-        self._scatter = isinstance(x_col, int)
-        self._x_col = None if x_col == "own" else x_col
-
+        self._scatter = scatter
         self._clear_groups()
         self.plot.clear()
         self._re_add_overlays()
 
-        # Group the traces, then order the groups so the axis channel's comes
-        # first: that one becomes the main ViewBox and owns the left axis.
-        plotted: list[Plotted] = []
-        for s, color in series:
-            if x_col == "own":
-                xs, ys, rows = self.points_for(s, s.time_col)
-            else:
-                xs, ys, rows = self.points_for(s, x_col)
-            plotted.append(Plotted(
-                series=s, color=color, xs=xs, ys=ys, rows=rows,
-                group=scale_group_key(s, own_scales),
-                sorted_x=not self._scatter,
-            ))
+        plotted = [
+            Plotted(
+                trace=t,
+                group=scale_group_key(t, own_scales),
+                sorted_x=not scatter,
+            )
+            for t in traces
+        ]
 
+        # Order the groups so the axis channel's comes first: that one becomes
+        # the main ViewBox and owns the left axis.
         order: list[str] = []
         axis_group = next(
-            (p.group for p in plotted if p.series.key == axis_key), None
-        ) or (plotted[0].group if plotted else None)
+            (p.group for p in plotted if p.key == axis_key), None
+        ) or plotted[0].group
         for p in plotted:
             if p.group not in order:
                 order.append(p.group)
-        if axis_group in order:
-            order.remove(axis_group)
-            order.insert(0, axis_group)
+        order.remove(axis_group)
+        order.insert(0, axis_group)
 
-        self.axis_key = axis_key if any(p.series.key == axis_key for p in plotted) \
-            else plotted[0].series.key
+        self.axis_key = (
+            axis_key if any(p.key == axis_key for p in plotted) else plotted[0].key
+        )
         self.plotted = plotted
 
         # the main ViewBox takes group 0; every other group gets an overlay
@@ -374,22 +410,23 @@ class LogChart(QtWidgets.QWidget):
             if n == 1:
                 self.plot.getAxis("right").linkToView(vb)
 
+        self._sparse = False
         for p in plotted:
             vb = self._groups[p.group]
             p.curve = pg.PlotDataItem(
                 p.xs, p.ys,
-                pen=None if self._scatter else pg.mkPen(p.color, width=theme.LINE_WIDTH),
-                antialias=True,
-                autoDownsample=not self._scatter,
+                pen=None if scatter else pg.mkPen(p.color, width=theme.LINE_WIDTH),
+                antialias=self._antialias,
+                autoDownsample=not scatter,
                 downsampleMethod="peak",
                 clipToView=True,
             )
-            if self._scatter:
+            if scatter:
                 p.curve.setSymbol("o")
                 p.curve.setSymbolSize(5)
                 p.curve.setSymbolPen(pg.mkPen(None))
                 p.curve.setSymbolBrush(pg.mkBrush(p.color))
-            if p.series.key == self.axis_key and not self._scatter:
+            elif p.key == self.axis_key:
                 p.curve.setPen(pg.mkPen(p.color, width=theme.LINE_WIDTH + 1.5))
             # Parent it BEFORE addItem. An overlay ViewBox lives directly in the
             # scene, so ViewBox.addItem's scene.addItem() runs while the curve
@@ -401,16 +438,7 @@ class LogChart(QtWidgets.QWidget):
             vb.addItem(p.curve)
 
         self._label_axes(order, x_label)
-        if second_x is not None and not self._scatter:
-            self._top_axis.set_reference(*self._second_x_points(second_x))
-            self._top_axis.setLabel(
-                f"{second_x.label} ({second_x.unit})" if second_x.unit
-                else second_x.label,
-                color=theme.TEXT_MUTED,
-            )
-        else:
-            self._top_axis.set_reference(None, None)
-            self._top_axis.setLabel("", color=theme.TEXT_MUTED)
+        self.set_second_x(second_x)
         self._sync_groups()
         if view is not None:
             self._vb.setXRange(*view, padding=0)
@@ -419,10 +447,36 @@ class LogChart(QtWidgets.QWidget):
         self._refit_y()
         self._draw_cursor()
 
-    def _second_x_points(self, s: LogSeries) -> tuple[np.ndarray, np.ndarray]:
-        """The reference channel against the chart's own x, for the top labels."""
-        xs, ys, _ = self.points_for(s, s.time_col if self._x_col is None else self._x_col)
-        return xs, ys
+    def update_traces(self, traces: list[Trace]) -> bool:
+        """New points for the channels already on the chart.
+
+        Returns False when the set of channels has changed and the caller must
+        call draw() instead. This is the path the live logger takes twenty times
+        a second, so it allocates nothing and touches no ViewBox geometry.
+        """
+        if len(traces) != len(self.plotted):
+            return False
+        if any(p.key != t.key for p, t in zip(self.plotted, traces)):
+            return False
+        for p, t in zip(self.plotted, traces):
+            p.trace = t
+            if p.curve is not None:
+                p.curve.setData(t.xs, t.ys)
+        self._refit_y()
+        self._update_sparse_marks()
+        self._draw_cursor()
+        return True
+
+    def set_second_x(self, trace: Trace | None) -> None:
+        if trace is not None and not self._scatter and len(trace.xs):
+            self._top_axis.set_reference(trace.xs, trace.ys)
+            self._top_axis.setLabel(
+                f"{trace.label} ({trace.unit})" if trace.unit else trace.label,
+                color=theme.TEXT_MUTED,
+            )
+        else:
+            self._top_axis.set_reference(None, None)
+            self._top_axis.setLabel("", color=theme.TEXT_MUTED)
 
     def _label_axes(self, order: list[str], x_label: str) -> None:
         self.plot.setLabel("bottom", x_label, color=theme.TEXT_MUTED)
@@ -434,16 +488,14 @@ class LogChart(QtWidgets.QWidget):
                 continue
             axis.setStyle(showValues=True)
             owners = [p for p in self.plotted if p.group == order[n]]
-            unit = owners[0].series.unit
             # The axis wears its group's colour only when the group is one
             # channel; a shared axis belongs to several, so it stays in ink.
             color = owners[0].color if len(owners) == 1 else theme.TEXT_SECONDARY
-            text = unit or owners[0].series.label
-            axis.setLabel(text, color=color)
+            axis.setLabel(owners[0].unit or owners[0].label, color=color)
             axis.setTextPen(pg.mkPen(color if len(owners) == 1 else theme.TEXT_MUTED))
 
     def _clear_groups(self) -> None:
-        for group, vb in self._groups.items():
+        for vb in self._groups.values():
             if vb is self._vb:
                 continue
             vb.setXLink(None)
@@ -475,19 +527,30 @@ class LogChart(QtWidgets.QWidget):
         return (low, high) if high > low else (low, low + 1.0)
 
     def visible_x_range(self) -> tuple[float, float]:
-        """The zoom window. The stats table is computed over exactly this."""
+        """The zoom window. The stats are computed over exactly this."""
         low, high = self._vb.viewRange()[0]
         return float(low), float(high)
-
-    @property
-    def x_column(self) -> int | None:
-        """The column the chart is drawn against; None means each series' own
-        clock (or the row number, when the log has no clock)."""
-        return self._x_col
 
     def reset_zoom(self) -> None:
         low, high = self.data_x_range()
         self._vb.setXRange(low, high, padding=0.01)
+
+    def set_x_window(self, seconds: float | None, latest: float) -> None:
+        """Scroll the X axis so "now" stays at the right edge.
+
+        Until there is a window's worth of data, fit what exists rather than
+        reserving the full span -- otherwise the first half-minute of a session
+        is a trace squeezed into a corner of an empty chart.
+        """
+        if not self.plotted:
+            return
+        if seconds is None:
+            low, _ = self.data_x_range()
+            self._vb.setXRange(low, max(latest, low + 1.0), padding=0.01)
+        elif latest <= seconds:
+            self._vb.setXRange(0.0, max(latest, 1.0), padding=0)
+        else:
+            self._vb.setXRange(latest - seconds, latest, padding=0)
 
     def _on_x_changed(self) -> None:
         # Clamp: a wheel in an empty corner can otherwise zoom to a span no
@@ -529,7 +592,19 @@ class LogChart(QtWidgets.QWidget):
             if y1 - y0 < 1e-9:
                 y0, y1 = y0 - 0.5, y1 + 0.5
             pad = (y1 - y0) * Y_PAD
-            vb.setYRange(y0 - pad, y1 + pad, padding=0)
+            y0, y1 = y0 - pad, y1 + pad
+            # Live, the window slides every frame and the fitted range changes
+            # by a hair each time, so the axis labels flicker and the trace
+            # creeps against a grid that will not hold still. Only move the
+            # scale when the move would actually be visible. (This was also
+            # tried as a throughput fix -- setYRange re-renders the ViewBox --
+            # but across four 15 s runs it made no measurable difference, so
+            # the reason it is here is readability, not speed.)
+            was0, was1 = vb.viewRange()[1]
+            span = max(abs(y1 - y0), 1e-12)
+            if abs(was0 - y0) / span < Y_HYSTERESIS and abs(was1 - y1) / span < Y_HYSTERESIS:
+                continue
+            vb.setYRange(y0, y1, padding=0)
 
     def _update_sparse_marks(self) -> None:
         """A log sparse enough to show its samples gets a square on each."""
@@ -537,7 +612,7 @@ class LogChart(QtWidgets.QWidget):
             return
         width = max(1.0, self._vb.width())
         low, high = self._vb.viewRange()[0]
-        axis = next((p for p in self.plotted if p.series.key == self.axis_key), None)
+        axis = next((p for p in self.plotted if p.key == self.axis_key), None)
         if axis is None or not len(axis.xs):
             return
         visible = int(((axis.xs >= low) & (axis.xs <= high)).sum())
@@ -562,21 +637,49 @@ class LogChart(QtWidgets.QWidget):
         self._refit_y()
 
     def group_of(self, key: str) -> str | None:
-        return next((p.group for p in self.plotted if p.series.key == key), None)
+        return next((p.group for p in self.plotted if p.key == key), None)
+
+    def set_axis_key(self, key: str) -> None:
+        self.axis_key = key
 
     # -- cursor and hover --------------------------------------------------
+
+    def set_follow_latest(self, following: bool) -> None:
+        """Pin the cursor to the newest sample, or hand it to the reader."""
+        self.follow_latest = following
+        self._draw_cursor()
 
     def set_cursor_row(self, row: int | None) -> None:
         self.cursor_row = row
         self._draw_cursor()
 
+    def reference(self) -> Plotted | None:
+        """The trace the cursor and the row lookup are measured against."""
+        if not self.plotted:
+            return None
+        return next(
+            (p for p in self.plotted if p.key == self.axis_key), self.plotted[0]
+        )
+
+    def latest_row(self) -> int | None:
+        """The newest sample's row, by the reference trace."""
+        reference = self.reference()
+        if reference is None or not len(reference.rows):
+            return None
+        return int(reference.rows[-1])
+
     def _draw_cursor(self) -> None:
-        if self.cursor_row is None or not self.plotted:
+        reference = self.reference()
+        if reference is None:
             self._cursor_line.setVisible(False)
             return
-        reference = next(
-            (p for p in self.plotted if p.series.key == self.axis_key), self.plotted[0]
-        )
+        if self.follow_latest:
+            # Live: the cursor IS the newest sample, so the readouts beside it
+            # are the live values and there is nothing to chase with the mouse.
+            self.cursor_row = self.latest_row()
+        if self.cursor_row is None:
+            self._cursor_line.setVisible(False)
+            return
         i = reference.index_for_row(self.cursor_row)
         if i is None:
             self._cursor_line.setVisible(False)
@@ -585,6 +688,8 @@ class LogChart(QtWidgets.QWidget):
         self._cursor_line.setVisible(not self._scatter)
 
     def _on_click(self, x: float) -> None:
+        if self.follow_latest:
+            return  # the cursor belongs to the newest sample while live
         row = self._row_at(x)
         if row is not None:
             self.cursor_placed.emit(row)
@@ -595,17 +700,13 @@ class LogChart(QtWidgets.QWidget):
         if not self._vb.sceneBoundingRect().contains(ev.scenePos()):
             return
         ev.accept()
-        x = float(self._vb.mapSceneToView(ev.scenePos()).x())
-        row = self._row_at(x)
-        near = self._nearest_series(ev.scenePos()) if row is not None else None
-        self.context_requested.emit(ev.screenPos().toPoint(), near)
+        self.context_requested.emit(
+            ev.screenPos().toPoint(), self._nearest_key(ev.scenePos())
+        )
 
     def _row_at(self, x: float) -> int | None:
-        """The log row the reference channel's nearest sample to x belongs to."""
-        reference = next(
-            (p for p in self.plotted if p.series.key == self.axis_key),
-            self.plotted[0] if self.plotted else None,
-        )
+        """The row of the reference trace's nearest sample to x."""
+        reference = self.reference()
         if reference is None or not len(reference.xs):
             return None
         if reference.sorted_x:
@@ -617,7 +718,7 @@ class LogChart(QtWidgets.QWidget):
             i = int(np.argmin(np.abs(reference.xs - x)))
         return int(reference.rows[i])
 
-    def _nearest_series(self, scene_pos) -> LogSeries | None:
+    def _nearest_key(self, scene_pos) -> str | None:
         """The trace nearest a scene position, in pixels. Used by the menu."""
         best, best_d = None, float("inf")
         for p in self.plotted:
@@ -633,8 +734,17 @@ class LogChart(QtWidgets.QWidget):
             here = vb.mapViewToScene(QtCore.QPointF(float(p.xs[i]), float(p.ys[i])))
             d = (here - scene_pos).manhattanLength()
             if d < best_d:
-                best, best_d = p.series, d
+                best, best_d = p.key, d
         return best
+
+    def values_at_row(self, row: int) -> dict[str, float]:
+        """Every plotted trace's value at (or nearest to) a row."""
+        out: dict[str, float] = {}
+        for p in self.plotted:
+            i = p.index_for_row(row)
+            if i is not None and len(p.ys):
+                out[p.key] = float(p.ys[i])
+        return out
 
     def _on_mouse_moved(self, args) -> None:
         position = args[0]
@@ -655,28 +765,29 @@ class LogChart(QtWidgets.QWidget):
         values: dict[str, float] = {}
         lines: list[str] = []
         for p in self.plotted:
-            i = p.index_for_row(row) if p.sorted_x else None
-            if i is None and not p.sorted_x:
-                i = int(np.argmin(np.abs(p.xs - x))) if len(p.xs) else None
+            i = p.index_for_row(row) if p.sorted_x else (
+                int(np.argmin(np.abs(p.xs - x))) if len(p.xs) else None
+            )
             if i is None:
                 continue
             value = float(p.ys[i])
-            values[p.series.key] = value
+            values[p.key] = value
             lines.append(
                 f'<span style="color:{p.color}">&#9644;</span> '
-                f'<span style="color:{theme.TEXT_SECONDARY}">{p.series.label}</span> '
+                f'<span style="color:{theme.TEXT_SECONDARY}">{p.label}</span> '
                 f'<span style="color:{theme.TEXT_PRIMARY};font-weight:600">'
-                f"{self._readout(p.series, value)}</span>"
+                f"{self.readout(p.label, p.unit, value)}</span>"
             )
         self._show_tooltip(position, x, lines)
         self.hovered.emit(Hover(x=x, row=row, values=values))
 
     @staticmethod
-    def _readout(series: LogSeries, value: float) -> str:
+    def readout(label: str, unit: str, value: float) -> str:
+        """A value with its unit, and its meaning when the channel is a code."""
         text = format_value(value)
-        if series.unit:
-            text += f" {series.unit}"
-        table = enum_for(series.label)
+        if unit:
+            text += f" {unit}"
+        table = enum_for(label)
         if table:
             meaning = describe_value(table, value)
             if meaning:
@@ -700,8 +811,7 @@ class LogChart(QtWidgets.QWidget):
         right_half = position.x() > rect.center().x()
         below_half = position.y() > rect.center().y()
         self._tooltip.setAnchor((1 if right_half else 0, 1 if below_half else 0))
-        point = self._vb.mapSceneToView(position)
-        self._tooltip.setPos(point)
+        self._tooltip.setPos(self._vb.mapSceneToView(position))
         self._tooltip.setVisible(True)
 
     def grab_png(self, path: str) -> None:

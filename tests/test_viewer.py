@@ -97,7 +97,7 @@ def main() -> int:
         next(s.key for s in log.series if s.label == label)
         for label in ("boost", "target", "rpm", "fuel")
     ])
-    groups = {p.series.label: p.group for p in chart.plotted}
+    groups = {p.label: p.group for p in chart.plotted}
     check("boost and target share mbar", groups["boost"], groups["target"])
     check("rpm is on its own", groups["rpm"] != groups["boost"], True)
     check("a channel with no unit never shares",
@@ -165,10 +165,10 @@ def main() -> int:
     check("the label says so", "First sample" in window.source_label.text(), True)
 
     print("\nThe nearest sample to a row, per trace")
-    boost = next(p for p in chart.plotted if p.series.label == "boost")
+    boost = next(p for p in chart.plotted if p.label == "boost")
     check("an exact hit", boost.index_for_row(5), 5)
     check("past the end clamps", boost.index_for_row(999), len(boost.rows) - 1)
-    fuel = next(p for p in chart.plotted if p.series.label == "fuel")
+    fuel = next(p for p in chart.plotted if p.label == "fuel")
     check("the ragged channel skips its hole", 7 in list(fuel.rows), False)
     check("and row 7 takes a neighbour", fuel.rows[fuel.index_for_row(7)] in (6, 8), True)
 

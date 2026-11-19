@@ -109,7 +109,8 @@ behaves like the real thing with no hardware attached. Against a real cable:
 Useful flags: `--channels N40,TL,FR` to preselect a set, `--connect` to skip the
 Connect button, `--knock-base 0` for this ECU's cylinder numbering, `--database` to
 point at a different channel JSON, `--no-autorecord` to wait for the Record button
-instead of recording from the moment the link comes up.
+instead of recording from the moment the link comes up, `--stacked` to open in the
+small-multiples view instead of the overlay.
 
 **Drawing costs sample rate, so the defaults favour rate.** Painting antialiased
 traces holds the GIL and measurably starves the sampling thread — on the bench,
@@ -126,17 +127,49 @@ the four window captures behind them, including the blank OpenGL one, are in
 what a selection costs per sample and the sample rate it implies — throughput is the
 binding constraint here, so the picker makes it visible while you choose.
 
-**Plots are stacked small multiples, one channel per panel, sharing one X axis.** A
-tuning log mixes rpm, degrees, milliseconds and temperatures; putting two of those on
-one set of axes would need a second y-scale, and a dual-axis chart invites exactly the
-false correlation you are trying to read out of the data. So there is never more than
-one scale per panel. Each panel is directly labelled with its channel, unit and current
-value, and a crosshair reads values at any point in the trace.
+**The live plot is the viewer's chart.** Same code, fed from the recorder's ring
+buffer instead of a parsed CSV, so what you watch during a pull and what you read
+afterwards behave identically — same scale groups, same cursor, same axes. Channels
+that share a unit share a Y scale, which is the whole point: `TL` lands against
+`LDSHK` and you can see the gap rather than comparing two numbers. Under the chart is
+a table of every plotted channel with its current value and its min and max over the
+visible window.
+
+> **The scales across units are independent, so vertical distance between two traces
+> in different units means nothing.** One plot showing rpm, degrees and milliseconds
+> has one scale per unit, each auto-fitted to the visible window — that is a
+> multi-scale chart, and a multi-scale chart will happily make two unrelated traces
+> look like they track each other. Only two of those scales get an axis (left and
+> right); the rest are drawn with no axis at all, which is why the value table
+> matters. The comparison this chart is built for is **same-unit**: actual against
+> target, this cylinder's retard against that one's. For anything across units, read
+> the numbers, or switch to **stacked**.
+
+**View: stacked** is the old small multiples, one channel per panel, one scale each,
+unchanged. Nothing can mislead you there, and past a dozen channels it is the easier
+read. It costs a little less too: measured on the simulator over four 15 s runs with
+ten channels, stacked held **15.1 Hz** against overlay's **13.9 Hz**, about 8 %.
+
+**The cursor follows the newest sample while the logger is running.** It sits at the
+right-hand edge and moves with the data, so the values beside it are the live ones and
+there is nothing to chase with the mouse. **Disconnect or Freeze view and the cursor
+becomes yours** — click anywhere to put it on a sample and read the values there. The
+data has stopped moving at that point, so a row index keeps pointing at the sample it
+pointed at when you clicked. The status bar always says which it is: *live*, *cursor*,
+*mouse*, or *last sample*.
+
+Right-click a channel, on the chart or in the value table, for a fixed Y range. This
+matters more live than in the viewer: a log is static, so an auto-fitted scale settles,
+but a sliding window refits every sample and the scale breathes continuously. Pin it to
+0–8000 rpm or 0–10 ms/Umdr. and it stops. **Auto Y** drops them all again.
 
 Colours come from a validated 8-slot categorical palette, checked against the dark
-surface for lightness, chroma, colour-vision separation and contrast. The order is fixed
-and **never cycled**: a ninth channel draws in neutral ink rather than reusing a hue, so
-two panels never share a colour. Identity comes from the direct label regardless.
+surface for lightness, chroma, colour-vision separation and contrast. The order is
+fixed and **never cycled**. The overlay chart runs to 16 slots because twelve traces on
+one plot need them, and identity there never rests on colour: every channel is named in
+the value table beside its swatch, and again in the hover tooltip. Stacked panels stop
+at 8 and draw further ones in neutral ink, because each panel is directly labelled
+anyway. See the note on `SERIES_EXTENDED` in `gui/theme.py`.
 
 **Threading.** The serial path is blocking and lock-step, and the ECU drops the session
 after 2 s of silence — so sampling runs on its own thread in `mcmess/recorder.py` and
@@ -357,7 +390,8 @@ verify on the car.
 | `mcmess/logparse.py` | Reads a datalog: VCDS, ME7Logger, OP-COM, any CSV. No UI |
 | `mcmess/logenums.py` | Channels that log a code: KLINFO, BMW MG1 limiters |
 | `gui/main.py` | The window |
-| `gui/plots.py` | Stacked small-multiple plot panels |
+| `gui/plots.py` | Stacked small-multiple plot panels (the "stacked" view) |
+| `gui/live.py` | The logger's overlay view: chart plus live value table |
 | `gui/picker.py` | Channel tree with live cost estimate |
 | `gui/theme.py` | Validated dark palette and Qt styling |
 | `gui/viewer.py` | The log viewer window: channel panel, stats, raw table |
@@ -375,6 +409,7 @@ verify on the car.
 | `tests/test_derived.py` | Knock demultiplexer and derived-column plumbing |
 | `tests/test_logparse.py` | The datalog parser, against excerpts of real files |
 | `tests/test_viewer.py` | The viewer window and chart, on Qt's offscreen platform |
+| `tests/test_live.py` | The logger's overlay view, and who owns the cursor |
 
 ## Logging a wideband
 

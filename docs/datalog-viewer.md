@@ -11,10 +11,11 @@ someone might reasonably want back.
 |---|---|
 | `src/lib/parse-log.ts` | [`mcmess/logparse.py`](../mcmess/logparse.py) |
 | `src/lib/log-enums.ts` | [`mcmess/logenums.py`](../mcmess/logenums.py) |
-| `log-chart.tsx` (canvas) | [`gui/logchart.py`](../gui/logchart.py) (pyqtgraph) |
+| `log-chart.tsx` (canvas) | [`gui/logchart.py`](../gui/logchart.py) (pyqtgraph, shared with the logger) |
 | `log-viewer.tsx` (React) | [`gui/viewer.py`](../gui/viewer.py) (Qt) |
 | `test/parse-log.test.ts`, `test/log-enums.test.ts` | [`tests/test_logparse.py`](../tests/test_logparse.py) |
 | — | [`tests/test_viewer.py`](../tests/test_viewer.py) |
+| — | [`gui/live.py`](../gui/live.py), [`tests/test_live.py`](../tests/test_live.py) |
 
 The notes call the parser tests the acceptance suite: *"a port is right when the
 same excerpts give the same columns, units and values."* They are ported one for
@@ -61,6 +62,39 @@ knock*. That needed a third kind beside the original's `value` and `flags` — a
 `packed` kind, which unpacks with a function rather than a lookup. `KNK_CYL1..4`,
 the demultiplexed flag, is an ordinary `value` table so the readout says *knock
 detected* rather than `1`.
+
+## 2a. The chart is shared with the live logger
+
+Not in the original notes at all: the chart ported here is now also what the
+**logger** draws, fed from the recorder's ring buffer instead of a parsed CSV.
+`gui/logchart.py` therefore knows nothing about `ParsedLog` — it takes a list of
+`Trace` (key, label, unit, colour, xs, ys, rows) and both callers build those.
+The viewer builds them from CSV columns; `gui/live.py` builds them from numpy
+slices. Same scale groups, same cursor, same axes in both windows, and no second
+implementation to drift.
+
+Two things were added for the live case:
+
+**`follow_latest`.** The cursor is pinned to the newest sample while data is
+arriving, so the readouts are the live values; clicks are ignored. The logger
+turns it off the moment it disconnects or the view is frozen, and the cursor
+becomes the reader's. That the data is static at that point is what makes a row
+index safe to hold on to — a free cursor over a sliding window would silently
+drift onto a different sample as old ones fall out.
+
+**`update_traces`.** A fast path for "same channels, new points" that calls
+`setData` and nothing else, because `draw()` tears down and rebuilds every
+ViewBox and that cannot run twenty times a second.
+
+**The honest caveat, which the original did not have to make.** A viewer is
+opened deliberately; a live chart is glanced at. One plot with a scale per unit
+is a multi-scale chart, and the vertical distance between two traces in
+*different* units is an artefact of two independently fitted scales — it will
+make unrelated traces look like they track each other. The comparison the chart
+is built for is same-unit (actual against target). Across units, read the value
+table, or use the stacked small-multiples view, which the logger keeps one click
+away and which has exactly one scale per panel. The README says this where
+someone choosing a view will see it.
 
 ## 3. Chart: pyqtgraph, as section 12 of the notes suggests
 

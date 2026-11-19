@@ -41,6 +41,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+import numpy as np  # noqa: E402
 import pyqtgraph as pg  # noqa: E402
 from PySide6 import QtCore, QtGui, QtWidgets  # noqa: E402
 
@@ -57,10 +58,11 @@ from mcmess.logparse import (  # noqa: E402
     row_time,
     row_values,
     scale_group_key,
+    series_points,
 )
 
 from gui import theme  # noqa: E402
-from gui.logchart import Hover, LogChart  # noqa: E402
+from gui.logchart import Hover, LogChart, Trace  # noqa: E402
 
 #: Common fixed Y ranges, offered on the right-click menu. A starting point --
 #: custom min / max is always there too.
@@ -168,6 +170,8 @@ class LogViewerWindow(QtWidgets.QMainWindow):
         self.cursor_row: int | None = None
         self.hover: Hover | None = None
         self._rows: dict[str, int] = {}          # series key -> panel row
+        self._points_cache: dict[tuple, tuple] = {}
+        self._x_col: int | None | str = "own"
         self._loading = False
         self.settings = QtCore.QSettings("McMESS", "logviewer")
 
@@ -453,7 +457,9 @@ class LogViewerWindow(QtWidgets.QMainWindow):
 
     def set_log(self, log: ParsedLog) -> None:
         self.log = log
-        self.chart.set_log(log)
+        self.chart.clear()
+        self.chart.fixed_ranges.clear()
+        self._points_cache.clear()
         self.cursor_row = None
         self.hover = None
         name = self.path.name if self.path else "log"
@@ -664,16 +670,43 @@ class LogViewerWindow(QtWidgets.QMainWindow):
 
     # -- drawing -----------------------------------------------------------
 
+    def _points_for(self, s: LogSeries) -> tuple:
+        """Cached (xs, ys, rows) for one channel against the current X axis.
+
+        The chart is handed finished points, so it never has to know what a
+        parsed log is -- which is what lets the live logger feed it slices of a
+        ring buffer instead. Caching here means switching the axis channel, the
+        colours or the scale mode costs no re-extraction.
+        """
+        col = s.time_col if self._x_col == "own" else self._x_col
+        key = (s.key, col)
+        hit = self._points_cache.get(key)
+        if hit is None:
+            xs, ys, rows = series_points(self.log, s, col)
+            hit = (
+                np.asarray(xs, dtype=float),
+                np.asarray(ys, dtype=float),
+                np.asarray(rows, dtype=int),
+            )
+            self._points_cache[key] = hit
+        return hit
+
+    def _trace(self, s: LogSeries) -> Trace:
+        xs, ys, rows = self._points_for(s)
+        return Trace(
+            key=s.key, label=s.label, unit=s.unit,
+            color=self.colors.get(s.key, theme.SERIES[0]),
+            xs=xs, ys=ys, rows=rows,
+        )
+
     def _redraw(self) -> None:
         if self._loading or self.log is None:
             return
         by_key = self.log.by_key
-        series = [(by_key[k], self.colors.get(k, theme.SERIES[0]))
-                  for k in self.selected]
-        x_col = self.x_combo.currentData()
-        scatter = isinstance(x_col, int)
+        self._x_col = self.x_combo.currentData()
+        scatter = isinstance(self._x_col, int)
         x_label = self.x_combo.currentText().replace(" (scatter)", "")
-        if x_col == "own":
+        if self._x_col == "own":
             x_label = "seconds" if any(c.is_time for c in self.log.columns) else "sample"
 
         second = self.x2_combo.currentData()
@@ -685,12 +718,12 @@ class LogViewerWindow(QtWidgets.QMainWindow):
             second_series = by_key.get(second)
 
         self.chart.draw(
-            series,
+            [self._trace(by_key[k]) for k in self.selected],
             axis_key=self.axis_key,
-            x_col=x_col,
+            scatter=scatter,
             x_label=x_label,
             own_scales=bool(self.y_combo.currentData()),
-            second_x=second_series,
+            second_x=self._trace(second_series) if second_series else None,
             keep_view=True,
         )
         self.axis_key = self.chart.axis_key
@@ -770,9 +803,7 @@ class LogViewerWindow(QtWidgets.QMainWindow):
                 meaning = describe_value(table, at)
                 if meaning:
                     text = f"{text}  {meaning}"
-            xs, ys, _ = self.chart.points_for(
-                s, s.time_col if self.chart.x_column is None else self.chart.x_column
-            )
+            xs, ys, _ = self._points_for(s)
             window = ys[(xs >= low) & (xs <= high)] if len(xs) else ys
             if not len(window):
                 window = ys
@@ -815,8 +846,8 @@ class LogViewerWindow(QtWidgets.QMainWindow):
             item.data(QtCore.Qt.ItemDataRole.UserRole),
         )
 
-    def _on_chart_context(self, global_point, series) -> None:
-        self._show_menu(global_point, series.key if series else None)
+    def _on_chart_context(self, global_point, key) -> None:
+        self._show_menu(global_point, key)
 
     def _show_menu(self, global_point, key: str | None) -> None:
         if self.log is None or key is None:
