@@ -306,6 +306,37 @@ it cannot affect how the engine runs, and it keeps the wideband's full resolutio
 
 The AFR gets its own panel in the window and its own column in the log.
 
+## Logs name themselves
+
+**Record to CSV** writes straight away, no dialog, to a name that cannot collide
+with the last one:
+
+```
+logs/2026-11-19_12-34-21_018CG_pull2.csv
+```
+
+Date first so a directory listing is chronological, time to the second, then the
+ECU and an optional `--tag`. The window's status bar shows the filename beside the
+row count, so you can tell which of several logs is the live one.
+
+The previous default was a fixed `logs/run.csv` behind a save dialog — accept it
+twice and the second pull quietly overwrote the first. Losing a pull you cannot
+easily repeat is worse than an ugly filename, so a name is never reused: two starts
+inside one second get `_2`, `_3`.
+
+```bash
+.venv\Scripts\python.exe gui\main.py --port COM2 --tag pull2
+```
+
+`--log-dir` puts them elsewhere, and `--ask-filename` brings the save dialog back.
+On `probe.py watch`, `--csv` with no value does the same thing, and `--csv somedir/`
+auto-names inside that directory:
+
+```bash
+.venv\Scripts\python.exe tools\probe.py watch --port COM2 --csv --tag pull2
+```
+
+
 **Look at the device first.** Before trusting any decode:
 
 ```bash

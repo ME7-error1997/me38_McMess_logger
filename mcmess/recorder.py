@@ -38,6 +38,48 @@ from .errors import McMessError, PortError, TimeoutError_
 from .session import ConnectResult, McMessSession, ReadProgram, build_program
 from .transport import KLineTransport
 
+#: Where logs go when nothing says otherwise.
+DEFAULT_LOG_DIR = Path("logs")
+
+
+def auto_log_path(
+    directory: str | Path = DEFAULT_LOG_DIR,
+    part_number: str | None = None,
+    tag: str = "",
+    now: time.struct_time | None = None,
+) -> Path:
+    """A log filename that cannot collide with the last one.
+
+    `2026-11-19_12-34-21_018CG_pull2.csv` -- date first so a directory listing is
+    chronological, time to the second, then the ECU and an optional tag.
+
+    The previous default was a fixed `logs/run.csv`, which meant a second pull
+    silently overwrote the first. Losing a pull you cannot easily repeat is a far
+    worse outcome than an ugly filename, so nothing here is reused: if a name is
+    somehow taken (two starts inside one second), a counter is appended rather than
+    the file being opened for writing.
+
+    Colons are deliberately absent -- Windows will not have them in a filename.
+    """
+    stamp = time.strftime("%Y-%m-%d_%H-%M-%S", now or time.localtime())
+    parts = [stamp]
+    if part_number:
+        # The family prefix is the same on every one of these, so the suffix is
+        # what actually distinguishes a log: 06A906018CG -> 018CG.
+        parts.append(part_number[-5:])
+    if tag:
+        safe = "".join(c if c.isalnum() or c in "-_" else "-" for c in tag)
+        if safe.strip("-"):
+            parts.append(safe)
+    directory = Path(directory)
+    candidate = directory / ("_".join(parts) + ".csv")
+    counter = 2
+    while candidate.exists():
+        candidate = directory / ("_".join(parts) + f"_{counter}.csv")
+        counter += 1
+    return candidate
+
+
 #: Samples kept in memory. 36000 is 20 minutes at 30 Hz; at 20 channels that is about
 #: 6 MB, which is nothing, and it means a whole pull is always still on screen.
 DEFAULT_CAPACITY = 36_000

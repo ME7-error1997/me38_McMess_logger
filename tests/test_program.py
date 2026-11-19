@@ -329,6 +329,45 @@ def main() -> int:
     for rate in (200, 300, 500):
         print(f"  at {rate} bytes/s: {rate / prog.wire_bytes:.1f} Hz")
 
+    print("\nLogs name themselves")
+    import re as _re
+    import tempfile as _tempfile
+    import time as _time
+
+    from mcmess.recorder import auto_log_path
+
+    with _tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        stamp = _time.localtime()
+        p1 = auto_log_path(tmp, part_number="06A906018CG", now=stamp)
+        check("date first, then time, then the ECU",
+              bool(_re.fullmatch(r"\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}_018CG\.csv", p1.name)),
+              True)
+        # Windows will not accept a colon in a filename, and the old fixed name
+        # logs/run.csv silently overwrote the previous pull.
+        check("no colons", ":" in p1.name, False)
+        check("tag is appended",
+              auto_log_path(tmp, "06A906018CG", "pull2", stamp).name.endswith("_018CG_pull2.csv"),
+              True)
+        check("a tag with path characters is made safe",
+              "/" in auto_log_path(tmp, None, "3rd/WOT", stamp).name, False)
+
+        # Two starts inside one second must not collide: losing a pull you cannot
+        # easily repeat is far worse than an ugly filename.
+        p1.parent.mkdir(parents=True, exist_ok=True)
+        p1.write_text("x", encoding="utf-8")
+        p2 = auto_log_path(tmp, part_number="06A906018CG", now=stamp)
+        check("an existing name is never reused", p2.name == p1.name, False)
+        check("it counts up instead", p2.name.endswith("_2.csv"), True)
+        p2.write_text("x", encoding="utf-8")
+        p3 = auto_log_path(tmp, part_number="06A906018CG", now=stamp)
+        check("and keeps counting", p3.name.endswith("_3.csv"), True)
+
+        # Sorting the directory must give chronological order.
+        early = auto_log_path(tmp, now=_time.strptime("2026-01-02 03:04:05", "%Y-%m-%d %H:%M:%S"))
+        late = auto_log_path(tmp, now=_time.strptime("2026-11-19 12:34:56", "%Y-%m-%d %H:%M:%S"))
+        check("names sort chronologically", sorted([late.name, early.name])[0], early.name)
+
     print("\nEvery channel has an English description")
     import json as _json
 

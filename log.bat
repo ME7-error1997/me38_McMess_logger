@@ -6,6 +6,9 @@ rem  Double-click this file, or from a prompt:
 rem      log.bat              uses COM2
 rem      log.bat COM5         uses COM5
 rem
+rem  Press "Record to CSV" and the log names itself from the date, time and
+rem  ECU, in the logs\ folder. Nothing is ever overwritten.
+rem
 rem  Nothing here writes to the ECU -- the 018CG responder is read-only.
 rem ---------------------------------------------------------------------------
 

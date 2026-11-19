@@ -23,7 +23,7 @@ from serial.tools import list_ports  # noqa: E402
 
 from mcmess.channels import ChannelSet, load_channels  # noqa: E402
 from mcmess.derived import DERIVED_COLUMNS, expand_selection  # noqa: E402
-from mcmess.recorder import Recorder  # noqa: E402
+from mcmess.recorder import Recorder, auto_log_path  # noqa: E402
 from mcmess.wideband import (  # noqa: E402
     add_arguments as add_wideband_args,
     from_args as make_wideband,
@@ -59,6 +59,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.channel_set = channels
         self.args = args
         self.recorder: Recorder | None = None
+        self._log_path: Path | None = None
         self._selection = []
         self._paused = False
         self._reported_error = ""
@@ -336,14 +337,23 @@ class MainWindow(QtWidgets.QMainWindow):
             self.record_button.setChecked(False)
             return
         if self.record_button.isChecked():
-            default = Path.cwd() / "logs" / "run.csv"
-            path, _ = QtWidgets.QFileDialog.getSaveFileName(
-                self, "Record log to", str(default), "CSV files (*.csv)"
+            path = auto_log_path(
+                self.args.log_dir,
+                part_number=self.channel_set.part_number,
+                tag=self.args.tag,
             )
-            if not path:
-                self.record_button.setChecked(False)
-                return
+            if self.args.ask_filename:
+                chosen, _ = QtWidgets.QFileDialog.getSaveFileName(
+                    self, "Record log to", str(path.resolve()), "CSV files (*.csv)"
+                )
+                if not chosen:
+                    self.record_button.setChecked(False)
+                    return
+                path = Path(chosen)
+            # One press, recording, no dialog: in a car there is rarely a free hand,
+            # and the old default of logs/run.csv quietly overwrote the previous pull.
             self.recorder.start_recording(path)
+            self._log_path = path
             self.record_button.setText("Stop recording")
         else:
             self.recorder.stop_recording()
@@ -376,8 +386,9 @@ class MainWindow(QtWidgets.QMainWindow):
             f"{stats.baudrate} baud   rtt {stats.rtt_ms:.2f} ms   "
             f"timeouts {stats.timeouts}   reconnects {stats.reconnects}"
         )
+        name = Path(stats.recording_path).name if stats.recording_path else ""
         self.record_label.setText(
-            f"recording {stats.recording_rows} rows" if stats.recording_path else ""
+            f"recording {stats.recording_rows} rows -> {name}" if name else ""
         )
         self.picker.set_measured_rate(stats.bytes_per_second)
 
@@ -443,6 +454,21 @@ def main(argv: list[str] | None = None) -> int:
             "whether KLINFO counts cylinders 0..3 or 1..4 (0, 1, or auto). "
             "auto waits for a 0 or a 4, which settles it without guessing"
         ),
+    )
+    parser.add_argument(
+        "--log-dir",
+        default="logs",
+        help="where Record to CSV writes (default: logs/)",
+    )
+    parser.add_argument(
+        "--tag",
+        default="",
+        help="appended to the auto-generated log filename, e.g. --tag pull2",
+    )
+    parser.add_argument(
+        "--ask-filename",
+        action="store_true",
+        help="open a save dialog instead of naming the log automatically",
     )
     add_wideband_args(parser)
     parser.add_argument(

@@ -50,6 +50,7 @@ from mcmess.derived import (  # noqa: E402
     expand_selection,
 )
 from mcmess.identify import identify  # noqa: E402
+from mcmess.recorder import auto_log_path  # noqa: E402
 from mcmess.session import PING_ADDR, SESSION_REARM  # noqa: E402
 from mcmess.wideband import (  # noqa: E402
     add_arguments as add_wideband_args,
@@ -912,8 +913,19 @@ def cmd_watch(args: argparse.Namespace) -> int:
     start = time.perf_counter()
     samples = 0
     try:
-        if args.csv:
-            handle = Path(args.csv).open("w", newline="", encoding="utf-8")
+        if args.csv is not None:
+            # "" means --csv was given with no value; a directory means "in here".
+            target = Path(args.csv) if args.csv else None
+            if target is None or target.is_dir() or args.csv.endswith(("/", "\\")):
+                target = auto_log_path(
+                    target or args.log_dir,
+                    part_number=channel_set.part_number,
+                    tag=args.tag,
+                )
+            target.parent.mkdir(parents=True, exist_ok=True)
+            args.csv = str(target)
+            print(f"logging to {target}\n")
+            handle = target.open("w", newline="", encoding="utf-8")
             writer = csv.writer(handle)
             writer.writerow(
                 ["t"] + [column_label(c) for c in channels]
@@ -1130,7 +1142,20 @@ def main(argv: list[str] | None = None) -> int:
     add_channel_args(p)
     add_wideband_args(p)
     p.add_argument("--channels", help="comma-separated names (default: page-0 starter set)")
-    p.add_argument("--csv", help="write samples to this CSV file")
+    p.add_argument(
+        "--csv",
+        nargs="?",
+        const="",
+        default=None,
+        help=(
+            "write samples to CSV. Give a filename, or a directory, or nothing at "
+            "all and one is named from the date, time and ECU"
+        ),
+    )
+    p.add_argument("--tag", default="", help="appended to an auto-generated filename")
+    p.add_argument(
+        "--log-dir", default="logs", help="where an auto-named log goes (default logs/)"
+    )
     p.add_argument("--seconds", type=float, default=0.0, help="stop after N seconds")
 
     p = sub.add_parser(
