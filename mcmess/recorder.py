@@ -30,6 +30,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from .channels import Channel, ChannelSet, column_label, csv_number
+from .derived import Derivation, apply as apply_derivations
 
 if TYPE_CHECKING:  # import cycle: wideband builds AuxChannels from channels.py
     from .wideband import WidebandSource
@@ -160,6 +161,7 @@ class Recorder:
         channel_set: ChannelSet | None = None,
         verify_ecu: bool = True,
         aux_sources: Sequence["WidebandSource"] | None = None,
+        derivations: Sequence[Derivation] | None = None,
     ) -> None:
         self.port = port
         self.highspeed = highspeed
@@ -180,6 +182,9 @@ class Recorder:
         #: a column of NaN rather than the log.
         self.aux_sources = list(aux_sources or [])
         self._aux_by_key = {s.key: s for s in self.aux_sources}
+        #: Columns computed from the others in the same sample. They cost nothing
+        #: on the K-line; their inputs are ordinary channels in the selection.
+        self.derivations = list(derivations or [])
 
         self._lock = threading.Lock()
         self._channels: list[Channel] = list(channels)
@@ -257,6 +262,8 @@ class Recorder:
         # Start the aux sources first so a wideband has its port open and a reading
         # ready by the time the first row is written, rather than logging NaN
         # through the handshake and the first second of sampling.
+        for derivation in self.derivations:
+            derivation.reset()
         for source in self.aux_sources:
             source.start()
         self._thread = threading.Thread(target=self._run, name="mcmess-recorder", daemon=True)
@@ -452,24 +459,41 @@ class Recorder:
         now: float,
     ) -> None:
         channels = self.channels
-        row: list[float] = []
         raws: dict[str, int | None] = {}
+        # Collect physical values by name first, because a derived column is
+        # computed from the others in this same sample and so cannot be filled in
+        # a single left-to-right pass over the row.
+        physical: dict[str, float] = {}
         for channel in channels:
+            if channel.is_derived:
+                continue
             if channel.is_aux:
                 # Zero-order hold off the source's own thread. value() returns NaN
                 # once the reading is stale, so a stopped wideband leaves the cell
                 # empty instead of repeating its last number down the whole log.
                 source = self._aux_by_key.get(channel.source_key)
-                row.append(source.value(now) if source is not None else float("nan"))
+                physical[channel.name] = (
+                    source.value(now) if source is not None else float("nan")
+                )
                 raws[channel.name] = None
                 continue
             raw = channel.assemble(values)
             raws[channel.name] = raw
             if raw is None:
-                row.append(float("nan"))
+                physical[channel.name] = float("nan")
                 continue
-            value = channel.physical(raw)
-            row.append(float(value) if value is not None else float(raw))
+            converted = channel.physical(raw)
+            physical[channel.name] = (
+                float(converted) if converted is not None else float(raw)
+            )
+
+        if self.derivations:
+            physical.update(apply_derivations(self.derivations, physical))
+            for channel in channels:
+                if channel.is_derived:
+                    raws[channel.name] = None
+
+        row: list[float] = [physical.get(c.name, float("nan")) for c in channels]
 
         window.append(now)
         if len(window) > 64:

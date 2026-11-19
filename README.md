@@ -251,6 +251,7 @@ verify on the car.
 | `mcmess/channels.py` | Channels and physical conversions |
 | `mcmess/identify.py` | Checks the connected ECU against the loaded database |
 | `mcmess/wideband.py` | Second input on its own port: decoders, source thread |
+| `mcmess/derived.py` | Columns computed from others: knock demux, g/s air mass |
 | `mcmess/recorder.py` | Sampling thread, ring buffer, CSV — Qt-free |
 | `mcmess/simulator.py` | Simulated 018CG responder + engine model |
 | `mcmess/data/m38_018cg.json` | Generated channel + conversion database, one per ECU |
@@ -266,6 +267,7 @@ verify on the car.
 | `tests/test_recorder.py` | Sampling engine, ring buffer, CSV, engine model |
 | `tests/test_ramscan.py` | MCS-96 operand decoding in the RAM scanner |
 | `tests/test_wideband.py` | Decoders, staleness, and the join onto the ECU clock |
+| `tests/test_derived.py` | Knock demultiplexer and derived-column plumbing |
 
 ## Logging a wideband
 
@@ -344,6 +346,42 @@ keep driving. An empty cell is obviously missing data; a frozen one is not.
 
 The aux column costs nothing on the wire, which the picker's cost line shows: three
 ECU channels plus a wideband still reads `3 channels, 3 bytes`.
+
+## Derived columns
+
+Two things the ECU does not hand you directly. Ask for them by name in `--channels`
+like any other channel; the inputs they need are selected automatically, and the
+columns themselves cost **nothing** on the K-line.
+
+| Column | From | |
+|---|---|---|
+| `ML_GS` | `ML` | air mass in g/s rather than kg/h |
+| `KR_CYL1`..`KR_CYL4` | `KLINFO` + `DWKR_Z` | per-cylinder knock retard |
+
+### Why per-cylinder knock has to be reconstructed
+
+**M3.8 has no `DWKR1..4`.** Knock control works one cylinder at a time and publishes
+a pair: `DWKR_Z` is the retard of whichever cylinder it is processing right now, and
+`KLINFO` says which one that is. Logged raw, `DWKR_Z` jumps between cylinders and is
+close to unreadable. The demultiplexer routes each sample to the right column and
+holds the other three at their last known value — retard persists between a
+cylinder's turns, so holding shows the current state rather than a comb.
+
+**The `KLINFO` encoding is not documented.** The FR calls it *"Akt. Zyl.Nr. der
+Klopfreg."* with the plain `DEZ` conversion, which leaves open whether it counts
+`1..4` or `0..3`. Guessing would silently relabel every cylinder, so `--knock-base
+auto` (the default) waits for proof instead: an observed `0` proves 0-based, an
+observed `4` proves 1-based, and neither can occur under the other convention. Until
+one shows up the columns report blank — a fraction of a second at idle. The run
+prints what it settled on:
+
+```
+KLINFO reads 1..4 (values seen: [1, 2, 3, 4])
+```
+
+Pass `--knock-base 0` or `1` to skip the wait once you know which it is. Values
+outside the resolved range are dropped rather than written to a cylinder, and
+counted in that same line.
 
 ## ECU variants
 

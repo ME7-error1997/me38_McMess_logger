@@ -100,11 +100,17 @@ class ChannelPanel:
 
     def set_readout(self, raw: int | None, value: float | None, at_cursor: bool) -> None:
         conv = self.channel.conversion
-        if self.channel.is_aux:
-            # No raw integer and no DAMOS conversion behind an aux value: it arrives
-            # in physical units already. "--" here means genuinely no reading, which
-            # for a wideband means stale or disconnected -- worth seeing.
-            text = "--" if value is None else f"{value:.{self.channel.decimals}f}"
+        if self.channel.is_virtual:
+            # No raw integer and no DAMOS conversion behind an aux or derived value:
+            # it is already in physical units. "--" here means genuinely no reading --
+            # a stale wideband, or a cylinder knock control has not reached yet.
+            if value is None:
+                text = "--"
+            else:
+                # Collapse IEEE negative zero. ZWNEG and friends are rational forms
+                # with a negative denominator, so a retard of exactly 0 comes out as
+                # -0.0 and renders "-0.00", which reads like a real measurement.
+                text = f"{0.0 if value == 0 else value:.{self.channel.decimals}f}"
         elif raw is None:
             text = "--"
         elif value is None:

@@ -338,8 +338,22 @@ class Channel:
 
     @property
     def is_aux(self) -> bool:
-        """Whether this column comes from somewhere other than the ECU."""
+        """Whether this column is fed by an external source on its own port."""
         return False
+
+    @property
+    def is_derived(self) -> bool:
+        """Whether this column is computed from other channels in the same sample."""
+        return False
+
+    @property
+    def is_virtual(self) -> bool:
+        """Whether this column comes from anywhere other than an ECU memory read.
+
+        Everything virtual has empty `byte_addresses`, so it never reaches the read
+        program and costs nothing on the K-line.
+        """
+        return self.is_aux or self.is_derived
 
 
 @dataclass(frozen=True)

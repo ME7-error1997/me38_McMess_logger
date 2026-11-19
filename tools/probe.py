@@ -44,6 +44,11 @@ from mcmess.channels import (  # noqa: E402
     set_byte_order,
     word_value,
 )
+from mcmess.derived import (  # noqa: E402
+    DERIVED_COLUMNS,
+    apply as apply_derivations,
+    expand_selection,
+)
 from mcmess.identify import identify  # noqa: E402
 from mcmess.session import PING_ADDR, SESSION_REARM  # noqa: E402
 from mcmess.wideband import (  # noqa: E402
@@ -85,6 +90,14 @@ def _load(args: argparse.Namespace) -> ChannelSet:
 def add_channel_args(sub: argparse.ArgumentParser) -> None:
     sub.add_argument(
         "--database", help="override the generated channel/conversion JSON"
+    )
+    sub.add_argument(
+        "--knock-base",
+        default="auto",
+        help=(
+            "whether KLINFO counts cylinders 0..3 or 1..4 (0, 1, or auto). "
+            "auto waits for a 0 or a 4, which settles it without guessing"
+        ),
     )
     sub.add_argument(
         "--byte-order",
@@ -840,10 +853,20 @@ def cmd_watch(args: argparse.Namespace) -> int:
     names = args.channels.split(",") if args.channels else PAGE0_STARTER
     names = [n.strip() for n in names if n.strip()]
     try:
-        channels = channel_set.select(names)
+        channels, derivations = expand_selection(
+            channel_set, names, knock_base=args.knock_base
+        )
     except KeyError as exc:
         print(f"ERROR: {exc}")
         return 1
+    for derivation in derivations:
+        derivation.reset()
+        extra = [n for n in derivation.inputs if n not in names]
+        if extra:
+            print(
+                f"note: {derivation.key} also needs {', '.join(extra)}, "
+                "added to the selection\n"
+            )
 
     wideband = make_wideband(args)
     if wideband is not None:
@@ -865,7 +888,12 @@ def cmd_watch(args: argparse.Namespace) -> int:
     )
     for ch in channels:
         unit = ch.unit or "raw"
-        where = "   aux  " if ch.is_aux else f"0x{ch.addr:04X}"
+        if ch.is_derived:
+            where = " derived"
+        elif ch.is_aux:
+            where = "   aux  "
+        else:
+            where = f"0x{ch.addr:04X}"
         print(
             f"  {ch.name:<10} {where}  {ch.size}B  {ch.umr:<9} "
             f"{unit:<10} {ch.description}"
@@ -907,24 +935,34 @@ def cmd_watch(args: argparse.Namespace) -> int:
 
             cells = []
             row = [f"{now:.3f}"]
+            # Physical values by name first: a derived column is computed from the
+            # others in this same sample, so a single left-to-right pass will not do.
+            physical: dict[str, float] = {}
+            shown: dict[str, str] = {}
             for ch in channels:
+                if ch.is_derived:
+                    continue
                 if ch.is_aux:
                     value = wideband.value()
-                    if value != value:  # NaN: nothing recent enough to report
-                        cells.append(f"{ch.name}=--")
-                        row.append("")
-                    else:
-                        cells.append(f"{ch.name}={value:.2f}")
-                        row.append(csv_number(value, 4))
+                    physical[ch.name] = value
+                    shown[ch.name] = "--" if value != value else f"{value:.2f}"
                     continue
                 raw = ch.assemble(values)
                 if raw is None:
-                    cells.append(f"{ch.name}=??")
-                    row.append("")
+                    physical[ch.name] = float("nan")
+                    shown[ch.name] = "??"
                     continue
-                cells.append(f"{ch.name}={ch.format(raw)}")
+                shown[ch.name] = ch.format(raw)
                 value = ch.physical(raw)
-                row.append(csv_number(value, 4) if value is not None else str(raw))
+                physical[ch.name] = float(value) if value is not None else float(raw)
+            if derivations:
+                for name, value in apply_derivations(derivations, physical).items():
+                    physical[name] = value
+                    shown[name] = "--" if value != value else f"{value:.2f}"
+            for ch in channels:
+                value = physical.get(ch.name, float("nan"))
+                cells.append(f"{ch.name}={shown.get(ch.name, '??')}")
+                row.append("" if value != value else csv_number(value, 4))
             if writer:
                 writer.writerow(row)
 
@@ -950,6 +988,10 @@ def cmd_watch(args: argparse.Namespace) -> int:
         print(RULE)
         print(f"{samples} samples in {elapsed:.1f} s = {samples / max(elapsed, 1e-9):.1f} Hz")
         print(tp.stats.summary())
+        for derivation in derivations:
+            note = derivation.note()
+            if note:
+                print(note)
         if wideband is not None:
             wb = wideband.stats()
             print(

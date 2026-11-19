@@ -22,6 +22,7 @@ from PySide6 import QtCore, QtGui, QtWidgets  # noqa: E402
 from serial.tools import list_ports  # noqa: E402
 
 from mcmess.channels import ChannelSet, load_channels  # noqa: E402
+from mcmess.derived import DERIVED_COLUMNS, expand_selection  # noqa: E402
 from mcmess.recorder import Recorder  # noqa: E402
 from mcmess.wideband import (  # noqa: E402
     add_arguments as add_wideband_args,
@@ -65,9 +66,20 @@ class MainWindow(QtWidgets.QMainWindow):
         # A wideband (or any second input) is not in the channel database and never
         # appears in the picker: it is not an ECU channel and cannot be ticked off
         # without also closing its port. It is appended to whatever is selected.
+        self.derived_channels, self.derivations = [], []
+        if getattr(args, "channels", None):
+            asked = [n.strip() for n in args.channels.split(",") if n.strip()]
+            _, self.derivations = expand_selection(
+                channels, asked, knock_base=args.knock_base
+            )
+            self.derived_channels = [
+                c for d in self.derivations for c in d.channels()
+                if c.name in asked
+            ]
         self.aux_source = make_wideband(args)
         self.aux_channels = [make_channel(self.aux_source)] if self.aux_source else []
-        self._selection = list(self.aux_channels)
+        self._extra_columns = self.derived_channels + self.aux_channels
+        self._selection = list(self._extra_columns)
 
         part = channels.part_number or "unknown ECU"
         self.setWindowTitle(f"McMESS logger - Bosch M3.8 / {part}")
@@ -80,7 +92,14 @@ class MainWindow(QtWidgets.QMainWindow):
             self.setWindowTitle(self.windowTitle() + "   [DEMO - simulated ECU]")
         if args.channels:
             wanted = [n.strip() for n in args.channels.split(",") if n.strip()]
-            unknown = [n for n in wanted if n not in channels.by_name]
+            # Derived columns are legitimate names that are deliberately not in the
+            # channel database -- they are computed, not read. Without this they
+            # tripped the unknown-channel warning, and since it is modal the window
+            # hung on a dialog nobody was there to click.
+            unknown = [
+                n for n in wanted
+                if n not in channels.by_name and n not in DERIVED_COLUMNS
+            ]
             if unknown:
                 self._warn("Unknown channels", "Not in the database: " + ", ".join(unknown))
             self.picker.set_selection([n for n in wanted if n in channels.by_name])
@@ -240,7 +259,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def _on_selection_changed(self, channels: list) -> None:
         # Aux columns ride along with every selection, always last, so the panel
         # order does not shuffle when ECU channels are ticked on and off.
-        self._selection = list(channels) + self.aux_channels
+        self._selection = list(channels) + self._extra_columns
         self.plots.rebuild(self._selection)
         if self.recorder is not None:
             self.recorder.set_channels(self._selection)
@@ -280,6 +299,7 @@ class MainWindow(QtWidgets.QMainWindow):
             serial_factory=factory,
             channel_set=self.channel_set,
             aux_sources=[self.aux_source] if self.aux_source else [],
+            derivations=self.derivations,
         )
         self.recorder.start()
         self.connect_button.setText("Disconnect")
@@ -399,6 +419,14 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument(
         "--screenshot", help="render the window to this PNG and exit (for checking)"
+    )
+    parser.add_argument(
+        "--knock-base",
+        default="auto",
+        help=(
+            "whether KLINFO counts cylinders 0..3 or 1..4 (0, 1, or auto). "
+            "auto waits for a 0 or a 4, which settles it without guessing"
+        ),
     )
     add_wideband_args(parser)
     parser.add_argument(
