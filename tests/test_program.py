@@ -329,6 +329,28 @@ def main() -> int:
     for rate in (200, 300, 500):
         print(f"  at {rate} bytes/s: {rate / prog.wire_bytes:.1f} Hz")
 
+    print("\nSelection cost charges for parity switches")
+    from mcmess.recorder import selection_cost
+
+    cg = load_channels("06A906018CG")
+    page0 = selection_cost(cg.select(["N40", "TL", "TMOT", "UB"]))
+    check("one page needs no parity switches", page0.parity_switches, 0)
+    check("cost is just the bytes there", page0.cost_units, page0.wire_bytes)
+
+    spread = selection_cost(cg.select(["N40", "FR", "TVM", "DWKR_Z", "TI0"]))
+    check("spanning pages costs switches", spread.parity_switches > 0, True)
+    check("and they are charged for",
+          spread.cost_units, spread.wire_bytes + spread.parity_switches)
+
+    # Measured on a running 018CG: 22 channels over 5 pages took 53.8 ms/sample at a
+    # 1.57 ms round trip. Bytes alone predicts 39.5 ms, which is 27% optimistic; the
+    # picker must not promise a rate the car cannot deliver.
+    rtt_ms, actual_ms, wire, switches = 1.57, 53.8, 25, 8
+    bytes_only = wire * rtt_ms
+    with_switches = (wire + switches) * rtt_ms
+    check("bytes-only badly underestimates the real set", bytes_only < actual_ms * 0.8, True)
+    check("bytes+switches lands within 5%", abs(with_switches - actual_ms) / actual_ms < 0.05, True)
+
     print("\nPer-ECU databases")
     from mcmess.channels import available_databases
 

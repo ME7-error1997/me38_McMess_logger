@@ -602,10 +602,31 @@ class SelectionCost:
     pages: int = 0
     page0_channels: int = 0
 
+    @property
+    def cost_units(self) -> int:
+        """Byte-times one sample takes: wire bytes plus one per parity switch.
+
+        Charging only for bytes is what this used to do, and on a real car it is
+        optimistic by a wide margin as soon as a selection spans pages. Measured on
+        a running 018CG across three runs, predicted against actual ms/sample:
+
+            | channels | B/smp | switches | actual | bytes only | bytes+switches |
+            |---|---|---|---|---|---|
+            | 10, 2 pages | 12.1 |  2 | 26.2 ms | 22.6 ms | 26.3 ms |
+            |  9, 2 pages | 11.0 |  2 | 23.0 ms | 19.7 ms | 23.3 ms |
+            | 22, 5 pages | 25.2 |  8 | 53.8 ms | 39.5 ms | 52.1 ms |
+
+        Bytes alone is 27% optimistic on the five-page set; adding one byte-time per
+        switch tracks all three within a few percent. That matches the mechanism --
+        flipping the parity bit means draining and reprogramming the UART between
+        frames, which costs about what another round trip does.
+        """
+        return self.wire_bytes + self.parity_switches
+
     def estimated_hz(self, bytes_per_second: float) -> float:
-        if not self.wire_bytes or bytes_per_second <= 0:
+        if not self.cost_units or bytes_per_second <= 0:
             return 0.0
-        return bytes_per_second / self.wire_bytes
+        return bytes_per_second / self.cost_units
 
     def describe(self, bytes_per_second: float = 0.0) -> str:
         if not self.channel_count:

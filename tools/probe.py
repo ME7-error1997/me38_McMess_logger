@@ -958,7 +958,12 @@ def cmd_watch(args: argparse.Namespace) -> int:
             if derivations:
                 for name, value in apply_derivations(derivations, physical).items():
                     physical[name] = value
-                    shown[name] = "--" if value != value else f"{value:.2f}"
+                    # Collapse negative zero: ZWNEG is a rational form with a
+                    # negative denominator, so a retard of exactly 0 prints "-0.00".
+                    shown[name] = (
+                        "--" if value != value
+                        else f"{0.0 if value == 0 else value:.2f}"
+                    )
             for ch in channels:
                 value = physical.get(ch.name, float("nan"))
                 cells.append(f"{ch.name}={shown.get(ch.name, '??')}")
