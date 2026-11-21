@@ -39,11 +39,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from .logenums import enum_for
+from .paths import APP_DIR
 
 FORMAT = "mcmess-profile/1"
 
-#: Where profiles live unless a path says otherwise: profiles/ beside the code.
-PROFILE_DIR = Path(__file__).resolve().parent.parent / "profiles"
+#: Where profiles live unless a path says otherwise: profiles/ beside the code,
+#: or beside the exe in a built release (see mcmess/paths.py).
+PROFILE_DIR = APP_DIR / "profiles"
 
 #: The profile loaded when nothing else is asked for.
 DEFAULT_PROFILE = PROFILE_DIR / "tuning.json"

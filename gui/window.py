@@ -44,6 +44,7 @@ import numpy as np
 from PySide6 import QtCore, QtGui, QtWidgets
 from serial.tools import list_ports
 
+from mcmess import __version__
 from mcmess.channels import PAGE0_STARTER, ChannelSet, load_channels
 from mcmess.derived import DERIVED_COLUMNS, expand_selection
 from mcmess.logenums import describe_value, enum_for
@@ -1970,7 +1971,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def _update_title(self) -> None:
         part = self.channel_set.part_number or "unknown ECU"
-        title = f"McMESS logger - Bosch M3.8 / {part}"
+        title = f"McMESS logger {__version__} - Bosch M3.8 / {part}"
         if self.recorder is not None:
             port = self.port_combo.currentText().split(" - ")[0]
             name = self._log_path.name if (

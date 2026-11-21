@@ -9,6 +9,10 @@ __pycache__/
 logs/
 run.csv
 
+# Release builds: tools/build_release.py writes these
+build/
+dist/
+
 # Editor / OS
 .vscode/
 .idea/

@@ -3,9 +3,15 @@
 Fast ECU RAM logging over the K-line, for tuning modified engines. Replaces KW1281
 logging in VCDS, which tops out around 15–30 values/s.
 
-Two windows: a **logger** that samples and records, and a **[viewer](#the-log-viewer)**
-that reads the result back — yours, or a VCDS, ME7Logger, OP-COM or MHD log from
-someone else.
+One window does both jobs: it **logs** — samples and records — and it
+**[reads a log back](#reading-a-log)**: yours, or a VCDS, ME7Logger, OP-COM or MHD log
+from someone else.
+
+**To just use it:** download `McMessLogger-<version>-win64.zip` from
+[Releases](https://github.com/ME7-error1997/me38_McMess_logger/releases), unzip it
+anywhere, and run `McMessLogger.exe`. Nothing to install; the `README.txt` in the folder
+is the user's guide. Everything below is for running it from source, or
+[building that zip yourself](#building-a-release).
 
 Supports **06A906018CG** and **06A906018AQ**, one channel database each, with the
 connected ECU checked against the loaded database before anything is logged — see
@@ -345,6 +351,44 @@ Device Manager -> Ports (COM & LPT) -> cable -> Properties
   -> Port Settings -> Advanced -> Latency Timer (msec) -> 1
 ```
 
+## Building a release
+
+**Double-click `build_release.bat`.** It produces
+`dist\McMessLogger-<version>-win64.zip`: one folder with `McMessLogger.exe` in it,
+which runs on a Windows 10 or 11 machine with nothing installed. The version is
+`__version__` in `mcmess/__init__.py`; bump it before building.
+
+```bash
+.venv\Scripts\python.exe -m pip install -r requirements-build.txt
+.venv\Scripts\python.exe tools\build_release.py
+```
+
+What is in the folder: the exe, `Log.bat` (connect on a port at once),
+`profiles\tuning.json`, a `README.txt` written for somebody who has never seen this
+repository, the licence, and `_internal\` with Python, Qt and the program. Presets and
+logs live beside the exe, not inside `_internal\` (`mcmess/paths.py`), so a newer
+version unzipped elsewhere cannot eat a preset somebody spent an afternoon on.
+
+**The build runs what it built.** A PyInstaller bundle that builds is not a bundle that
+starts — a missing data file only shows when the exe is launched. So the script starts
+the exe against the simulated ECU, lets it connect, record and disconnect, and checks
+that it drew, that a CSV landed in the `logs` folder beside the exe rather than in the
+working directory, and that the shipped preset is untouched. A logger window opens and
+closes by itself for a few seconds; that is the check. If any of it fails there is no
+zip.
+
+**It is packaged, not compiled.** The program is in the bundle as Python bytecode. That
+is not readable in an editor, and it keeps a recipient from needing Python, but anyone
+determined can turn it back into something close to the source. If the code has to stay
+secret, this is not the tool; a real compiler such as Nuitka is.
+
+It is one folder rather than a single self-extracting exe on purpose: a single exe
+unpacks itself to a temp directory at every start, which costs seconds each time and
+trips more antivirus heuristics, and Qt for Python is LGPL, which expects the Qt
+libraries to stay replaceable — in a folder they are plain DLLs. `THIRD-PARTY.txt` in
+the release lists what is inside and under which licence. The exe is not signed, so
+Windows SmartScreen will warn the first time it is run.
+
 ## Bench bring-up
 
 Run in this order. Each step answers a `[VERIFY]` item in the spec. All of these
@@ -459,6 +503,7 @@ verify on the car.
 | `mcmess/logenums.py` | Channels that log a code: KLINFO, BMW MG1 limiters |
 | `mcmess/profile.py` | Presets: what is logged, what is drawn, each channel's colour and Y range |
 | `mcmess/replay.py` | Plays a recorded log back through the recorder's interface |
+| `mcmess/paths.py` | Where presets and logs live: the repo from source, beside the exe in a release |
 | `profiles/tuning.json` | The preset the program starts with |
 | `gui/main.py` | The command line |
 | `gui/window.py` | The window: logger and log viewer in one |
@@ -471,6 +516,9 @@ verify on the car.
 | `log.bat` | Double-click launcher: connect with the last preset and record |
 | `view.bat` | Double-click launcher: opens the newest log |
 | `replay.bat` | Double-click launcher: plays the newest log back as if live |
+| `build_release.bat` | Double-click launcher: builds the release zip |
+| `tools/build_release.py` | Builds, prunes, runs and zips the release |
+| `tools/release/` | What goes beside the exe: the user's README, `Log.bat`, licence notes |
 | `tools/probe.py` | Bench bring-up and measurement |
 | `tools/build_database.py` | Rebuilds the database from the RE files |
 | `tools/ramscan.py` | Finds RAM the firmware never touches, for patch variables |

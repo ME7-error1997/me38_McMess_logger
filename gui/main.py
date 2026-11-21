@@ -19,7 +19,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import pyqtgraph as pg  # noqa: E402
 from PySide6 import QtCore, QtWidgets  # noqa: E402
 
+from mcmess import __version__  # noqa: E402
 from mcmess.channels import load_channels  # noqa: E402
+from mcmess.paths import in_app_dir  # noqa: E402
 from mcmess.wideband import add_arguments as add_wideband_args  # noqa: E402
 
 # Absolute, not relative: this file is meant to run directly as
@@ -32,6 +34,9 @@ from gui.window import REPLAY_PORT, MainWindow  # noqa: E402
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="McMESS logger and log viewer")
+    parser.add_argument(
+        "--version", action="version", version=f"McMESS logger {__version__}"
+    )
     parser.add_argument("log", nargs="?", help="a log to open straight away")
     parser.add_argument("--port", help="preselect this serial port, e.g. COM3")
     parser.add_argument(
@@ -141,6 +146,9 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    # "logs" means the program's logs folder, not a folder of that name in
+    # whatever directory a shortcut started the exe from.
+    args.log_dir = str(in_app_dir(args.log_dir))
 
     try:
         channels = load_channels(args.database) if args.database else load_channels()

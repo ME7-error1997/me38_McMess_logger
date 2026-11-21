@@ -1,0 +1,44 @@
+McMESS logger @VERSION@ - third-party software
+=====================================================================
+
+The program itself is under the licence in LICENSE.txt. It is built
+with, and this folder contains, the following software. Each remains
+under its own licence.
+
+
+Qt and Qt for Python (PySide6, shiboken6)
+    Copyright (C) The Qt Company Ltd. and other contributors.
+    Licensed under the GNU Lesser General Public License, version 3.
+    https://www.qt.io/licensing    https://doc.qt.io/qtforpython-6/
+
+    Qt is used here as unmodified shared libraries: the Qt6*.dll and
+    PySide6/shiboken6 files under _internal\ are the ones published by
+    The Qt Company and can be replaced by other builds of the same
+    version, which is what the LGPL asks for. The LGPL v3 and GPL v3
+    texts are at https://www.gnu.org/licenses/ and the source of Qt
+    and Qt for Python is at https://download.qt.io/official_releases/
+
+Python
+    Copyright (C) Python Software Foundation.
+    Python Software Foundation License.   https://www.python.org/
+
+NumPy
+    Copyright (C) NumPy Developers.
+    BSD 3-Clause License.   https://numpy.org/
+
+pyqtgraph
+    Copyright (C) Luke Campagnola and the pyqtgraph developers.
+    MIT License.   https://www.pyqtgraph.org/
+
+pySerial
+    Copyright (C) Chris Liechti.
+    BSD 3-Clause License.   https://github.com/pyserial/pyserial
+
+PyInstaller (the bootloader that starts the program)
+    Copyright (C) PyInstaller Development Team.
+    GPL v2 or later with an exception that permits distributing the
+    bootloader with programs under any licence.
+    https://pyinstaller.org/
+
+Where a library ships its own licence file, it is included beside the
+library under _internal\.

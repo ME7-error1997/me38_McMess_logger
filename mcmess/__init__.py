@@ -6,6 +6,10 @@ plain FTDI serial cable -- 9-bit frames are produced by pinning the UART parity 
 See docs/mcmess-018cg.md for the protocol and what is still unverified.
 """
 
+#: The release number. tools/build_release.py names the zip after it and the
+#: window title shows it, so a screenshot sent back says which build it was.
+__version__ = "1.0.0"
+
 from .errors import (
     DesyncError,
     HandshakeError,
