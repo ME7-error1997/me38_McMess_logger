@@ -12,10 +12,10 @@ someone might reasonably want back.
 | `src/lib/parse-log.ts` | [`mcmess/logparse.py`](../mcmess/logparse.py) |
 | `src/lib/log-enums.ts` | [`mcmess/logenums.py`](../mcmess/logenums.py) |
 | `log-chart.tsx` (canvas) | [`gui/logchart.py`](../gui/logchart.py) (pyqtgraph, shared with the logger) |
-| `log-viewer.tsx` (React) | [`gui/viewer.py`](../gui/viewer.py) (Qt) |
+| `log-viewer.tsx` (React) | [`gui/window.py`](../gui/window.py) (Qt; also the logger) |
 | `test/parse-log.test.ts`, `test/log-enums.test.ts` | [`tests/test_logparse.py`](../tests/test_logparse.py) |
 | — | [`tests/test_viewer.py`](../tests/test_viewer.py) |
-| — | [`gui/live.py`](../gui/live.py), [`tests/test_live.py`](../tests/test_live.py) |
+| — | [`gui/sources.py`](../gui/sources.py), [`tests/test_live.py`](../tests/test_live.py) |
 
 The notes call the parser tests the acceptance suite: *"a port is right when the
 same excerpts give the same columns, units and values."* They are ported one for
@@ -63,38 +63,63 @@ knock*. That needed a third kind beside the original's `value` and `flags` — a
 the demultiplexed flag, is an ordinary `value` table so the readout says *knock
 detected* rather than `1`.
 
-## 2a. The chart is shared with the live logger
+## 2a. One window: the viewer became the logger
 
-Not in the original notes at all: the chart ported here is now also what the
-**logger** draws, fed from the recorder's ring buffer instead of a parsed CSV.
-`gui/logchart.py` therefore knows nothing about `ParsedLog` — it takes a list of
-`Trace` (key, label, unit, colour, xs, ys, rows) and both callers build those.
-The viewer builds them from CSV columns; `gui/live.py` builds them from numpy
-slices. Same scale groups, same cursor, same axes in both windows, and no second
-implementation to drift.
+Not in the original notes at all. The viewer ported here is now also the
+**logger**: `gui/window.py` is one window that shows either a parsed log or the
+recorder's live buffer, and the separate logger window and its stacked
+small-multiples view are gone. `gui/viewer.py` is kept as a door into the same
+window.
 
-Two things were added for the live case:
+What made that possible is that the chart never knew what a parsed log was. It
+takes a list of `Trace` (key, label, unit, colour, xs, ys, rows). The window gets
+those from a *source* (`gui/sources.py`): `LogSource` wraps a `ParsedLog`,
+`LiveSource` wraps the recorder's latest snapshot, and both answer the same five
+questions — the channels, how many rows, one channel as points, every channel's
+value on a row, a row's time. The channel panel, the stats table, the cursor and
+the right-click menu are written once against that.
 
-**`follow_latest`.** The cursor is pinned to the newest sample while data is
-arriving, so the readouts are the live values; clicks are ignored. The logger
-turns it off the moment it disconnects or the view is frozen, and the cursor
-becomes the reader's. That the data is static at that point is what makes a row
-index safe to hold on to — a free cursor over a sliding window would silently
-drift onto a different sample as old ones fall out.
+Three things were added for the live case:
+
+**`follow_latest`, and it locks the view.** While data is arriving the cursor is
+pinned to the newest sample and the mouse can do nothing: no click, no zoom, no
+pan, no hover. The first version only ignored clicks, and hovering the chart
+quietly swapped the live values in the panel for the ones under the mouse — old
+numbers in the place where the live ones are read, with only a word in the
+status bar to say so. Now the chart is the data's until the data stops.
 
 **`update_traces`.** A fast path for "same channels, new points" that calls
 `setData` and nothing else, because `draw()` tears down and rebuilds every
-ViewBox and that cannot run twenty times a second.
+ViewBox and that cannot run twenty times a second. The second X axis is fed on
+this path too; it was not at first, and its rpm labels went stale after the
+first frame.
+
+**A session ends by becoming a log.** On disconnect the window does not keep
+showing the buffer: it re-reads the CSV that was being written and shows that,
+so what is inspected is what was saved. Selection, colours, fixed ranges and the
+visible stretch of time are carried across by channel *name*, because a live
+key is the name and a parsed key is a column number. With no CSV (recording was
+off, or it was a replay) the buffer is pushed through the same parser as text,
+so the two cases cannot behave differently, and the window says it is unsaved.
+A row index is only safe to hold once the data is static — a free cursor over a
+sliding window would silently drift onto a different sample as old ones fall
+out — which is why the cursor is the reader's only from that moment.
+
+**What is logged and what is drawn are separate lists**, kept in a profile
+(`mcmess/profile.py`) and chosen before connecting. The original viewer only
+ever had "plotted"; a logger also has "recorded but not worth a trace" —
+`KLINFO` is the case that forced it.
 
 **The honest caveat, which the original did not have to make.** A viewer is
 opened deliberately; a live chart is glanced at. One plot with a scale per unit
 is a multi-scale chart, and the vertical distance between two traces in
 *different* units is an artefact of two independently fitted scales — it will
 make unrelated traces look like they track each other. The comparison the chart
-is built for is same-unit (actual against target). Across units, read the value
-table, or use the stacked small-multiples view, which the logger keeps one click
-away and which has exactly one scale per panel. The README says this where
-someone choosing a view will see it.
+is built for is same-unit (actual against target). Across units, read the
+values beside it. The stacked view that had exactly one scale per panel was the
+remedy for this and has been removed with the old logger window; *Y: each on
+its own* and the value column are what is left, and the README says so where
+someone looking at the chart will see it.
 
 ## 3. Chart: pyqtgraph, as section 12 of the notes suggests
 
@@ -167,11 +192,10 @@ problem, because "could not open" sends the reader to look in the wrong place.
 
 ## 6. Colours
 
-The live logger uses a validated 8-slot categorical palette and **never cycles**:
-a ninth channel draws in neutral ink, because it is small multiples and every
-panel is directly labelled anyway.
+The palette's validated set is eight slots, in a fixed order that is **never
+cycled**.
 
-The viewer's chart is an overlay, where a reader may reasonably want twelve
+The chart is an overlay, where a reader may reasonably want twelve
 traces, and neutral ink for traces nine onward would make them unreadable. So
 `theme.SERIES_EXTENDED` adds eight more, taken from the reference viewer's own
 sixteen. **Those eight are not part of the validated set** — the lightness band,

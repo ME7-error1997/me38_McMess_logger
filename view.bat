@@ -1,6 +1,6 @@
 @echo off
 rem ---------------------------------------------------------------------------
-rem  Open a datalog in the viewer.
+rem  Open a datalog. Same window as the logger, with nothing connected.
 rem
 rem  Double-click this file to open the newest log in logs\, or from a prompt:
 rem      view.bat                       the newest log in logs\
@@ -45,16 +45,16 @@ if not defined LOG (
 
 if defined LOG (
     echo Opening %LOG% ...
-    ".venv\Scripts\python.exe" gui\viewer.py "%LOG%"
+    ".venv\Scripts\python.exe" gui\main.py "%LOG%"
 ) else (
-    echo No log given and none found in logs\ - the viewer will ask for one.
-    ".venv\Scripts\python.exe" gui\viewer.py
+    echo No log given and none found in logs\ - use Open log... in the window.
+    ".venv\Scripts\python.exe" gui\main.py
 )
 set "RC=%ERRORLEVEL%"
 
 if not "%RC%"=="0" (
     echo.
-    echo   The viewer exited with code %RC%.
+    echo   The window exited with code %RC%.
     echo.
     pause
 )

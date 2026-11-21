@@ -1,0 +1,41 @@
+{
+  "format": "mcmess-profile/1",
+  "ecu": "06A906018CG",
+  "log": [
+    "N40",
+    "TANS",
+    "TMOT",
+    "DKPOT",
+    "TI0",
+    "ML",
+    "ML_GS",
+    "TL",
+    "LDSHK",
+    "LDSKF",
+    "DTVLD",
+    "TVM",
+    "ZWOUT",
+    "KR_CYL1",
+    "KR_CYL2",
+    "KR_CYL3",
+    "KR_CYL4",
+    "XSUMSPV",
+    "FR",
+    "FRA+1"
+  ],
+  "graph": [
+    "N40",
+    "DKPOT",
+    "ML",
+    "TL",
+    "LDSHK",
+    "LDSKF",
+    "TVM",
+    "ZWOUT",
+    "KR_CYL1",
+    "KR_CYL2",
+    "KR_CYL3",
+    "KR_CYL4",
+    "FR"
+  ]
+}

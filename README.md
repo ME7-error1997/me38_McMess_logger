@@ -85,32 +85,126 @@ The design leans on two properties of this responder:
   latch byte. This was the design's biggest assumption; `probe.py latch` **confirmed**
   it on hardware (15/15 agreement).
 
-## The logger window
+## The window
 
-**Double-click `log.bat`.** It opens the window on COM2 with the tuning channel set
-and connects on its own — no typing, which matters when the laptop is balanced on a
-wing. Pass a port to override: `log.bat COM5`. Edit the `CHANNELS` line in that file
-to change the set.
-
-Everything below is what the batch file does, spelled out.
+One window makes a log and reads one. **Double-click `log.bat`**: it opens on COM2 and
+puts the channel window in front of you; press Enter and it connects and starts
+recording. Pass a port to override: `log.bat COM5`.
 
 ```bash
-.venv\Scripts\python.exe gui\main.py --demo
+.venv\Scripts\python.exe gui\main.py --port COM3              # log from the car
+.venv\Scripts\python.exe gui\main.py logs\432.csv             # read a log
+.venv\Scripts\python.exe gui\main.py --demo                   # simulated ECU
+.venv\Scripts\python.exe gui\main.py --replay logs\432.csv    # a real pull, played back
 ```
 
-`--demo` runs against a simulated ECU with a running engine model — a 40 s cycle of
-idle, a pull to redline and overrun — at an emulated ~300 bytes/s, so the window
-behaves like the real thing with no hardware attached. Against a real cable:
+**There is one rule.** *While data is arriving, the chart belongs to the data.* The
+cursor sits on the newest sample and the values down the left are the live ones; the
+mouse can not move the cursor, zoom, pan or hover, because each of those would put old
+numbers on screen in the place where the live ones are read. *When it stops, the chart
+belongs to you.* Disconnect — or lose the link — and the session is opened as the log
+it has just become: the CSV that was being written, re-read from disk, so what you
+inspect is exactly what was saved. Click to place the cursor, drag to zoom, read any
+channel at any sample. Nothing else changes at that moment: same traces, same colours,
+same Y scales, same stretch of time on screen. The status bar always says which sample
+the values are from: *Live*, *Cursor*, *Mouse*, *First sample*.
 
-```bash
-.venv\Scripts\python.exe gui\main.py --port COM3
+**Freeze view** is the same bargain without dropping the link: the chart stops, the
+cursor and zoom come free, sampling and recording carry on underneath, and releasing
+it pins the cursor to the newest sample again.
+
+### Choosing channels, before connecting
+
+**Connect opens the channel window first.** Every channel has two ticks, because
+logging and drawing are different decisions:
+
+- **log** — the channel is read from the ECU, written to the CSV, and has a row with
+  its live value in the window. Log everything you might want afterwards: a channel you
+  did not log is a pull you have to drive again.
+- **graph** — it is also drawn. Draw only what you want to watch.
+
+They differ on purpose. `KLINFO` has to be logged for the per-cylinder knock columns to
+exist, and drawn it is a cylinder counter stepping 0-1-2-3 forty times a second — noise
+that flattens every trace sharing a chart with it. So ticking **log** on a quantity
+ticks **graph** too, and ticking it on a code or a status byte does not; either can be
+changed by hand. The window shows what the selection costs per sample and the sample
+rate it implies, counting the channels a computed column needs even though nobody
+ticked them.
+
+The choice is made before connecting rather than during, because changing the channel
+set mid-session reallocates the buffer and changes the CSV's columns — which is how a
+pull ends up split across two files. One session is one file with one set of columns.
+What is *drawn* can still be changed at any time: tick a row in the left panel.
+
+### Profiles
+
+The two lists are a **profile**, a small JSON file in `profiles/`:
+
+```json
+{
+  "format": "mcmess-profile/1",
+  "ecu": "06A906018CG",
+  "log":   ["N40", "TL", "LDSHK", "KR_CYL1", "..."],
+  "graph": ["N40", "TL", "LDSHK", "KR_CYL1"]
+}
 ```
 
-Useful flags: `--channels N40,TL,FR` to preselect a set, `--connect` to skip the
-Connect button, `--knock-base 0` for this ECU's cylinder numbering, `--database` to
-point at a different channel JSON, `--no-autorecord` to wait for the Record button
-instead of recording from the moment the link comes up, `--stacked` to open in the
-small-multiples view instead of the overlay.
+**Load profile…**, **Save** and **Save as…** are in the channel window. The program
+starts with the last profile used, else `profiles/tuning.json`; `--profile path` names
+one, and `--channels N40,TL,FR` skips profiles for a bare list. A profile naming a
+channel this ECU's database does not have loads without it and says so; one saved for
+another ECU is flagged before you trust it.
+
+### What is on screen
+
+**Left: every logged channel**, drawn or not — tick, name, value, unit, and what the
+channel is (`TMOT` — *Engine coolant temperature*). The descriptions come from the
+ECU's channel database, so they are there live and when the log is opened a month
+later. Reading a log from another tool, where the database knows none of the names,
+the column is hidden rather than left blank.
+
+**Right: the chart**, with a table under it of each drawn channel's value at the
+cursor and its min, max and mean over the visible window. Channels that share a unit
+share a Y scale, which is the whole point: `TL` lands against `LDSHK` and you can see
+the gap rather than comparing two numbers.
+
+> **The scales across units are independent, so vertical distance between two traces
+> in different units means nothing.** One plot showing rpm, degrees and milliseconds
+> has one scale per unit, each auto-fitted to the visible window — that is a
+> multi-scale chart, and a multi-scale chart will happily make two unrelated traces
+> look like they track each other. Only two of those scales get an axis (left and
+> right); the rest are drawn with no axis at all, which is why the values are always
+> beside it. The comparison this chart is built for is **same-unit**: actual against
+> target, this cylinder's retard against that one's. For anything across units, read
+> the numbers.
+
+Right-click a channel, on the chart or in either table, for a fixed Y range or a
+colour. A fixed range matters more live than in a log: a log is static, so an
+auto-fitted scale settles, but a sliding window refits every sample and the scale
+breathes continuously. Pin it to 0–8000 rpm or 0–10 ms/Umdr. and it stops; ranges set
+while logging are remembered for the next session. **Auto ranges** drops them all.
+
+**Open log…** while connected opens the log in a second window, so an earlier pull can
+sit beside the live one.
+
+### Replay
+
+`--replay logs\432.csv` adds the log to the port list. Connecting plays it back sample
+by sample at the pace it was recorded (`--replay-speed 4` to hurry it), through the
+same interface the recorder has, so the window cannot tell the difference: the cursor
+is pinned, the view is locked, and when the log runs out the session ends and
+everything unlocks. The simulator proves the protocol; it does not look like an engine.
+This is how to see what the live window does with real boost onset and real knock
+retard without a car. Nothing is written — a replay that recorded would leave a second
+file claiming to be a pull that was never driven.
+
+### Flags
+
+`--knock-base 0` for this ECU's cylinder numbering, `--connect` to connect at once with
+the profile as it is and no channel window, `--select` to open the channel window at
+start-up (what `log.bat` does), `--no-autorecord` to wait for the Record button instead
+of recording from the moment the link comes up, `--database` to point at a different
+channel JSON, `--tag pull2` to name the log.
 
 **Drawing costs sample rate, so the defaults favour rate.** Painting antialiased
 traces holds the GIL and measurably starves the sampling thread — on the bench,
@@ -121,71 +215,27 @@ dependent, so it is opt-in — in the captured run it hit 73 Hz with an **empty 
 area**, so check the traces actually draw before trusting a log taken with it. Full
 measurements in [section 8.4](docs/mcmess-018cg.md#84-drawing-competes-with-sampling);
 the four window captures behind them, including the blank OpenGL one, are in
-[docs/bench](docs/bench/).
-
-**Layout.** A searchable channel tree on the left, grouped by memory page and showing
-what a selection costs per sample and the sample rate it implies — throughput is the
-binding constraint here, so the picker makes it visible while you choose.
-
-**The live plot is the viewer's chart.** Same code, fed from the recorder's ring
-buffer instead of a parsed CSV, so what you watch during a pull and what you read
-afterwards behave identically — same scale groups, same cursor, same axes. Channels
-that share a unit share a Y scale, which is the whole point: `TL` lands against
-`LDSHK` and you can see the gap rather than comparing two numbers. Under the chart is
-a table of every plotted channel with its current value and its min and max over the
-visible window.
-
-> **The scales across units are independent, so vertical distance between two traces
-> in different units means nothing.** One plot showing rpm, degrees and milliseconds
-> has one scale per unit, each auto-fitted to the visible window — that is a
-> multi-scale chart, and a multi-scale chart will happily make two unrelated traces
-> look like they track each other. Only two of those scales get an axis (left and
-> right); the rest are drawn with no axis at all, which is why the value table
-> matters. The comparison this chart is built for is **same-unit**: actual against
-> target, this cylinder's retard against that one's. For anything across units, read
-> the numbers, or switch to **stacked**.
-
-**View: stacked** is the old small multiples, one channel per panel, one scale each,
-unchanged. Nothing can mislead you there, and past a dozen channels it is the easier
-read. It costs a little less too: measured on the simulator over four 15 s runs with
-ten channels, stacked held **15.1 Hz** against overlay's **13.9 Hz**, about 8 %.
-
-**The cursor follows the newest sample while the logger is running.** It sits at the
-right-hand edge and moves with the data, so the values beside it are the live ones and
-there is nothing to chase with the mouse. **Disconnect or Freeze view and the cursor
-becomes yours** — click anywhere to put it on a sample and read the values there. The
-data has stopped moving at that point, so a row index keeps pointing at the sample it
-pointed at when you clicked. The status bar always says which it is: *live*, *cursor*,
-*mouse*, or *last sample*.
-
-Right-click a channel, on the chart or in the value table, for a fixed Y range. This
-matters more live than in the viewer: a log is static, so an auto-fitted scale settles,
-but a sliding window refits every sample and the scale breathes continuously. Pin it to
-0–8000 rpm or 0–10 ms/Umdr. and it stops. **Auto Y** drops them all again.
+[docs/bench](docs/bench/). The value column and the stats repaint five times a second,
+not twenty: at the full redraw rate they cost about a fifth of the sample rate, and
+numbers changing that fast are unreadable anyway.
 
 Colours come from a validated 8-slot categorical palette, checked against the dark
 surface for lightness, chroma, colour-vision separation and contrast. The order is
-fixed and **never cycled**. The overlay chart runs to 16 slots because twelve traces on
-one plot need them, and identity there never rests on colour: every channel is named in
-the value table beside its swatch, and again in the hover tooltip. Stacked panels stop
-at 8 and draw further ones in neutral ink, because each panel is directly labelled
-anyway. See the note on `SERIES_EXTENDED` in `gui/theme.py`.
+fixed and **never cycled**. The chart runs to 16 slots because twelve traces on one
+plot need them, and identity never rests on colour: every drawn channel is named
+beside its swatch in the panel, in the table under the chart, and in the hover
+tooltip. See the note on `SERIES_EXTENDED` in `gui/theme.py`.
 
 **Threading.** The serial path is blocking and lock-step, and the ECU drops the session
 after 2 s of silence — so sampling runs on its own thread in `mcmess/recorder.py` and
 the window only reads buffered snapshots on a timer. That engine is Qt-free and tested
 headlessly against the simulator, so the GUI is only responsible for drawing.
 
-## The log viewer
+## Reading a log
 
-**Double-click `view.bat`** and it opens the newest log in `logs/` — almost always
-the pull you have just driven. Drag a CSV onto it, or pass one: `view.bat
-logs\432.csv`. From the logger window, **View log…** opens the log this session is
-writing, in its own window, so the live traces stay on screen beside it.
-
-```bash
-.venv\Scripts\python.exe gui\viewer.py logs\432.csv
-```
+**Double-click `view.bat`** and the window opens on the newest log in `logs/` — almost
+always the pull you have just driven. Drag a CSV onto it, or pass one: `view.bat
+logs\432.csv`. It is the same window as the logger, with nothing connected.
 
 It is not limited to this logger's own CSVs. It reads **VCDS** measuring blocks and
 advanced measuring blocks, **ME7Logger**, **OP-COM**, and generic CSV from MHD,
@@ -389,15 +439,19 @@ verify on the car.
 | `mcmess/data/descriptions_en.json` | English description for every channel |
 | `mcmess/logparse.py` | Reads a datalog: VCDS, ME7Logger, OP-COM, any CSV. No UI |
 | `mcmess/logenums.py` | Channels that log a code: KLINFO, BMW MG1 limiters |
-| `gui/main.py` | The window |
-| `gui/plots.py` | Stacked small-multiple plot panels (the "stacked" view) |
-| `gui/live.py` | The logger's overlay view: chart plus live value table |
-| `gui/picker.py` | Channel tree with live cost estimate |
+| `mcmess/profile.py` | Logging profiles: what is logged, what is drawn |
+| `mcmess/replay.py` | Plays a recorded log back through the recorder's interface |
+| `profiles/tuning.json` | The profile the program starts with |
+| `gui/main.py` | The command line |
+| `gui/window.py` | The window: logger and log viewer in one |
+| `gui/sources.py` | What the window shows: a parsed log, or the live buffer |
+| `gui/picker.py` | The channel window: log and graph ticks, cost estimate, profiles |
 | `gui/theme.py` | Validated dark palette and Qt styling |
-| `gui/viewer.py` | The log viewer window: channel panel, stats, raw table |
-| `gui/logchart.py` | The viewer's chart: scale groups, row cursor, second X axis |
-| `log.bat` | Double-click launcher: tuning set, auto-connect, auto-record |
-| `view.bat` | Double-click launcher: opens the newest log in the viewer |
+| `gui/viewer.py` | The old viewer entry point; opens the same window |
+| `gui/logchart.py` | The chart: scale groups, row cursor, second X axis, live lock |
+| `log.bat` | Double-click launcher: channel window, then connect and record |
+| `view.bat` | Double-click launcher: opens the newest log |
+| `replay.bat` | Double-click launcher: plays the newest log back as if live |
 | `tools/probe.py` | Bench bring-up and measurement |
 | `tools/build_database.py` | Rebuilds the database from the RE files |
 | `tools/ramscan.py` | Finds RAM the firmware never touches, for patch variables |
@@ -408,8 +462,9 @@ verify on the car.
 | `tests/test_wideband.py` | Decoders, staleness, and the join onto the ECU clock |
 | `tests/test_derived.py` | Knock demultiplexer and derived-column plumbing |
 | `tests/test_logparse.py` | The datalog parser, against excerpts of real files |
-| `tests/test_viewer.py` | The viewer window and chart, on Qt's offscreen platform |
-| `tests/test_live.py` | The logger's overlay view, and who owns the cursor |
+| `tests/test_viewer.py` | Reading a log: the window and chart, on Qt's offscreen platform |
+| `tests/test_live.py` | Logging: who owns the cursor, and what a session becomes |
+| `tests/test_profile.py` | Profiles, the channel window, and replay |
 
 ## Logging a wideband
 

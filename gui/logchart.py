@@ -1,14 +1,16 @@
-"""The overlay chart, shared by the log viewer and the live logger.
+"""The overlay chart: the same one for reading a log and for making one.
 
 Traces share one plot area, and channels that share a unit share a Y scale. That
 is what lets you see that `TL` never reaches `LDSHK`, or that boost actual never
 reaches requested -- two numbers in a table do not show you that, and two
 separate panels make you measure it by eye across a gap.
 
-The chart knows nothing about where its points came from. The viewer hands it
-columns out of a parsed CSV; the logger hands it slices of the recorder's ring
-buffer. Both get the same cursor, the same scale groups, the same axes. One
-chart means there is no second implementation to drift.
+The chart knows nothing about where its points came from. The window hands it
+columns out of a parsed CSV, or slices of the recorder's ring buffer while a
+session is running (gui/sources.py). Both get the same cursor, the same scale
+groups, the same axes. One chart means there is no second implementation to
+drift. The one thing that differs live is ``follow_latest``, which pins the
+cursor to the newest sample and locks the mouse out of the view.
 
 Six behaviours are worth stating, because they are the ones a charting library
 will not give without a fight:
@@ -205,13 +207,29 @@ class ChartViewBox(pg.ViewBox):
 
     def __init__(self) -> None:
         super().__init__()
+        #: Live: the view belongs to the incoming data. No zoom, no pan, no
+        #: cursor -- every mouse gesture is swallowed until it is unlocked.
+        self.locked = False
         self.setMouseMode(pg.ViewBox.RectMode)
         # X only: a rubber band that also rescaled Y would be undone a moment
         # later by the refit, and a wheel that zoomed Y would fight it.
         self.setMouseEnabled(x=True, y=False)
         self.setMenuEnabled(False)
 
+    def set_locked(self, locked: bool) -> None:
+        self.locked = locked
+        self.setMouseEnabled(x=not locked, y=False)
+
+    def wheelEvent(self, ev, axis=None) -> None:  # noqa: N802
+        if self.locked:
+            ev.accept()  # swallowed, so it does not scroll something behind
+            return
+        super().wheelEvent(ev, axis)
+
     def mouseDragEvent(self, ev, axis=None) -> None:  # noqa: N802
+        if self.locked:
+            ev.accept()
+            return
         if ev.modifiers() & QtCore.Qt.KeyboardModifier.ShiftModifier:
             previous = self.state["mouseMode"]
             self.setMouseMode(pg.ViewBox.PanMode)
@@ -223,6 +241,9 @@ class ChartViewBox(pg.ViewBox):
             super().mouseDragEvent(ev, axis)
 
     def mouseClickEvent(self, ev) -> None:  # noqa: N802
+        if self.locked and ev.button() == QtCore.Qt.MouseButton.LeftButton:
+            ev.accept()
+            return
         if ev.button() == QtCore.Qt.MouseButton.LeftButton:
             if ev.double():
                 ev.accept()
@@ -256,8 +277,9 @@ class LogChart(QtWidgets.QWidget):
         self.axis_key: str | None = None
         self.fixed_ranges: dict[str, tuple[float, float]] = {}
         self.cursor_row: int | None = None
-        #: Live mode: the cursor is pinned to the newest sample and clicks are
-        #: ignored. The logger turns this off when it disconnects or freezes.
+        #: Live mode: the cursor is pinned to the newest sample, and the mouse
+        #: can neither move it, zoom, pan nor hover. The logger turns this off
+        #: when it disconnects or freezes, and the chart becomes the reader's.
         self.follow_latest = False
         self._antialias = antialias
         self._scatter = False
@@ -535,6 +557,12 @@ class LogChart(QtWidgets.QWidget):
         low, high = self.data_x_range()
         self._vb.setXRange(low, high, padding=0.01)
 
+    def set_x_range(self, low: float, high: float) -> None:
+        """Show exactly this stretch of X. Used to keep the picture a live
+        session had when it becomes a log."""
+        if high > low:
+            self._vb.setXRange(float(low), float(high), padding=0)
+
     def set_x_window(self, seconds: float | None, latest: float) -> None:
         """Scroll the X axis so "now" stays at the right edge.
 
@@ -645,8 +673,20 @@ class LogChart(QtWidgets.QWidget):
     # -- cursor and hover --------------------------------------------------
 
     def set_follow_latest(self, following: bool) -> None:
-        """Pin the cursor to the newest sample, or hand it to the reader."""
+        """Pin the cursor to the newest sample, or hand the chart to the reader.
+
+        Following locks everything the mouse can do to the view. While data is
+        arriving the right-hand edge IS the reading: a zoom would hide it, a
+        placed cursor would point at a sample that is about to scroll away, and
+        a hover would swap the live values for old ones with nothing on screen
+        to say so. Stop the data and all of it comes back.
+        """
         self.follow_latest = following
+        self._vb.set_locked(following)
+        if following and self._crosshair.isVisible():
+            self._crosshair.setVisible(False)
+            self._tooltip.setVisible(False)
+            self.hovered.emit(None)
         self._draw_cursor()
 
     def set_cursor_row(self, row: int | None) -> None:
@@ -748,6 +788,8 @@ class LogChart(QtWidgets.QWidget):
 
     def _on_mouse_moved(self, args) -> None:
         position = args[0]
+        if self.follow_latest:
+            return  # live: the readouts are the newest sample, not the mouse
         if not self.plotted or not self._vb.sceneBoundingRect().contains(position):
             if self._crosshair.isVisible():
                 self._crosshair.setVisible(False)

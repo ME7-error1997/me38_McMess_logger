@@ -1,13 +1,19 @@
 @echo off
 rem ---------------------------------------------------------------------------
-rem  Start the McMESS logger with the tuning channel set, and connect.
+rem  Start the McMESS logger.
 rem
 rem  Double-click this file, or from a prompt:
-rem      log.bat              uses COM2
-rem      log.bat COM5         uses COM5
+rem      log.bat                              uses COM2
+rem      log.bat COM5                         uses COM5
+rem      log.bat COM5 profiles\cruise.json    ...with that profile
 rem
-rem  Press "Record to CSV" and the log names itself from the date, time and
-rem  ECU, in the logs\ folder. Nothing is ever overwritten.
+rem  The channel window opens first: tick what to log and what to draw, or
+rem  just press Enter to take the profile as it is. It then connects, and a CSV
+rem  starts by itself in logs\, named from the date, time and ECU. Nothing is
+rem  ever overwritten.
+rem
+rem  With no profile named it starts with the last one you used, and the first
+rem  time with profiles\tuning.json.
 rem
 rem  Nothing here writes to the ECU -- the 018CG responder is read-only.
 rem ---------------------------------------------------------------------------
@@ -21,11 +27,12 @@ cd /d "%~dp0"
 set "PORT=%~1"
 if "%PORT%"=="" set "PORT=COM2"
 
+set "PROFILE="
+if not "%~2"=="" set "PROFILE=--profile "%~2""
+
 rem KLINFO was measured as 0-based on this ECU, so the knock columns need no
 rem warm-up to decide which cylinder is which.
 set "KNOCKBASE=0"
-
-set "CHANNELS=N40,TANS,TMOT,DKPOT,TI0,ML,ML_GS,TL,LDSHK,LDSKF,DTVLD,TVM,ZWOUT,KR_CYL1,KR_CYL2,KR_CYL3,KR_CYL4,XSUMSPV,FR,FRA+1"
 
 if not exist ".venv\Scripts\python.exe" (
     echo.
@@ -42,7 +49,7 @@ if not exist ".venv\Scripts\python.exe" (
 echo Starting the logger on %PORT% ...
 echo.
 
-".venv\Scripts\python.exe" gui\main.py --port %PORT% --connect --knock-base %KNOCKBASE% --channels %CHANNELS%
+".venv\Scripts\python.exe" gui\main.py --port %PORT% --select --knock-base %KNOCKBASE% %PROFILE%
 set "RC=%ERRORLEVEL%"
 
 if not "%RC%"=="0" (
