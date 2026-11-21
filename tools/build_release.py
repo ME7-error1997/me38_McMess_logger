@@ -12,6 +12,7 @@ which unpacks to one folder anyone can put anywhere:
         McMessLogger.exe          the window: logger and log viewer
         Log.bat                   connect on a port at once
         profiles/tuning.json      the preset it starts with -- the user's to edit
+        examples/                 a real log to open before there is a car to log
         README.txt                how to use it
         LICENSE.txt, THIRD-PARTY.txt
         _internal/                Python, Qt and the program itself
@@ -58,6 +59,7 @@ NAME = f"{APP}-{__version__}-win64"
 DIST = ROOT / "dist"
 BUILD = ROOT / "build"
 ASSETS = ROOT / "tools" / "release"
+EXAMPLES = ROOT / "examples"
 
 #: Things PyInstaller would otherwise drag in because something installed in the
 #: virtualenv mentions them. None is used; together they are most of the size.
@@ -191,6 +193,12 @@ def assemble(made: Path) -> Path:
 
     (release / "profiles").mkdir()
     shutil.copy2(ROOT / "profiles" / "tuning.json", release / "profiles" / "tuning.json")
+    # Real logs, so the window has something to show on a machine that has
+    # never been near the car. In a folder of their own rather than in logs/:
+    # that one is the user's, and "the newest log" should be one they made.
+    (release / "examples").mkdir()
+    for log in sorted(EXAMPLES.glob("*.csv")):
+        shutil.copy2(log, release / "examples" / log.name)
     shutil.copy2(ROOT / "LICENSE", release / "LICENSE.txt")
     for name in ("README.txt", "THIRD-PARTY.txt", "Log.bat"):
         text = (ASSETS / name).read_text(encoding="utf-8").replace("@VERSION@", __version__)
@@ -250,6 +258,30 @@ def smoke_test(release: Path) -> str:
         return "logs were written relative to the working directory, not the exe"
     # The release ships clean: no logs, and the preset exactly as committed.
     shutil.rmtree(release / "logs")
+
+    # The other half of the program: reading a log, with nothing connected.
+    # On the shipped example, so a release cannot go out with an example its
+    # own exe will not open.
+    examples = sorted((release / "examples").glob("*.csv"))
+    if not examples:
+        return "the release has no example log in its examples folder"
+    opened = BUILD / "smoke-example.png"
+    opened.unlink(missing_ok=True)
+    try:
+        result = subprocess.run(
+            [str(exe), str(examples[0]), "--screenshot", str(opened),
+             "--screenshot-after", "3"],
+            cwd=BUILD, timeout=120,
+        )
+    except subprocess.TimeoutExpired:
+        return "the exe did not exit within two minutes of opening the example log"
+    print(f"   opened examples/{examples[0].name}, exited {result.returncode}")
+    if result.returncode != 0:
+        return f"opening the example log exited with code {result.returncode}"
+    if not opened.exists() or opened.stat().st_size < 20_000:
+        return "the exe opened the example log but drew nothing"
+    if (release / "logs").exists():
+        return "opening a log created a logs folder; the release would ship with it"
     forget_buildcheck()
     shipped = (release / "profiles" / "tuning.json").read_bytes()
     if shipped != (ROOT / "profiles" / "tuning.json").read_bytes():
@@ -261,8 +293,9 @@ def forget_buildcheck() -> None:
     """Drop what the window remembered about the smoke test's log.
 
     The window keeps the drawn channels per log file in the user's settings.
-    The file is gone a moment later; its entry should not pile up there, one
-    per build, on the machine that does the building.
+    The recorded file is gone a moment later, and the example inside the
+    release folder is not a file anybody on the build machine reads from
+    there; neither entry should pile up, one per build.
     """
     try:
         from PySide6 import QtCore
@@ -270,7 +303,7 @@ def forget_buildcheck() -> None:
         return
     settings = QtCore.QSettings("McMESS", "logviewer")
     for key in settings.allKeys():
-        if "buildcheck" in key:
+        if "buildcheck" in key or f"/{NAME}/" in key:
             settings.remove(key)
 
 
@@ -301,7 +334,7 @@ def main() -> int:
         f"\nBuilt McMESS logger {__version__}\n"
         f"  folder  {release}   ({folder_size(release) / 1e6:.0f} MB)\n"
         f"  zip     {archive}   ({archive.stat().st_size / 1e6:.0f} MB)\n"
-        f"  checked {BUILD / 'smoke.png'}"
+        f"  checked {BUILD / 'smoke.png'} and {BUILD / 'smoke-example.png'}"
     )
     return 0
 

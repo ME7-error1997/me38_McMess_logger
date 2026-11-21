@@ -79,6 +79,12 @@ READING A LOG
 -------------
 Open log... , or drag a CSV onto McMessLogger.exe.
 
+No car yet? The examples folder has a real one: a full-throttle pull
+to 7360 rpm on a tuned 06A906018CG, recorded with this program. The
+ECU pulls up to 3 degrees of timing for knock from about 5000 rpm
+up, so the per-cylinder knock columns (KR_CYL1-4) have something to
+show.
+
     drag            zoom to the dragged span
     shift + drag    pan
     wheel           zoom at the mouse
@@ -116,6 +122,7 @@ FILES
     Log.bat              connect on a port straight away
     profiles\            your presets
     logs\                your recordings (made on the first one)
+    examples\            a real log to open and look around in
     _internal\           the program's own files - leave alone
     LICENSE.txt
     THIRD-PARTY.txt      the libraries inside and their licences

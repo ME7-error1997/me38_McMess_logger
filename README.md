@@ -261,6 +261,13 @@ headlessly against the simulator, so the GUI is only responsible for drawing.
 always the pull you have just driven. Drag a CSV onto it, or pass one: `view.bat
 logs\432.csv`. It is the same window as the logger, with nothing connected.
 
+**Nothing logged yet?** [examples/018CG-full-throttle-pull.csv](examples/018CG-full-throttle-pull.csv)
+is a real one, recorded with this program on 2026-11-21: 45 seconds on a tuned
+06A906018CG, wide open to 7360 rpm, with knock retard down to −3° from about 5000 rpm up, so the
+per-cylinder knock columns have something to show. `view.bat
+examples\018CG-full-throttle-pull.csv` opens it; `replay.bat` with the same path plays
+it back as if the car were connected. It ships in the release too, in `examples\`.
+
 It is not limited to this logger's own CSVs. It reads **VCDS** measuring blocks and
 advanced measuring blocks, **ME7Logger**, **OP-COM**, and generic CSV from MHD,
 bootmod3 or anything else that writes text — so a customer's log opens in the same
@@ -364,7 +371,7 @@ which runs on a Windows 10 or 11 machine with nothing installed. The version is
 ```
 
 What is in the folder: the exe, `Log.bat` (connect on a port at once),
-`profiles\tuning.json`, a `README.txt` written for somebody who has never seen this
+`profiles\tuning.json`, `examples\` with a real log, a `README.txt` written for somebody who has never seen this
 repository, the licence, and `_internal\` with Python, Qt and the program. Presets and
 logs live beside the exe, not inside `_internal\` (`mcmess/paths.py`), so a newer
 version unzipped elsewhere cannot eat a preset somebody spent an afternoon on.
@@ -505,6 +512,7 @@ verify on the car.
 | `mcmess/replay.py` | Plays a recorded log back through the recorder's interface |
 | `mcmess/paths.py` | Where presets and logs live: the repo from source, beside the exe in a release |
 | `profiles/tuning.json` | The preset the program starts with |
+| `examples/` | A real log from the car, to open or replay with nothing connected |
 | `gui/main.py` | The command line |
 | `gui/window.py` | The window: logger and log viewer in one |
 | `gui/sources.py` | What the window shows: a parsed log, or the live buffer |
