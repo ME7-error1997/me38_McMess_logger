@@ -16,10 +16,14 @@ link -- and the session is opened as the log it has just become: the CSV that
 was being written, re-read from disk, so what you inspect is what you saved.
 Click to place the cursor, drag to zoom, read any channel at any sample.
 
-What a session logs and what it draws are decided before connecting, in the
-channel window (gui/picker.py), and kept in a profile (mcmess/profile.py). The
-two lists differ on purpose: every logged channel has a row and a live value
-here, but only the ticked ones get a trace.
+What a session logs and what it draws are kept in a preset (a profile file,
+mcmess/profile.py) and edited in the channel window (gui/picker.py). The two
+lists differ on purpose: every logged channel has a row and a live value here,
+but only the ticked ones get a trace. Connect does not ask: it uses the preset
+on the toolbar. The preset also keeps each channel's colour and Y range, set by
+double-clicking its row, so the chart looks the same at every key-on. Whatever
+is changed here -- a tick, a colour, a range -- is written straight back to the
+preset's file; there is no second step to forget.
 
 The sampling loop runs in mcmess.recorder on its own thread -- the serial path
 is blocking and lock-step, and the ECU drops the session after 2 s of silence,
@@ -30,6 +34,7 @@ timer; it never touches the serial port.
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import json
 import time
 from dataclasses import dataclass, field
@@ -52,10 +57,12 @@ from mcmess.logparse import (
 )
 from mcmess.profile import (
     DEFAULT_PROFILE,
+    PROFILE_DIR,
     Profile,
     ProfileError,
     belongs_on_graph,
     load_profile,
+    save_profile,
     split_known,
 )
 from mcmess.recorder import Recorder, auto_log_path
@@ -67,6 +74,7 @@ from . import theme
 from .logchart import Hover, LogChart, Trace
 from .picker import ChannelDialog
 from .sources import Entry, LiveSource, LogSource, describer
+from .style import PRESETS, StyleDialog
 
 #: Redraw rate while live. Drawing is NOT independent of the sampling thread:
 #: measured on the bench, painting cost more than half the link's throughput,
@@ -85,28 +93,6 @@ MAX_PLOT_POINTS = 4000
 VALUES_INTERVAL_S = 0.2
 
 WINDOWS = (("10 s", 10.0), ("30 s", 30.0), ("60 s", 60.0), ("5 min", 300.0), ("All", None))
-
-#: Common fixed Y ranges, offered on the right-click menu. A starting point --
-#: custom min / max is always there too.
-PRESETS: tuple[tuple[str, float, float], ...] = (
-    ("Engine speed 0 - 8000 rpm", 0, 8000),
-    ("Load 0 - 10 ms/Umdr.", 0, 10),
-    ("Boost 0 - 3000 mbar", 0, 3000),
-    ("Boost 0 - 5 bar", 0, 5),
-    ("Boost 0 - 300 kPa", 0, 300),
-    ("Boost -1 - 2 bar (relative)", -1, 2),
-    ("Air mass 0 - 1500 mg/stk", 0, 1500),
-    ("Air flow 0 - 1000 kg/h", 0, 1000),
-    ("Air flow 0 - 300 g/s", 0, 300),
-    ("Lambda 0.6 - 1.4", 0.6, 1.4),
-    ("AFR 8 - 20", 8, 20),
-    ("Temperature 0 - 150 °C", 0, 150),
-    ("EGT 0 - 1000 °C", 0, 1000),
-    ("Timing -10 - 50 °", -10, 50),
-    ("Knock retard -15 - 0 °", -15, 0),
-    ("Percent 0 - 100 %", 0, 100),
-    ("Volts 0 - 16 V", 0, 16),
-)
 
 #: Opening a log bigger than this is likely a mistake -- a few hundred MB of CSV
 #: is not a pull, it is a stuck logger. Asked about rather than refused.
@@ -265,6 +251,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.derivations: list = []
 
         self.profile = self._initial_profile()
+        self._migrate_live_ranges()
 
         self._build_ui()
         self._restore_geometry()
@@ -327,18 +314,161 @@ class MainWindow(QtWidgets.QMainWindow):
         return channel.unit_label if channel is not None else ""
 
     def set_profile(self, profile: Profile) -> None:
+        """Switch to a preset. What is on screen takes its colours and ranges."""
+        before = self._preset_names()
         self.profile = profile.normalised()
+        self._names_cache = None
         if profile.path and not _testing():
             self.settings.setValue("profile/last", str(profile.path))
         self._update_profile_label()
+        if self.source is not None:
+            # Ranges the old preset put on the chart are not this one's.
+            own = bool(self.y_combo.currentData())
+            for entry in self.source.entries:
+                if entry.label in before:
+                    self.chart.fixed_ranges.pop(scale_group_key(entry, own), None)
+            self._apply_preset_colors()
+            self._refresh_panel_styles()
+            self._redraw()
 
     def _update_profile_label(self) -> None:
-        self.profile_label.setText(
-            f'<span style="color:{theme.TEXT_MUTED}">profile</span> '
-            f'<span style="color:{theme.TEXT_SECONDARY}">{self.profile.name}'
-            f"  ·  {len(self.profile.log)} logged, "
-            f"{len(self.profile.graph)} drawn</span>"
+        """Refill the preset list: every file in profiles/, and the one in use."""
+        combo = self.preset_combo
+        combo.blockSignals(True)
+        combo.clear()
+        paths = sorted(PROFILE_DIR.glob("*.json")) if PROFILE_DIR.is_dir() else []
+        current = self.profile.path
+        if current is not None and current.resolve() not in {p.resolve() for p in paths}:
+            paths.append(current)
+        for path in paths:
+            combo.addItem(path.stem, str(path))
+        if current is None:
+            # --channels, or a preset that was never saved to a file.
+            combo.addItem("custom (not saved)", "")
+            combo.setCurrentIndex(combo.count() - 1)
+        else:
+            index = next(
+                (i for i, path in enumerate(paths) if path.resolve() == current.resolve()),
+                -1,
+            )
+            combo.setCurrentIndex(index)
+        combo.blockSignals(False)
+        combo.setToolTip(
+            f"{self.profile.name}: {len(self.profile.log)} channels logged, "
+            f"{len(self.profile.graph)} drawn.\n"
+            "A preset is what to log, what to draw, and each channel's colour\n"
+            "and Y range. Channels... edits it; changes are saved to its file."
         )
+
+    def _on_preset_chosen(self, index: int) -> None:
+        chosen = self.preset_combo.itemData(index)
+        if not chosen:
+            return
+        path = Path(chosen)
+        if self.profile.path is not None and path.resolve() == self.profile.path.resolve():
+            return
+        try:
+            profile = load_profile(path)
+        except ProfileError as exc:
+            self._warn("Cannot load the preset", str(exc))
+            self._update_profile_label()     # put the list back on the one in use
+            return
+        self.set_profile(profile)
+
+    def _save_profile(self) -> None:
+        """Write the preset back to its file. One with no file stays in memory."""
+        if self.profile.path is None:
+            return
+        try:
+            save_profile(self.profile, self.profile.path)
+        except OSError as exc:
+            if not self._save_failed:
+                # Once, not on every tick of a checkbox.
+                self._save_failed = True
+                self._warn(
+                    "Cannot save the preset",
+                    f"{self.profile.path.name}: {exc.strerror or exc}. Changes "
+                    "are kept until the program closes.",
+                )
+
+    _save_failed = False
+    _names_cache: set[str] | None = None
+
+    def _preset_names(self) -> set[str]:
+        """The channels whose look is the preset's to keep.
+
+        What it logs, what it reads only because a computed column needs it,
+        anything it already has a style for, and the wideband. A channel of a
+        VCDS log is none of these, and its colour stays with that log file
+        instead of being written into a preset that will never see it again.
+        """
+        if self._names_cache is None:
+            names = set(self.profile.log) | set(self.profile.style)
+            names |= {c.name for c in self.aux_channels}
+            known, _ = split_known(
+                self.profile.log, set(self.channel_set.by_name) | set(DERIVED_COLUMNS)
+            )
+            channels, _ = expand_selection(self.channel_set, known)
+            names |= {c.name for c in channels}
+            self._names_cache = names
+        return self._names_cache
+
+    def _in_preset(self, entry: Entry) -> bool:
+        src = self.source
+        return (src is not None and src.live) or entry.label in self._preset_names()
+
+    def _apply_preset_colors(self) -> None:
+        if self.source is None:
+            return
+        for entry in self.source.entries:
+            color = self.profile.color_of(entry.label)
+            if color:
+                self.colors[entry.key] = color
+
+    def _apply_preset_ranges(self) -> None:
+        """Put the preset's Y ranges on the chart's scale groups.
+
+        Per channel in the file, per scale on the chart: channels that share a
+        unit share a scale, so a group takes the range of whichever drawn member
+        has one. Setting a range through the window writes it to every member,
+        so they agree unless the file was edited by hand.
+        """
+        if self.source is None:
+            return
+        own = bool(self.y_combo.currentData())
+        for key in self.selected:
+            entry = self._entry(key)
+            span = self.profile.range_of(entry.label) if entry else None
+            if span is not None:
+                self.chart.fixed_ranges[scale_group_key(entry, own)] = span
+
+    def _migrate_live_ranges(self) -> None:
+        """Once: Y ranges an earlier version kept in the settings, into the preset."""
+        if _testing():
+            return
+        raw = self.settings.value("live/ranges", "")
+        if not raw:
+            return
+        self.settings.remove("live/ranges")
+        try:
+            saved = json.loads(raw)
+        except (TypeError, ValueError):
+            return
+        changed = False
+        for group, span in saved.items():
+            try:
+                span = (float(span[0]), float(span[1]))
+            except (TypeError, ValueError, IndexError):
+                continue
+            kind, _, name = str(group).partition(":")
+            names = [name] if kind == "k" else [
+                n for n in self._preset_names() if self._unit_of(n) == name
+            ]
+            for n in names:
+                if self.profile.range_of(n) is None:
+                    changed |= self.profile.set_range(n, span)
+        if changed:
+            self._save_profile()
 
     # -- construction ------------------------------------------------------
 
@@ -450,10 +580,17 @@ class MainWindow(QtWidgets.QMainWindow):
         row.addWidget(self.speed_combo)
 
         row.addSpacing(8)
+        row.addWidget(QtWidgets.QLabel("Preset"))
+        self.preset_combo = QtWidgets.QComboBox()
+        self.preset_combo.setMinimumWidth(120)
+        self.preset_combo.activated.connect(self._on_preset_chosen)
+        row.addWidget(self.preset_combo)
+
         self.channels_button = QtWidgets.QPushButton("Channels...")
         self.channels_button.setToolTip(
-            "Choose what is logged and what is drawn, and load or save that\n"
-            "choice as a profile. Connect opens this first."
+            "Edit the preset: what is logged and what is drawn. Save as... in\n"
+            "that window makes a new preset. Connect does not open this; it\n"
+            "uses the preset as it stands."
         )
         self.channels_button.clicked.connect(lambda: self._choose_channels(False))
         row.addWidget(self.channels_button)
@@ -482,9 +619,6 @@ class MainWindow(QtWidgets.QMainWindow):
         )
         self.pause_button.clicked.connect(self._toggle_pause)
         row.addWidget(self.pause_button)
-
-        self.profile_label = QtWidgets.QLabel()
-        row.addWidget(self.profile_label)
 
         row.addStretch(1)
         if getattr(self.args, "demo", False):
@@ -624,8 +758,8 @@ class MainWindow(QtWidgets.QMainWindow):
             QtWidgets.QAbstractItemView.SelectionMode.NoSelection
         )
         self.channels.setToolTip(
-            "Tick a channel to draw it. Click a drawn channel's name to give it\n"
-            "the left axis. Right-click for colour and a fixed Y range."
+            "Tick a channel to draw it. Double-click it for its colour and Y\n"
+            "range. Click a drawn channel's name to give it the left axis."
         )
         head = self.channels.horizontalHeader()
         head.setSectionResizeMode(
@@ -640,6 +774,7 @@ class MainWindow(QtWidgets.QMainWindow):
         )
         self.channels.itemChanged.connect(self._on_item_changed)
         self.channels.cellClicked.connect(self._on_cell_clicked)
+        self.channels.cellDoubleClicked.connect(self._on_cell_double_clicked)
         self.channels.setContextMenuPolicy(
             QtCore.Qt.ContextMenuPolicy.CustomContextMenu
         )
@@ -843,6 +978,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         continue
                     group = f"k:{by_label[name_]}"
                 self.chart.fixed_ranges[group] = tuple(span)
+            self._apply_preset_colors()
             self._set_selection(source.keys_for_labels(carry.selected), remember=False)
         elif saved and saved.get("selected"):
             self.colors = {
@@ -851,11 +987,16 @@ class MainWindow(QtWidgets.QMainWindow):
             self.chart.fixed_ranges.update(
                 {k: tuple(v) for k, v in saved.get("ranges", {}).items()}
             )
+            # The preset wins for the channels it knows: a log taken last week
+            # is drawn in the colours rpm and load have now, not the ones they
+            # had when the file was last open.
+            self._apply_preset_colors()
             self._set_selection(
                 [k for k in saved["selected"] if k in log.by_key], remember=False
             )
         else:
             self.colors = {}
+            self._apply_preset_colors()
             self._select_suggested(remember=False)
 
         model = GridModel(log)
@@ -996,14 +1137,66 @@ class MainWindow(QtWidgets.QMainWindow):
         key = self.channels.item(row, self.COL_TICK).data(
             QtCore.Qt.ItemDataRole.UserRole
         )
-        if key in self.selected:
+        if key in self.selected and key != self.axis_key:
             # Already drawn: a click on the name promotes it to the axis
             # channel, which owns the left axis and the cursor's reference clock.
+            # A click on an undrawn name does nothing -- the tick draws it. It
+            # used to draw it too, but a double click is two clicks, and opening
+            # the colour window should not also change what is on the chart.
             self.axis_key = key
             self._redraw()
             self._refresh_panel_styles()
-        else:
-            self._set_selection([*self.selected, key])
+
+    def _on_cell_double_clicked(self, row: int, column: int) -> None:
+        if column == self.COL_TICK or self.source is None:
+            return
+        self.edit_style(
+            self.channels.item(row, self.COL_TICK).data(QtCore.Qt.ItemDataRole.UserRole)
+        )
+
+    def edit_style(self, key: str) -> bool:
+        """The colour and Y range of one channel. True when something was set."""
+        entry = self._entry(key)
+        if entry is None:
+            return False
+        own = bool(self.y_combo.currentData())
+        group = scale_group_key(entry, own)
+        members = [
+            e.label for e in self.source.entries
+            if e.key != key and scale_group_key(e, own) == group
+        ]
+        span = self.chart.fixed_ranges.get(group) or (
+            self.profile.range_of(entry.label) if self._in_preset(entry) else None
+        )
+        data_span = None
+        if self.source.n_rows:
+            _, ys, _ = self.source.points(key, "own")
+            finite = ys[np.isfinite(ys)]
+            if len(finite):
+                data_span = (float(finite.min()), float(finite.max()))
+        dialog = StyleDialog(
+            self,
+            label=entry.label,
+            unit=entry.unit,
+            description=entry.description,
+            color=self.colors.get(key) or self.profile.color_of(entry.label),
+            span=span,
+            data_span=data_span,
+            shared_with=members,
+            taken={c for k, c in self.colors.items() if k in self.selected and k != key},
+            remembered=self._in_preset(entry),
+        )
+        if not self.run_dialog(dialog):
+            return False
+        self._set_color(key, dialog.color(), save=False)
+        self._set_range(group, dialog.span(), save=False)
+        self._save_profile()
+        self._save_state()
+        return True
+
+    def run_dialog(self, dialog: QtWidgets.QDialog) -> bool:
+        """Show a modal dialog. A method so the tests can answer it."""
+        return dialog.exec() == QtWidgets.QDialog.DialogCode.Accepted
 
     def _refresh_panel_styles(self) -> None:
         if self.source is None:
@@ -1059,6 +1252,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.selected = sorted({k for k in keys if k in order}, key=lambda k: order[k])
 
         taken = {self.colors[k] for k in self.selected if k in self.colors}
+        # A colour the preset has given to a channel is that channel's, drawn
+        # or not: handing it to another now means two the same the moment the
+        # first is ticked.
+        taken |= {
+            self.profile.color_of(e.label) for e in src.entries
+            if self.profile.color_of(e.label)
+        }
         for n, key in enumerate(self.selected):
             if key not in self.colors:
                 color = pick_color(taken, n)
@@ -1095,8 +1295,12 @@ class MainWindow(QtWidgets.QMainWindow):
         # Drawing an input that was only being read for a computed column
         # (DWKR_Z, say) makes it a channel the profile asks for by name.
         log = self.profile.log + [k for k in graph if k not in self.profile.log]
-        self.profile = Profile(log, graph, self.profile.ecu, self.profile.path)
+        if (log, graph) == (self.profile.log, self.profile.graph):
+            return
+        self.profile = dataclasses.replace(self.profile, log=log, graph=graph)
+        self._names_cache = None
         self._update_profile_label()
+        self._save_profile()
 
     # -- drawing -----------------------------------------------------------
 
@@ -1127,6 +1331,7 @@ class MainWindow(QtWidgets.QMainWindow):
             x_label = "seconds" if src.has_clock else "sample"
 
         traces = [self._trace(k) for k in self.selected] if src.n_rows else []
+        self._apply_preset_ranges()
         self.chart.draw(
             traces,
             axis_key=self.axis_key,
@@ -1315,6 +1520,7 @@ class MainWindow(QtWidgets.QMainWindow):
         menu.addSection(entry.label)
 
         plotted = key in self.selected
+        edit = menu.addAction("Colour and Y range...")
         toggle = menu.addAction("Remove from the chart" if plotted else "Draw it")
         axis = menu.addAction("Make it the axis channel")
         axis.setEnabled(plotted and key != self.axis_key)
@@ -1349,7 +1555,9 @@ class MainWindow(QtWidgets.QMainWindow):
         chosen = menu.exec(global_point)
         if chosen is None:
             return
-        if chosen is toggle:
+        if chosen is edit:
+            self.edit_style(key)
+        elif chosen is toggle:
             self._set_selection(
                 [k for k in self.selected if k != key] if plotted
                 else [*self.selected, key]
@@ -1373,16 +1581,41 @@ class MainWindow(QtWidgets.QMainWindow):
         elif chosen.data():
             self._set_range(group, tuple(chosen.data()))
 
-    def _set_color(self, key: str, color: str) -> None:
+    def _set_color(self, key: str, color: str, save: bool = True) -> None:
+        """A channel's colour: on the chart now, and in the preset from now on."""
+        entry = self._entry(key)
+        if entry is None or not color:
+            return
         self.colors[key] = color
+        changed = self._in_preset(entry) and self.profile.set_color(entry.label, color)
         self._refresh_panel_styles()
         self._redraw()
-        self._save_state()
+        if save:
+            if changed:
+                self._save_profile()
+            self._save_state()
 
-    def _set_range(self, group: str, span: tuple[float, float] | None) -> None:
+    def _set_range(
+        self, group: str, span: tuple[float, float] | None, save: bool = True
+    ) -> None:
+        """A scale's fixed Y range, or None for auto.
+
+        The chart keeps it per scale group; the preset keeps it per channel, so
+        it is written to every channel on that scale. That is what makes the
+        range come back whichever of them happens to be drawn next time.
+        """
+        own = bool(self.y_combo.currentData())
+        changed = False
+        if self.source is not None:
+            for entry in self.source.entries:
+                if scale_group_key(entry, own) == group and self._in_preset(entry):
+                    changed |= self.profile.set_range(entry.label, span)
         self.chart.set_fixed_range(group, span)
         self.auto_button.setEnabled(bool(self.chart.fixed_ranges))
-        self._save_state()
+        if save:
+            if changed:
+                self._save_profile()
+            self._save_state()
 
     def _ask_custom_range(self, group: str, entry: Entry) -> None:
         _, ys, _ = self.source.points(entry.key, "own")
@@ -1407,38 +1640,40 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def _auto_ranges(self) -> None:
         for group in list(self.chart.fixed_ranges):
-            self.chart.set_fixed_range(group, None)
+            self._set_range(group, None, save=False)
         self.auto_button.setEnabled(False)
+        self._save_profile()
         self._save_state()
 
     # -- connecting --------------------------------------------------------
 
     def _choose_channels(self, connecting: bool) -> bool:
-        """The window before connecting. False when it was cancelled."""
+        """The channel window: edit the preset. False when it was cancelled."""
         dialog = ChannelDialog(
             self.channel_set, self.profile, self, connecting=connecting,
             measured_bytes_per_second=self._measured_rate,
         )
-        if dialog.exec() != QtWidgets.QDialog.DialogCode.Accepted:
+        if not self.run_dialog(dialog):
+            self._update_profile_label()     # it may have saved a new preset
             return False
         self.set_profile(dialog.profile())
+        # OK means "use this", and the preset's file is what is in use.
+        self._save_profile()
         return True
 
+    def choose_then_connect(self) -> None:
+        """--select: the channel window first, and its Connect button connects."""
+        if self.recorder is None and self._choose_channels(True):
+            self.connect()
+
     def _on_connect_clicked(self) -> None:
+        # No channel window here. Choosing channels is something done once and
+        # kept in a preset; connecting is something done at every key-on, often
+        # with one hand. The preset on the toolbar is what gets logged.
         if self.recorder is not None:
             self._disconnect()
-            return
-        port = self.port_combo.currentData()
-        if port is None:
-            self._warn(
-                "No serial port",
-                "No port is selected. Plug the cable in and press Refresh.",
-            )
-            return
-        # A replay's channels are the log's; there is nothing to choose.
-        if port != REPLAY_PORT and not self._choose_channels(True):
-            return
-        self.connect()
+        else:
+            self.connect()
 
     def connect(self) -> bool:
         """Start a session on the selected port with the current profile."""
@@ -1532,7 +1767,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.source = LiveSource(channels)
         self.chart.clear()
         self.chart.fixed_ranges.clear()
-        self.chart.fixed_ranges.update(self._load_live_ranges())
         self.cursor_row = None
         self.hover = None
         self.colors = {}
@@ -1545,6 +1779,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.file_label.setText("live")
         self._fill_x_combos()
         self._fill_panel()
+        self._apply_preset_colors()
         self._select_suggested(remember=False)
 
     def _disconnect(self, note: str = "") -> None:
@@ -1836,29 +2071,11 @@ class MainWindow(QtWidgets.QMainWindow):
             return None
         return saved if isinstance(saved, dict) else None
 
-    def _load_live_ranges(self) -> dict[str, tuple[float, float]]:
-        """The fixed Y ranges last used while logging.
-
-        Live they matter more than in a log: the window slides every sample, so
-        an auto-fitted scale breathes continuously. Having pinned rpm to 0-8000
-        once, you should not have to do it again at every key-on.
-        """
-        if _testing():
-            return {}
-        try:
-            saved = json.loads(self.settings.value("live/ranges", "") or "{}")
-            return {
-                str(k): (float(v[0]), float(v[1])) for k, v in saved.items()
-            }
-        except (TypeError, ValueError, IndexError):
-            return {}
-
     def _save_state(self) -> None:
-        """What the reader set: per file for a log, once for live sessions."""
+        """What the reader set for this log file. A live session has no file:
+        its colours and ranges are the preset's, saved by _save_profile."""
         ranges = {k: list(v) for k, v in self.chart.fixed_ranges.items()}
         if self.source is not None and self.source.live:
-            if not _testing():
-                self.settings.setValue("live/ranges", json.dumps(ranges))
             return
         key = self._state_key()
         if not key or self.source is None:

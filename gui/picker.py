@@ -13,10 +13,11 @@ counter stepping 0-1-2-3 forty times a second -- so it is logged and not drawn,
 and the default for a newly ticked channel follows that rule: quantities get a
 trace, codes and status bytes do not.
 
-The choice is made BEFORE connecting, in ``ChannelDialog``. Changing the channel
-set mid-session reallocates the buffer and starts a different CSV layout, which
-is how a log ends up with a pull split across two files; deciding first means
-one session is one file with one set of columns.
+The choice is made BEFORE connecting, in ``ChannelDialog``, and kept in a preset
+so it is made once rather than at every key-on. Changing the channel set
+mid-session reallocates the buffer and starts a different CSV layout, which is
+how a log ends up with a pull split across two files; deciding first means one
+session is one file with one set of columns.
 """
 
 from __future__ import annotations
@@ -42,7 +43,7 @@ from . import theme
 #: Past this many traces one chart stops being readable, whatever the colours.
 SOFT_GRAPH_LIMIT = theme.MAX_SERIES_EXTENDED
 
-PROFILE_FILTER = "Logging profiles (*.json);;All files (*)"
+PROFILE_FILTER = "Presets (*.json);;All files (*)"
 
 
 class ChannelPicker(QtWidgets.QWidget):
@@ -394,7 +395,7 @@ class ChannelPicker(QtWidgets.QWidget):
 
 
 class ChannelDialog(QtWidgets.QDialog):
-    """The window that comes before connecting: what to log, what to draw."""
+    """Editing a preset: what to log, what to draw."""
 
     def __init__(
         self,
@@ -409,6 +410,10 @@ class ChannelDialog(QtWidgets.QDialog):
         self.channel_set = channels
         self._path: Path | None = profile.path
         self._ecu = profile.ecu or (channels.part_number or "")
+        #: Colours and Y ranges are not edited here -- a double click on a
+        #: channel in the main window does that -- but they belong to the
+        #: preset, so they are carried through untouched.
+        self._style = profile.copy().style
         self._saved: tuple[list[str], list[str]] | None = None
         self.setWindowTitle("Channels to log")
         self.resize(980, 760)
@@ -421,7 +426,7 @@ class ChannelDialog(QtWidgets.QDialog):
         top.setSpacing(8)
         self.profile_label = QtWidgets.QLabel()
         top.addWidget(self.profile_label, stretch=1)
-        load = QtWidgets.QPushButton("Load profile...")
+        load = QtWidgets.QPushButton("Load preset...")
         load.clicked.connect(self._load)
         top.addWidget(load)
         self.save_button = QtWidgets.QPushButton("Save")
@@ -465,6 +470,7 @@ class ChannelDialog(QtWidgets.QDialog):
     def _apply(self, profile: Profile) -> None:
         unknown = [n for n in profile.log if not self.picker.knows(n)]
         self._path = profile.path
+        self._style = profile.copy().style
         self.picker.set_selection(profile.log, profile.graph)
         self._saved = (
             (self.picker.log_names(), self.picker.graph_names())
@@ -485,7 +491,8 @@ class ChannelDialog(QtWidgets.QDialog):
             graph=self.picker.graph_names(),
             ecu=self._ecu,
             path=self._path,
-        )
+            style=self._style,
+        ).copy()
 
     @property
     def modified(self) -> bool:
@@ -495,7 +502,7 @@ class ChannelDialog(QtWidgets.QDialog):
         name = self._path.name if self._path else "not saved to a file"
         changed = "  (changed since it was saved)" if self._path and self.modified else ""
         self.profile_label.setText(
-            f'<span style="color:{theme.TEXT_MUTED}">Profile</span>  '
+            f'<span style="color:{theme.TEXT_MUTED}">Preset</span>  '
             f"<b>{name}</b>"
             f'<span style="color:{theme.STATUS_WARNING}">{changed}</span>'
         )
@@ -505,7 +512,7 @@ class ChannelDialog(QtWidgets.QDialog):
     def _load(self) -> None:
         start = str(self._path.parent if self._path else PROFILE_DIR)
         chosen, _ = QtWidgets.QFileDialog.getOpenFileName(
-            self, "Load a logging profile", start, PROFILE_FILTER
+            self, "Load a preset", start, PROFILE_FILTER
         )
         if chosen:
             self.load_path(Path(chosen))
@@ -514,13 +521,13 @@ class ChannelDialog(QtWidgets.QDialog):
         try:
             profile = load_profile(path)
         except ProfileError as exc:
-            self._warn("Cannot load the profile", str(exc))
+            self._warn("Cannot load the preset", str(exc))
             return False
         if profile.ecu and self.channel_set.part_number and (
             profile.ecu != self.channel_set.part_number
         ):
             self._warn(
-                "A profile for another ECU",
+                "A preset for another ECU",
                 f"{path.name} was saved for {profile.ecu}; this is "
                 f"{self.channel_set.part_number}. Channel names it shares are "
                 "ticked, but check the list before trusting it.",
@@ -535,9 +542,9 @@ class ChannelDialog(QtWidgets.QDialog):
             self.save_path(self._path)
 
     def _save_as(self) -> None:
-        start = str(self._path or (PROFILE_DIR / "profile.json"))
+        start = str(self._path or (PROFILE_DIR / "preset.json"))
         chosen, _ = QtWidgets.QFileDialog.getSaveFileName(
-            self, "Save the logging profile", start, PROFILE_FILTER
+            self, "Save the preset as", start, PROFILE_FILTER
         )
         if chosen:
             path = Path(chosen)
@@ -548,7 +555,7 @@ class ChannelDialog(QtWidgets.QDialog):
         try:
             save_profile(profile, path)
         except OSError as exc:
-            self._warn("Cannot save the profile", f"{path.name}: {exc.strerror or exc}")
+            self._warn("Cannot save the preset", f"{path.name}: {exc.strerror or exc}")
             return False
         self._path = path
         self._saved = (self.picker.log_names(), self.picker.graph_names())

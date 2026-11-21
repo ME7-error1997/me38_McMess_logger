@@ -347,9 +347,9 @@ class LogChart(QtWidgets.QWidget):
     # -- drawing -----------------------------------------------------------
 
     def clear(self) -> None:
+        self._clear_groups()
         self.plotted = []
         self.cursor_row = None
-        self._clear_groups()
         self.plot.clear()
         self._re_add_overlays()
         self.placeholder.setVisible(True)
@@ -517,6 +517,20 @@ class LogChart(QtWidgets.QWidget):
             axis.setTextPen(pg.mkPen(color if len(owners) == 1 else theme.TEXT_MUTED))
 
     def _clear_groups(self) -> None:
+        # Every curve out of its ViewBox first, by hand. They are added to the
+        # ViewBoxes directly (see the note in draw), so the PlotItem has never
+        # heard of them and plot.clear() does not remove them. An overlay box
+        # leaves the scene below and takes its curves with it -- but the main
+        # box is never replaced, so the axis channel's group used to keep every
+        # curve it had ever been given. With the same log on screen the stale
+        # ones sat exactly under the fresh ones and nobody saw them; after a
+        # second connection they were the previous session, drawn through the
+        # new one.
+        for p in self.plotted:
+            vb = self._groups.get(p.group)
+            if p.curve is not None and vb is not None:
+                vb.removeItem(p.curve)
+            p.curve = None
         for vb in self._groups.values():
             if vb is self._vb:
                 continue

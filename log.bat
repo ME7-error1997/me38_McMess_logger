@@ -5,15 +5,14 @@ rem
 rem  Double-click this file, or from a prompt:
 rem      log.bat                              uses COM2
 rem      log.bat COM5                         uses COM5
-rem      log.bat COM5 profiles\cruise.json    ...with that profile
+rem      log.bat COM5 profiles\cruise.json    ...with that preset
 rem
-rem  The channel window opens first: tick what to log and what to draw, or
-rem  just press Enter to take the profile as it is. It then connects, and a CSV
-rem  starts by itself in logs\, named from the date, time and ECU. Nothing is
-rem  ever overwritten.
+rem  It connects by itself with the preset last used (the first time,
+rem  profiles\tuning.json), and a CSV starts in logs\, named from the date,
+rem  time and ECU. Nothing is ever overwritten.
 rem
-rem  With no profile named it starts with the last one you used, and the first
-rem  time with profiles\tuning.json.
+rem  To log something else: Disconnect, pick another preset on the toolbar or
+rem  press Channels... to edit this one, and Connect again.
 rem
 rem  Nothing here writes to the ECU -- the 018CG responder is read-only.
 rem ---------------------------------------------------------------------------
@@ -49,7 +48,7 @@ if not exist ".venv\Scripts\python.exe" (
 echo Starting the logger on %PORT% ...
 echo.
 
-".venv\Scripts\python.exe" gui\main.py --port %PORT% --select --knock-base %KNOCKBASE% %PROFILE%
+".venv\Scripts\python.exe" gui\main.py --port %PORT% --connect --knock-base %KNOCKBASE% %PROFILE%
 set "RC=%ERRORLEVEL%"
 
 if not "%RC%"=="0" (

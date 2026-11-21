@@ -87,9 +87,9 @@ The design leans on two properties of this responder:
 
 ## The window
 
-One window makes a log and reads one. **Double-click `log.bat`**: it opens on COM2 and
-puts the channel window in front of you; press Enter and it connects and starts
-recording. Pass a port to override: `log.bat COM5`.
+One window makes a log and reads one. **Double-click `log.bat`**: it opens on COM2,
+connects with the preset you used last and starts recording — no typing, which matters
+when the laptop is balanced on a wing. Pass a port to override: `log.bat COM5`.
 
 ```bash
 .venv\Scripts\python.exe gui\main.py --port COM3              # log from the car
@@ -113,10 +113,15 @@ the values are from: *Live*, *Cursor*, *Mouse*, *First sample*.
 cursor and zoom come free, sampling and recording carry on underneath, and releasing
 it pins the cursor to the newest sample again.
 
-### Choosing channels, before connecting
+### Presets
 
-**Connect opens the channel window first.** Every channel has two ticks, because
-logging and drawing are different decisions:
+What a session logs, what it draws and how each channel looks is a **preset**. Pick
+one from the **Preset** list on the toolbar and press **Connect** — Connect never asks
+anything. Choosing channels is done once and kept; connecting is done at every key-on,
+often with one hand.
+
+**Channels…** edits the preset. Every channel has two ticks there, because logging and
+drawing are different decisions:
 
 - **log** — the channel is read from the ECU, written to the CSV, and has a row with
   its live value in the window. Log everything you might want afterwards: a channel you
@@ -129,31 +134,46 @@ that flattens every trace sharing a chart with it. So ticking **log** on a quant
 ticks **graph** too, and ticking it on a code or a status byte does not; either can be
 changed by hand. The window shows what the selection costs per sample and the sample
 rate it implies, counting the channels a computed column needs even though nobody
-ticked them.
+ticked them. **Save as…** there makes a new preset; it then appears in the toolbar
+list.
 
-The choice is made before connecting rather than during, because changing the channel
-set mid-session reallocates the buffer and changes the CSV's columns — which is how a
-pull ends up split across two files. One session is one file with one set of columns.
-What is *drawn* can still be changed at any time: tick a row in the left panel.
+The channel set can only be edited while disconnected, because changing it mid-session
+reallocates the buffer and changes the CSV's columns — which is how a pull ends up
+split across two files. One session is one file with one set of columns. What is
+*drawn* can be changed at any time: tick a row in the left panel.
 
-### Profiles
+**Double-click a channel in the left panel for its colour and Y range.** Pick a colour
+from the palette or any other; leave the range on *Auto* (fit what is on screen) or fix
+it — type the two numbers, or take a common one (0–8000 rpm, 0–10 ms/Umdr., …). A fixed
+range matters more live than in a log: a log is static, so an auto-fitted scale
+settles, but a sliding window refits every sample and the scale breathes continuously.
+Channels that share a unit share a scale, so a range given to `TL` is `LDSHK`'s too,
+and the window says so before it moves them.
 
-The two lists are a **profile**, a small JSON file in `profiles/`:
+**The preset remembers all of it, by itself.** A tick, a colour, a range: each is
+written to the preset's file as it is made, and the next session — or a log opened a
+month later — is drawn the same way. There is no save step to forget. A preset is a
+small JSON file in `profiles/`:
 
 ```json
 {
   "format": "mcmess-profile/1",
   "ecu": "06A906018CG",
   "log":   ["N40", "TL", "LDSHK", "KR_CYL1", "..."],
-  "graph": ["N40", "TL", "LDSHK", "KR_CYL1"]
+  "graph": ["N40", "TL", "LDSHK", "KR_CYL1"],
+  "style": {
+    "N40": {"color": "#3987e5", "range": [0, 8000]},
+    "TL":  {"range": [0, 10]}
+  }
 }
 ```
 
-**Load profile…**, **Save** and **Save as…** are in the channel window. The program
-starts with the last profile used, else `profiles/tuning.json`; `--profile path` names
-one, and `--channels N40,TL,FR` skips profiles for a bare list. A profile naming a
-channel this ECU's database does not have loads without it and says so; one saved for
-another ECU is flagged before you trust it.
+The program starts with the last preset used, else `profiles/tuning.json`;
+`--profile path` names one, and `--channels N40,TL,FR` skips presets for a bare list.
+A preset naming a channel this ECU's database does not have connects without it and
+says so; one saved for another ECU is flagged in the channel window before you trust
+it. Reading somebody else's log — VCDS, say — colours and ranges are kept with that
+log file instead, since its channels are not ones a preset will ever see again.
 
 ### What is on screen
 
@@ -178,11 +198,9 @@ the gap rather than comparing two numbers.
 > target, this cylinder's retard against that one's. For anything across units, read
 > the numbers.
 
-Right-click a channel, on the chart or in either table, for a fixed Y range or a
-colour. A fixed range matters more live than in a log: a log is static, so an
-auto-fitted scale settles, but a sliding window refits every sample and the scale
-breathes continuously. Pin it to 0–8000 rpm or 0–10 ms/Umdr. and it stops; ranges set
-while logging are remembered for the next session. **Auto ranges** drops them all.
+Right-click a channel, on the chart or in either table, for the same colour and range
+choices as a double click, and to give it the left axis. **Auto ranges** drops every
+fixed range at once.
 
 **Open log…** while connected opens the log in a second window, so an earlier pull can
 sit beside the live one.
@@ -200,11 +218,11 @@ file claiming to be a pull that was never driven.
 
 ### Flags
 
-`--knock-base 0` for this ECU's cylinder numbering, `--connect` to connect at once with
-the profile as it is and no channel window, `--select` to open the channel window at
-start-up (what `log.bat` does), `--no-autorecord` to wait for the Record button instead
-of recording from the moment the link comes up, `--database` to point at a different
-channel JSON, `--tag pull2` to name the log.
+`--knock-base 0` for this ECU's cylinder numbering, `--connect` to connect as soon as
+the window is up (what `log.bat` does), `--select` to open the channel window first,
+`--no-autorecord` to wait for the Record button instead of recording from the moment
+the link comes up, `--database` to point at a different channel JSON, `--tag pull2` to
+name the log.
 
 **Drawing costs sample rate, so the defaults favour rate.** Painting antialiased
 traces holds the GIL and measurably starves the sampling thread — on the bench,
@@ -439,17 +457,18 @@ verify on the car.
 | `mcmess/data/descriptions_en.json` | English description for every channel |
 | `mcmess/logparse.py` | Reads a datalog: VCDS, ME7Logger, OP-COM, any CSV. No UI |
 | `mcmess/logenums.py` | Channels that log a code: KLINFO, BMW MG1 limiters |
-| `mcmess/profile.py` | Logging profiles: what is logged, what is drawn |
+| `mcmess/profile.py` | Presets: what is logged, what is drawn, each channel's colour and Y range |
 | `mcmess/replay.py` | Plays a recorded log back through the recorder's interface |
-| `profiles/tuning.json` | The profile the program starts with |
+| `profiles/tuning.json` | The preset the program starts with |
 | `gui/main.py` | The command line |
 | `gui/window.py` | The window: logger and log viewer in one |
 | `gui/sources.py` | What the window shows: a parsed log, or the live buffer |
-| `gui/picker.py` | The channel window: log and graph ticks, cost estimate, profiles |
+| `gui/picker.py` | The channel window: log and graph ticks, cost estimate, presets |
+| `gui/style.py` | The colour and Y range window a double click opens |
 | `gui/theme.py` | Validated dark palette and Qt styling |
 | `gui/viewer.py` | The old viewer entry point; opens the same window |
 | `gui/logchart.py` | The chart: scale groups, row cursor, second X axis, live lock |
-| `log.bat` | Double-click launcher: channel window, then connect and record |
+| `log.bat` | Double-click launcher: connect with the last preset and record |
 | `view.bat` | Double-click launcher: opens the newest log |
 | `replay.bat` | Double-click launcher: plays the newest log back as if live |
 | `tools/probe.py` | Bench bring-up and measurement |
@@ -464,7 +483,7 @@ verify on the car.
 | `tests/test_logparse.py` | The datalog parser, against excerpts of real files |
 | `tests/test_viewer.py` | Reading a log: the window and chart, on Qt's offscreen platform |
 | `tests/test_live.py` | Logging: who owns the cursor, and what a session becomes |
-| `tests/test_profile.py` | Profiles, the channel window, and replay |
+| `tests/test_profile.py` | Presets, the channel window, the colour window, and replay |
 
 ## Logging a wideband
 

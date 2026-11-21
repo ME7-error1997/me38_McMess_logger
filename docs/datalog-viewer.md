@@ -105,10 +105,27 @@ A row index is only safe to hold once the data is static — a free cursor over 
 sliding window would silently drift onto a different sample as old ones fall
 out — which is why the cursor is the reader's only from that moment.
 
-**What is logged and what is drawn are separate lists**, kept in a profile
-(`mcmess/profile.py`) and chosen before connecting. The original viewer only
-ever had "plotted"; a logger also has "recorded but not worth a trace" —
-`KLINFO` is the case that forced it.
+**What is logged and what is drawn are separate lists**, kept in a preset
+(`mcmess/profile.py`). The original viewer only ever had "plotted"; a logger
+also has "recorded but not worth a trace" — `KLINFO` is the case that forced it.
+
+**Colours and Y ranges live in the preset too, per channel.** The original
+remembered them per *file*, in browser storage, which is right for a viewer:
+each log is its own thing. A logger makes a new file at every key-on, so
+per-file memory means setting rpm to 0–8000 again every time. Here a channel
+the preset knows takes its colour and range from the preset wherever it is
+drawn — live, or in any log of it — and only channels the preset has never
+heard of (a VCDS log's) fall back to per-file memory. Anything changed in the
+window is written to the preset's file at once.
+
+**One bug worth recording, because it hid for a long time.** Curves are added to
+their ViewBoxes directly (section 3 explains why), so `PlotItem.clear()` has
+never heard of them. Overlay ViewBoxes are thrown away on every redraw and took
+their curves with them; the main ViewBox is never replaced, so the axis
+channel's scale kept every curve it had ever been given. With one log on screen
+the stale ones sat exactly under the fresh ones. It only showed once the logger
+could reconnect: the previous session drawn through the new one. `_clear_groups`
+now removes every curve by hand, and `tests/test_live.py` counts them.
 
 **The honest caveat, which the original did not have to make.** A viewer is
 opened deliberately; a live chart is glanced at. One plot with a scale per unit

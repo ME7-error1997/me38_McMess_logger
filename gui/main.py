@@ -55,8 +55,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--database", help="override the channel/conversion JSON")
     parser.add_argument(
         "--profile",
-        help="the logging profile to start with: which channels are logged and "
-        "which are drawn (default: the last one used, else profiles/tuning.json)",
+        help="the preset to start with: which channels are logged, which are "
+        "drawn, and their colours and Y ranges (default: the last one used, "
+        "else profiles/tuning.json)",
     )
     parser.add_argument(
         "--channels",
@@ -66,14 +67,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--select",
         action="store_true",
-        help="open the channel window as soon as the program starts; its "
-        "Connect button then connects",
+        help="open the channel window as soon as the program starts, to edit "
+        "the preset first; its Connect button then connects",
     )
     parser.add_argument(
         "--connect",
         action="store_true",
-        help="connect as soon as the window opens, with the profile as it is "
-        "and without showing the channel window",
+        help="connect as soon as the window opens, with the preset as it is",
     )
     parser.add_argument(
         "--knock-base",
@@ -191,7 +191,7 @@ def main(argv: list[str] | None = None) -> int:
         # for the second or two the init pulse and ack take.
         QtCore.QTimer.singleShot(400, window.connect)
     elif args.select:
-        QtCore.QTimer.singleShot(400, window._on_connect_clicked)
+        QtCore.QTimer.singleShot(400, window.choose_then_connect)
     if args.disconnect_after is not None:
         QtCore.QTimer.singleShot(
             int(400 + args.disconnect_after * 1000), window._disconnect

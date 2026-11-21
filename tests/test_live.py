@@ -30,11 +30,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 import numpy as np  # noqa: E402
+import pyqtgraph as pg  # noqa: E402
 from PySide6 import QtWidgets  # noqa: E402
 
 from mcmess.channels import load_channels  # noqa: E402
-from mcmess.profile import Profile  # noqa: E402
+from mcmess.profile import Profile, Style, load_profile, save_profile  # noqa: E402
 from mcmess.recorder import RecorderStats  # noqa: E402
+import gui.window as window_module  # noqa: E402
 from gui.logchart import Hover  # noqa: E402
 from gui.window import REPLAY_PORT, SIM_PORT, MainWindow, default_args  # noqa: E402
 
@@ -114,6 +116,14 @@ def tick(window: MainWindow) -> None:
     window._refresh()
 
 
+def curves(chart) -> list:
+    """Every curve in the chart's scene, whichever scale holds it."""
+    return [
+        item for item in chart._widget.scene().items()
+        if isinstance(item, pg.PlotDataItem)
+    ]
+
+
 def value(window: MainWindow, name: str) -> str:
     return window.channels.item(window._rows[name], window.COL_VALUE).text()
 
@@ -139,6 +149,9 @@ def main() -> int:
         return 1
 
     scratch = Path(tempfile.mkdtemp(prefix="mcmess-test-"))
+    # The toolbar lists the presets in this folder. The real one is the
+    # reader's own, and a test should neither depend on it nor write to it.
+    window_module.PROFILE_DIR = scratch
     args = default_args()
     args.demo = True
     args.log_dir = str(scratch)
@@ -303,6 +316,138 @@ def main() -> int:
     check("the reader is told", warned[-1], "Link failed")
     check("the session is on screen as a log", len(window.log.rows), 30)
     check("and the cursor is free", chart._vb.locked, False)
+
+    print("\nA second connection draws only itself")
+    # The bug this pins: the axis channel's scale kept every curve it had ever
+    # been given, so after reconnecting the previous session was drawn through
+    # the new one -- two blue rpm lines where there should be one.
+    fake = FakeRecorder(channels.by_name[n] for n in LOGGED)
+    asked: list[str] = []
+    window.run_dialog = lambda dialog: asked.append(type(dialog).__name__) or False
+    window._on_connect_clicked()
+    fake.feed(25)
+    tick(window)
+    check("the Connect button connects", window.recorder is fake, True)
+    check("without opening the channel window", asked, [])
+    check("one curve per trace, and no more", len(curves(chart)), len(chart.plotted))
+    check("none of them the previous session's",
+          sorted(len(c.xData) for c in curves(chart)), [25, 25, 25])
+    window._set_selection(window.selected)      # a redraw with nothing changed
+    check("a redraw does not add any", len(curves(chart)), len(chart.plotted))
+    window._disconnect()
+    check("nor does the session ending", len(curves(chart)), len(chart.plotted))
+    check("and they are the log's", sorted(len(c.xData) for c in curves(chart)),
+          [25, 25, 25])
+
+    print("\nPresets: picked on the toolbar")
+    first = save_profile(
+        Profile(list(LOGGED), list(DRAWN), channels.part_number), scratch / "first.json")
+    save_profile(
+        Profile(["N40", "TANS"], ["TANS"], channels.part_number,
+                style={"TANS": Style("#d95926", (0.0, 150.0))}),
+        scratch / "second.json")
+    window.set_profile(load_profile(first))
+    combo = window.preset_combo
+    check("every preset file is listed",
+          [combo.itemText(i) for i in range(combo.count())], ["first", "second"])
+    check("on the one in use", combo.currentText(), "first")
+    window._on_preset_chosen(combo.findText("second"))
+    check("choosing one loads it", window.profile.log, ["N40", "TANS"])
+    check("with what it keeps for each channel",
+          (window.profile.color_of("TANS"), window.profile.range_of("TANS")),
+          ("#d95926", (0.0, 150.0)))
+    (scratch / "broken.json").write_text("{ nope", encoding="utf-8")
+    window._update_profile_label()
+    window._on_preset_chosen(combo.findText("broken"))
+    check("a broken one is refused", warned[-1], "Cannot load the preset")
+    check("and the one in use stays", combo.currentText(), "second")
+    (scratch / "broken.json").unlink()
+    window.set_profile(load_profile(first))
+
+    print("\nDouble-click a channel: its colour and Y range, kept in the preset")
+    fake = FakeRecorder(channels.by_name[n] for n in LOGGED)
+    window.connect()
+    fake.feed(40)
+    tick(window)
+    seen: dict = {}
+
+    def answer(dialog) -> bool:
+        seen["title"] = dialog.windowTitle()
+        seen["starts on"] = dialog.color()
+        dialog.set_color("#c2308e")
+        dialog.set_span((0.0, 8000.0))
+        return True
+
+    window.run_dialog = answer
+    was = window.colors["N40"]
+    window._on_cell_double_clicked(window._rows["N40"], window.COL_NAME)
+    check("it opens on that channel", seen["title"].startswith("N40"), True)
+    check("showing the colour it has", seen["starts on"], was)
+    check("the trace takes the new colour",
+          next(p.color for p in chart.plotted if p.key == "N40"), "#c2308e")
+    check("its scale takes the range",
+          chart._groups[chart.group_of("N40")].viewRange()[1], [0.0, 8000.0])
+    check("the preset has the colour", window.profile.color_of("N40"), "#c2308e")
+    check("and the range", window.profile.range_of("N40"), (0.0, 8000.0))
+    check("NSOL is on the same scale, so the range is its too",
+          window.profile.range_of("NSOL"), (0.0, 8000.0))
+    check("but the colour is not", window.profile.color_of("NSOL"), "")
+    on_disk = load_profile(first)
+    check("it is in the preset's file at once",
+          (on_disk.color_of("N40"), on_disk.range_of("N40")),
+          ("#c2308e", (0.0, 8000.0)))
+    check("still following after all that", chart.follow_latest, True)
+
+    opened: list[int] = []
+    window.run_dialog = lambda dialog: opened.append(1) or False
+    window._on_cell_double_clicked(window._rows["N40"], window.COL_TICK)
+    check("a double click on the tick box is two ticks, not a window", opened, [])
+    window._on_cell_double_clicked(window._rows["TANS"], window.COL_ABOUT)
+    check("any other column opens it", opened, [1])
+    check("cancelled, nothing changes", window.profile.color_of("TANS"), "")
+    window._on_cell_clicked(window._rows["TANS"], window.COL_NAME)
+    check("a click on an undrawn name does not draw it",
+          "TANS" in window.selected, False)
+
+    def to_auto(dialog) -> bool:
+        dialog.set_span(None)
+        return True
+
+    window.run_dialog = to_auto
+    window.edit_style("NSOL")
+    check("Auto takes the range off the whole scale",
+          (window.profile.range_of("N40"), window.profile.range_of("NSOL")),
+          (None, None))
+    check("and off the chart", chart.fixed_ranges, {})
+    check("the colour is left alone", window.profile.color_of("N40"), "#c2308e")
+    window.run_dialog = answer
+    window.edit_style("N40")
+    window._disconnect()
+    check("the log the session becomes is drawn the same",
+          window.colors[window.selected[0]], "#c2308e")
+
+    print("\nThe next session starts the way the last one was left")
+    fake = FakeRecorder(channels.by_name[n] for n in LOGGED)
+    window.connect()
+    fake.feed(20)
+    tick(window)
+    check("in that colour", window.colors["N40"], "#c2308e")
+    check("on that range",
+          chart._groups[chart.group_of("N40")].viewRange()[1], [0.0, 8000.0])
+    check("and no other trace was given the colour",
+          [k for k in window.selected if window.colors[k] == "#c2308e"], ["N40"])
+    window._set_selection([k for k in window.selected if k != "ZWOUT"])
+    check("a tick is written to the preset's file too",
+          load_profile(first).graph, ["N40", "NSOL"])
+    window._disconnect()
+    other = MainWindow(channels, args)
+    other.set_profile(load_profile(first))
+    check("a new window reads it all back from the file",
+          (other.profile.color_of("N40"), other.profile.range_of("NSOL"),
+           other.profile.graph),
+          ("#c2308e", (0.0, 8000.0), ["N40", "NSOL"]))
+    other.close()
+    window.run_dialog = lambda dialog: False
 
     print("\nA real session: the CSV that was written is what you read")
     window.recorder_factory = None
